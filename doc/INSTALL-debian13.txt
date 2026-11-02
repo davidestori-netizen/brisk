@@ -32,7 +32,7 @@ forwarder, a single ban hits every player.
 
     sudo apt update
     sudo apt install git acl nginx postgresql \
-         php8.4-cli php8.4-fpm php8.4-mbstring php8.4-pgsql
+         php8.4-cli php8.4-fpm php8.4-mbstring php8.4-pgsql php8.4-gd
 
 sysvshm and sysvsem come with php8.4-common, pulled in by the others;
 pcntl and zlib are built into php. INSTALL.sh checks every extension

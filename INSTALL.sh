@@ -211,6 +211,7 @@ function php_ext_pkg() {
     case "$1" in
         mbstring)        echo "php8.4-mbstring" ;;
         pgsql)           echo "php8.4-pgsql" ;;
+        gd)              echo "php8.4-gd" ;;
         sysvshm|sysvsem) echo "php8.4-common" ;;
         *)               echo "php8.4-cli" ;;
     esac
@@ -223,7 +224,9 @@ function php_ext_pkg() {
 # is how this was found on a debian 13 without php8.4-mbstring. The shared
 # memory and ftok hold the room, the challenges and the hardbans, pcntl
 # carries the signals of the daemon, zlib compresses the stream, pgsql is
-# the database unless $G_dbasetype says "file".
+# the database unless $G_dbasetype says "file". gd is needed by the pages
+# only: suprend.php and donometer.php draw their images with it, and without
+# it they die with a fatal error that the browser sees as a broken image.
 function php_ext_check() {
     local cand label exts bin b m miss pkgs
 
@@ -977,7 +980,7 @@ if [ "$install_mode" != "server" ]; then
     # and then it is that machine that has to carry the extensions.
     case "$fpm_pass" in
         unix:*|127.*|localhost:*|"")
-            php_ext_check "php-fpm8.4 /usr/sbin/php-fpm8.4" "the pages" "mbstring sysvshm sysvsem zlib $db_ext" || php_ext_ok=1 ;;
+            php_ext_check "php-fpm8.4 /usr/sbin/php-fpm8.4" "the pages" "mbstring sysvshm sysvsem zlib gd $db_ext" || php_ext_ok=1 ;;
         *)
             echo "  the pages: php-fpm is on another machine ($fpm_pass), check it there" ;;
     esac
