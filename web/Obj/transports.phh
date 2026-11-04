@@ -23,6 +23,24 @@
  */
 
 /*
+ * Socket helpers safe on closed streams.
+ * With PHP 8, calling fwrite/fread/fclose/fflush/stream_set_blocking on a
+ * stream that has already been closed throws a TypeError, which is not
+ * silenced by '@' and stops the whole daemon. With PHP 5.x the same calls
+ * only returned FALSE. These wrappers restore the old behaviour.
+ */
+function spu_fclose($s)                 { return is_resource($s) ? fclose($s) : FALSE; }
+function spu_fread($s, $l)              { return is_resource($s) ? fread($s, $l) : FALSE; }
+function spu_fflush($s)                 { return is_resource($s) ? fflush($s) : FALSE; }
+function spu_set_blocking($s, $b)       { return is_resource($s) ? stream_set_blocking($s, $b) : FALSE; }
+function spu_fwrite($s, $d, $l = NULL)
+{
+    if (!is_resource($s))
+        return FALSE;
+    return ($l === NULL ? fwrite($s, $d) : fwrite($s, $d, $l));
+}
+
+/*
  *  test: SO x Browser
  *  Values: Y: works, N: not works, @: continuous download,
  *          D: continuous download after first reload
@@ -382,7 +400,7 @@ class Transport_websocket {
             $reply = $this->frame($payload,$this,'pong');
             // TODO FIXME ALL socket_write management
             // socket_write($user->socket,$reply,mb_strlen($reply, "ASCII"));
-            @fwrite($socket, $reply, mb_strlen($reply, "ASCII"));
+            @spu_fwrite($socket, $reply, mb_strlen($reply, "ASCII"));
             return false;
         }
         if (extension_loaded('mbstring')) {

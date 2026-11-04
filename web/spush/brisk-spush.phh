@@ -254,11 +254,15 @@ class PendingPage {
 
       if ($this->kalive < $curtime) {
           // printf("TRY FLUSH CLOSE 1\n");
-          @fclose($this->socket);
+          @spu_fclose($this->socket);
           return TRUE;
       }   
 
-      $wret = @fwrite($this->socket, $this->msg, mb_strlen($this->msg, "ASCII"));
+      /* the client may have closed the connection meanwhile: drop the page */
+      if (!is_resource($this->socket)) {
+          return TRUE;
+      }
+      $wret = @spu_fwrite($this->socket, $this->msg, mb_strlen($this->msg, "ASCII"));
       if ($wret == FALSE && $wret !== FALSE) {
           // printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE [%d]\n", mb_strlen($this->msg, "ASCII"));
       }
@@ -269,7 +273,7 @@ class PendingPage {
           }
           else {
               // printf("TRY FLUSH CLOSE 2\n");
-              fclose($this->socket);
+              spu_fclose($this->socket);
               return TRUE;
           }
       }

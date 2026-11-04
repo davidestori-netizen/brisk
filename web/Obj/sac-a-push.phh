@@ -123,14 +123,14 @@ function pid_save()
         $old = intval(trim(stream_get_contents($fp)));
         log_crit(sprintf("REFUSING TO START: %s is held by %d", $fname, $old));
         fprintf(STDERR, "REFUSING TO START: %s is held by %d\n", $fname, $old);
-        fclose($fp);
+        spu_fclose($fp);
         return (FALSE);
     }
 
     ftruncate($fp, 0);
     rewind($fp);
-    fwrite($fp, sprintf("%d\n", getmypid()));
-    fflush($fp);
+    spu_fwrite($fp, sprintf("%d\n", getmypid()));
+    spu_fflush($fp);
 
     /* kept open on purpose: closing it would drop the lock */
     $G_pid_fp = $fp;
@@ -150,7 +150,7 @@ function pid_remove()
 
     unlink(LEGAL_PATH."/brisk.pid");
     flock($G_pid_fp, LOCK_UN);
-    fclose($G_pid_fp);
+    spu_fclose($G_pid_fp);
     $G_pid_fp = FALSE;
 }
 
@@ -593,8 +593,8 @@ class Sac_a_push {
             break;
         case SIGTERM:
             if (static::$cnt_master != NULL) {
-                    fwrite(static::$cnt_master, "\nshutdown\n");
-                    fflush(static::$cnt_master);
+                    spu_fwrite(static::$cnt_master, "\nshutdown\n");
+                    spu_fflush(static::$cnt_master);
             }
             else {
                 exit(1);
@@ -602,8 +602,8 @@ class Sac_a_push {
             break;
         case SIGHUP:
             if (static::$cnt_master != NULL) {
-                fwrite(static::$cnt_master, "\nreload\n");
-                fflush(static::$cnt_master);
+                spu_fwrite(static::$cnt_master, "\nreload\n");
+                spu_fflush(static::$cnt_master);
             }
             break;
         }
@@ -701,9 +701,9 @@ class Sac_a_push {
         }
         umask($old_umask);
         for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
-            stream_set_blocking($thiz->list_web[$i], $thiz->blocking_mode); # Set the stream to non-blocking
+            spu_set_blocking($thiz->list_web[$i], $thiz->blocking_mode); # Set the stream to non-blocking
         }
-        stream_set_blocking($thiz->list_cmd, $thiz->blocking_mode); # Set the stream to non-blocking
+        spu_set_blocking($thiz->list_cmd, $thiz->blocking_mode); # Set the stream to non-blocking
 
         if (($thiz->in = fopen("php://stdin", "r")) === FALSE) {
             return(FALSE);
@@ -810,7 +810,7 @@ class Sac_a_push {
             if (isset($this->s2c[$id])) {
                 $postclose = $this->s2c[$id];
                 if ($postclose->read('', $this->curtime) == 0) {
-                    fclose($sock);
+                    spu_fclose($sock);
                     $this->socks_unset($sock);
                 }
             }
@@ -824,7 +824,7 @@ class Sac_a_push {
                         }
                         unset($this->socks[$id]);
                         unset($this->s2u[$id]);
-                        fclose($sock);
+                        spu_fclose($sock);
                         // printf("CLOSE ON GARBAGE MANAGER\n");
                     }
                 }
@@ -996,7 +996,7 @@ class Sac_a_push {
                                connection is added to the watched ones in the WAITHEAD
                                state; the loop will complete it when select() reports it
                                readable. */
-                            stream_set_blocking($new_unix, 0);
+                            spu_set_blocking($new_unix, 0);
                             $this->pendpage_add(
                                 PendingPage::pendingpage_waithead($new_unix, $this->curtime, 20));
                             continue;
@@ -1004,7 +1004,7 @@ class Sac_a_push {
                         $new_socket = ancillary_getstream($new_unix, $stream_info);
                         if ($new_socket !== FALSE) {
                             // printf("NEW_SOCKET: %d\n", intval($new_socket));
-                            stream_set_blocking($new_socket, $this->blocking_mode); // Set the stream to non-blocking
+                            spu_set_blocking($new_socket, $this->blocking_mode); // Set the stream to non-blocking
                             // error_log(sprintf("RECEIVED HEADER:\n%s", $stream_info));
                             if (($path = spu_process_info($stream_info, $method, $header,
                                                           $get, $post, $cookie, $rest, $cont))
@@ -1055,11 +1055,11 @@ class Sac_a_push {
                             printf("SOCKET_ACCEPT FAILED\n");
                             continue;
                         }
-                        stream_set_blocking($new_unix, $this->blocking_mode);
+                        spu_set_blocking($new_unix, $this->blocking_mode);
                         $this->direct_mgmt($new_unix);
                     } // not socket_list nor socket_list_cmd
                     else if ($id % SOCK_SHARD_N == $sock_shard_cur) {  // already opened socket
-                        $buf = fread($sock, 4096);
+                        $buf = spu_fread($sock, 4096);
                         // if socket is closed
                         if ($buf == FALSE || mb_strlen($buf, "ASCII") == 0 || feof($sock)) {
                             $postclose = NULL;
@@ -1089,7 +1089,7 @@ class Sac_a_push {
                                         $clo = $this->s2u[$id]->stream_close();
                                         $postclose = $user->stream_postclose_get($sock, $this->curtime);
                                         $clo_l = mb_strlen($clo, "ASCII");
-                                        @fwrite($sock, $clo, $clo_l);
+                                        @spu_fwrite($sock, $clo, $clo_l);
                                         $this->s2u[$id]->rd_socket_set(NULL);
                                     }
                                     unset($this->s2u[$id]);
@@ -1100,7 +1100,7 @@ class Sac_a_push {
                                 $this->socks_set($sock, NULL, NULL, $postclose);
                             }
                             else {
-                                fclose($sock);
+                                spu_fclose($sock);
                             }
                             // printf("CLOSE ON READ\n");
 
@@ -1231,7 +1231,7 @@ class Sac_a_push {
                                     if ($sep === FALSE) {
                                         if (mb_strlen($pp->cont, "ASCII") > 32768) {
                                             $this->pendpage_rem($pp);
-                                            fclose($sock);
+                                            spu_fclose($sock);
                                             $this->socks_unset($sock);
                                         }
                                         continue;      /* testa incompleta: si riprende al prossimo giro */
@@ -1244,7 +1244,7 @@ class Sac_a_push {
                                     $cookie = array(); $rest = 0; $cont = "";
                                     if (($path = spu_process_info($stream_info, $method, $header,
                                                                   $get, $post, $cookie, $rest, $cont)) == FALSE) {
-                                        fclose($new_socket);
+                                        spu_fclose($new_socket);
                                         $this->socks_unset($new_socket);
                                         continue;
                                     }
@@ -1283,7 +1283,7 @@ class Sac_a_push {
                                     // printf("POSTCLOSE: found pc in s2c list\n");
                                     if ($postclose->read($buf, $this->curtime) == 0) {
                                         printf("POSTCLOSE: received end opcode, close\n");
-                                        fclose($sock);
+                                        spu_fclose($sock);
                                         $this->socks_unset($sock);
                                     }
                                 }
@@ -1312,7 +1312,7 @@ class Sac_a_push {
                         if ($rret == FALSE) {
                             // FIXME: manage 404 !!!
                             printf("TODO: fix unknown page: %s\n", $path);
-                            fclose($new_socket);
+                            spu_fclose($new_socket);
                         }
                     }
                 }
@@ -1355,7 +1355,7 @@ class Sac_a_push {
                     $user = $this->s2u[$id];
 
                     if ($user->rd_toflush) {
-                        if (fflush($sock) == FALSE)
+                        if (spu_fflush($sock) == FALSE)
                             continue;
                         else
                             $user->rd_toflush = FALSE;
@@ -1391,7 +1391,7 @@ class Sac_a_push {
                         // echo "SPIA: [".substr($response, 0, 60)."...]\n";
                         // echo "SPIA: [".$response."]\n";
                         $response_l = mb_strlen($response, "ASCII");
-                        $wret = @fwrite($sock, $response, $response_l);
+                        $wret = @spu_fwrite($sock, $response, $response_l);
                         if ($wret < $response_l) {
                             printf("TROUBLE WITH FWRITE: %d\n", $wret);
                             $user->rd_cache_set(mb_substr($response, $wret, $response_l - $wret, "ASCII"));
@@ -1399,7 +1399,7 @@ class Sac_a_push {
                         else {
                             $user->rd_cache_set("");
                         }
-                        if (fflush($sock) == FALSE) {
+                        if (spu_fflush($sock) == FALSE) {
                             $user->rd_toflush = TRUE;
                             continue;
                         }
@@ -1416,12 +1416,12 @@ class Sac_a_push {
                         unset($this->s2u[$id]);
                         $clo = $user->stream_close();
                         $clo_l = mb_strlen($clo, "ASCII");
-                        @fwrite($sock, $clo, $clo_l);
+                        @spu_fwrite($sock, $clo, $clo_l);
                         if ($postclose) {
                             $this->socks_set($sock, NULL, NULL, $postclose);
                         }
                         else {
-                            fclose($sock);
+                            spu_fclose($sock);
                         }
                         // printf("CLOSE ON LOOP\n");
                     }
@@ -1510,7 +1510,7 @@ class Sac_a_push {
         while(time() <= $endtime) {
             printf("DIRECT: init loop %d\n", $st);
             if ($st == DIRECT_ST_READ) {
-                $buf = fread($socket, 4096);
+                $buf = spu_fread($socket, 4096);
                 if ($buf == FALSE && feof($socket)) {
                     break;
                 }
@@ -1528,7 +1528,7 @@ class Sac_a_push {
                 }
             }
             else if ($st == DIRECT_ST_WRITE)  {
-                $ret = fwrite($socket, $output, $output_len);
+                $ret = spu_fwrite($socket, $output, $output_len);
                 if ($ret === FALSE) {
                     if (feof($socket)) {
                         break;
@@ -1540,7 +1540,7 @@ class Sac_a_push {
                     continue;
                 }
                 else if ($ret == $output_len) {
-                    fclose($socket);
+                    spu_fclose($socket);
                     return TRUE;
                 }
             }
@@ -1548,7 +1548,7 @@ class Sac_a_push {
             // usleep(10000);
         }
 
-        fclose($socket);
+        spu_fclose($socket);
         return FALSE;
     }
 } // class Sac_a_push
