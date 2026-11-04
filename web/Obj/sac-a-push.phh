@@ -1166,8 +1166,18 @@ class Sac_a_push {
                                         $clie_cmd = json_decode($clie_cmd, TRUE);
                                         // fprintf(STDERR, "HERE WE ARE INCOMING DATA [%s]\n", print_r($clie_cmd, TRUE));
 
-                                        $wr_addr = substr(parse_url($clie_cmd["target"])["path"], strlen(SITE_PREFIX));
-                                        if ($wr_addr == "index_wr.php") {
+                                        /* an empty or non-JSON frame (ping, close) has no target:
+                                           with PHP 8 it raised "array offset on null", skip it */
+                                        $wr_addr = "";
+                                        if (is_array($clie_cmd) && isset($clie_cmd["target"]) && is_string($clie_cmd["target"])) {
+                                            $wr_url = parse_url($clie_cmd["target"]);
+                                            if (is_array($wr_url) && isset($wr_url["path"]))
+                                                $wr_addr = substr($wr_url["path"], strlen(SITE_PREFIX));
+                                        }
+                                        if ($wr_addr == "") {
+                                            /* nothing to do */
+                                        }
+                                        else if ($wr_addr == "index_wr.php") {
                                             ob_start();
                                             // complete: index_wr_main($this->app, $addr, $get, $post, $cookie);
                                             index_wr_main($this->app, $addr, $clie_cmd, NULL, NULL);
