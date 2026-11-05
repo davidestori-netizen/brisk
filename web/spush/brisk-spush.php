@@ -23,6 +23,8 @@
  *
  */
 
+date_default_timezone_set('Europe/Rome');
+
 $G_base = "../";
 
 require_once($G_base."Obj/sac-a-push.phh");

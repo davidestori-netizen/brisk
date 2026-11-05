@@ -22,6 +22,8 @@
  *
  */
 
+date_default_timezone_set('Europe/Rome');
+
 require_once("Obj/user.phh");
 require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");

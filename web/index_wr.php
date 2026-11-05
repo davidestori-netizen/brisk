@@ -21,6 +21,7 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  */
+date_default_timezone_set('Europe/Rome');
 
 $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                                 'en' => 'unknown error'),

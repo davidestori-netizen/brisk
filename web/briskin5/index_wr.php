@@ -22,6 +22,7 @@
  *
  */
 
+date_default_timezone_set('Europe/Rome');
 
 $G_base = "../";
 

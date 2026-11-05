@@ -22,6 +22,8 @@
  *
  */
 
+date_default_timezone_set('Europe/Rome');
+
 /* MLANG: le img dell'asta */
 
 $G_base = "../";
