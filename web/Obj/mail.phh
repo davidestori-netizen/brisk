@@ -15,6 +15,15 @@ require_once("{$G_base}Obj/PHPMailer/src/Exception.php");
 require_once("{$G_base}Obj/PHPMailer/src/PHPMailer.php");
 require_once("{$G_base}Obj/PHPMailer/src/SMTP.php");
 
+function mail_secrets(&$mail)
+{
+    return;
+}
+
+if (file_exists("$DOCUMENT_ROOT/Etc/brisk_mail_secrets.pho")) {
+    require("$DOCUMENT_ROOT/Etc/brisk_mail_secrets.pho");
+}
+
 function brisk_mail($to, $subject, $text, $html)
 {
     GLOBAL $G_admin_mail;
@@ -22,6 +31,8 @@ function brisk_mail($to, $subject, $text, $html)
     try {
         $mail = new PHPMailer(TRUE);
         $mail->CharSet = "UTF-8";
+
+        mail_secrets($mail);
 
         $mail->setFrom($G_admin_mail, 'Brisk Admin');
         $mail->addAddress($to);     // Add a recipient
