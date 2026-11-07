@@ -135,7 +135,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     GLOBAL $G_proto, $G_domain, $G_webbase, $G_mail_seed, $G_notguar_code;
     GLOBAL $G_shutdown, $G_alarm_passwd, $G_ban_list, $G_black_list, $G_lang, $G_room_help, $G_room_about;
     GLOBAL $G_room_passwdhowto, $mlang_indwr;
-    GLOBAL $G_tos_vers;
+    GLOBAL $G_tos_vers, $G_admin_mail;
 
     log_load("index_wr.php");
     $remote_addr = addrtoipv4($remote_addr_full);
@@ -315,7 +315,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     break;
                 }
 
-                if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
+                if (brisk_mail($cli_email, 'Utente Brisk {$cli_name}',
+                               $subj, $body_txt, $body_htm) == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
                     $mesg_to_user = "Fallito invio email.";
@@ -504,7 +505,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
 
-                    if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
+                    if (brisk_mail($cli_email, 'Utente Brisk {$cli_name}', $subj, $body_txt, $body_htm) == FALSE) {
                         // mail error
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
@@ -560,11 +561,19 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                            the user name have to be encoded by hand, otherwise
                            they end up as raw UTF-8 in the headers (forbidden by
                            RFC 5322). */
-                        mail("brisk@alternativeoutput.it",
-                             mb_encode_mimeheader(urldecode($cli_subj), "UTF-8"),
-                             urldecode($cli_mesg),
-                             sprintf("From: %s <%s>\r\nContent-Type: text/plain; charset=UTF-8",
-                                     mb_encode_mimeheader($user->name, "UTF-8"), $ema));
+                        if (brisk_mail($G_admin_mail, 'Brisk Team',
+                                       urldecode($cli_subj), urldecode($cli_mesg),
+                                       urldecode($cli_mesg), ["Utente Brisk {$user->name}", $ema]) == FALSE) {
+                                       # urldecode($cli_mesg), NULL) == FALSE) {
+                            // mail error
+                            fprintf(STDERR, "ERROR: mail send FAILED\n");
+                        }
+
+                        //    mail("brisk@alternativeoutput.it",
+                        //        mb_encode_mimeheader(urldecode($cli_subj), "UTF-8"),
+                        //     urldecode($cli_mesg),
+                        //     sprintf("From: %s <%s>\r\nContent-Type: text/plain; charset=UTF-8",
+                        //             mb_encode_mimeheader($user->name, "UTF-8"), $ema));
                     }
 
                     if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {

@@ -59,7 +59,7 @@ Benvenuto e buone partite, mop.<br>";
                              $subject, $body_htm);
 }
 
-if (brisk_mail("matteo.nastasi@gmail.com", $subject, $body_txt, $body_htm_full)) {
+if (brisk_mail("matteo.nastasi@gmail.com", 'Matteo Nastasi', $subject, $body_txt, $body_htm_full)) {
     echo "SUCCESS";
 }
 else {

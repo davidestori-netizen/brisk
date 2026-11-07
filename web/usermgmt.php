@@ -242,7 +242,7 @@ SELECT usr.*, guar.login AS guar_login
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
 
-                    if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                    if (brisk_mail($usr_obj->email, 'Utente Brisk {$usr_obj->login}', $subj, $body_txt, $body_htm) == FALSE) {
                         // mail error
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
@@ -421,7 +421,7 @@ SELECT usr.*, guar.login AS guar_login
                     }
                     // retrieve list added users
                     $mai_sql = sprintf("
-SELECT mail.*, usr.email AS email
+SELECT mail.*, usr.email AS email, user.login AS login
      FROM %susers AS usr
      JOIN %smails AS mail ON mail.ucode = usr.code
      WHERE mail.ucode = %d AND mail.type = %d",
@@ -440,7 +440,7 @@ SELECT mail.*, usr.email AS email
                     $mai_obj = pg_fetch_object($mai_pg, 0);
                     $mail = MailDBItem::MailDBItemFromRecord($mai_obj);
 
-                    if (brisk_mail($mai_obj->email, $mail->subj, $mail->body_txt, $mail->body_htm) == FALSE) {
+                    if (brisk_mail($mai_obj->email, 'Utente Brisk {$mai_obj->login}', $mail->subj, $mail->body_txt, $mail->body_htm) == FALSE) {
                         // mail error
                         $status .= sprintf("Send mail filed for user id %d<br>\n", $id);
                         break;
@@ -585,7 +585,7 @@ SELECT usr.*, guar.login AS guar_login
                 log_step(sprintf("[%s], [%s], [%s], [%s]\n", $usr_obj->email, $subj, $body_txt, $body_htm));
 
 
-                if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                if (brisk_mail($usr_obj->email, 'Utente Brisk {$usr_obj->login}', $subj, $body_txt, $body_htm) == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
                     break;
@@ -675,7 +675,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                     /*                         $usr_obj->guar_login, $usr_obj->login, $confirm_page); */
                     /* } */
 
-                    if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                    if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                         // mail error
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
