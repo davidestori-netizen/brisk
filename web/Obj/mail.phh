@@ -3,7 +3,10 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
 if (isset($argv) && __FILE__ == realpath($argv[0])) {
-    $G_base = "web/";
+    // cd <$DOCUMENT_ROOT>
+    // php ./brisk/Obj/mail.phh  # to run send mail test
+    $DOCUMENT_ROOT = "/home/nastasi/web";
+    $G_base = "/home/nastasi/web/brisk/";
 }
 
 /* php8: the old class.phpmailer.php 5.1 (2009) used each(),
@@ -17,10 +20,11 @@ require_once("{$G_base}Obj/PHPMailer/src/SMTP.php");
 
 if (file_exists("$DOCUMENT_ROOT/Etc/brisk_mail_secrets.pho")) {
     require("$DOCUMENT_ROOT/Etc/brisk_mail_secrets.pho");
+    printf("secrets file found\n");
 }
 
 if (!function_exists('mail_secrets')) {
-    function mail_secret(&$mail)
+    function mail_secrets(&$mail)
     {
         return;
     }
@@ -116,8 +120,8 @@ function brisk_mail($to, $to_name, $subject, $text, $html, $reply_to=NULL)
 if (isset($argv) && __FILE__ == realpath($argv[0])) {
     $G_admin_mail = "brisk@alternativeoutput.it";
 
-    $to = "brisk@alternativeoutput.it";
-    $to_name = "Brisk Team";
+    $to = "nastasi@alternativeoutput.it";
+    $to_name = "Utente Brisk mop";
     $subject = "Brisk: credenziali di accesso.";
     $body_txt = "Ciao, sono l' amministratore del sito di Brisk.
 
@@ -133,7 +137,7 @@ Benvenuto e buone partite, mop.<br>";
                              $subject, $body_htm);
 
 
-    if (brisk_mail($to, $to_name, $subject, $body_txt, $body_htm)) {
+    if (brisk_mail($to, $to_name, $subject, $body_txt, $body_htm, ["Brisk Team", "brisk@alternativeoutput.it"])) {
         echo "SUCCESS";
     }
     else {
