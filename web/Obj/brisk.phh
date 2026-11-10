@@ -614,10 +614,17 @@ function csplitter($in, $sep)
     return ($out);
 }
 
+/* The result goes inside a javascript string, in a block of the stream
+   that the client finds with a regexp whose "." matches no line
+   terminator: a raw \r, \n, U+2028 or U+2029 made it drop the whole
+   block - the room of whoever entered, the chat of everyone looking at
+   it. They become escapes, turned back into themselves by the eval of the
+   client. The backslash is doubled first, so the ones added here stay
+   single. */
 function xcape($s)
 {
-    $from = array (   '\\',     '@',        '|' );
-    $to   = array ( '\\\\', '&#64;', '&brvbar;' );
+    $from = array (   '\\',     '@',        '|', "\r",  "\n", "\u{2028}", "\u{2029}" );
+    $to   = array ( '\\\\', '&#64;', '&brvbar;', '\\r', '\\n', '\\u2028', '\\u2029' );
 
     return (str_replace($from, $to, htmlentities($s,ENT_COMPAT,"UTF-8")));
 }
