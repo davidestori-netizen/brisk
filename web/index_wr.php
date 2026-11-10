@@ -81,6 +81,10 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                             'en' => "login already in use"),
                       'nu_emailau' => array('it' => "email già utilizzata",
                                             'en' => "email already in use"),
+                      'nu_loginiv' => array('it' => "login non valido",
+                                            'en' => "invalid login"),
+                      'nu_emailiv' => array('it' => "email non valida",
+                                            'en' => "invalid email"),
                       'nu_msubj' => array( 'it' => 'Brisk: verifica email',
                                            'en' => 'Brisk: email verification'),
                       // %s(guar) %s(login) %s(baseurl) %d(code) %s(hash)
@@ -471,6 +475,18 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                     $cli_name = trim(urldecode($cli_name));
                     $cli_email = trim(urldecode($cli_email));
+
+                    /* the login is shown to the admins and, once in, to every
+                       player: it has to be a name that validate_name takes as
+                       it is, or its owner could not even type it at the login */
+                    if (validate_name($cli_name) !== $cli_name) {
+                        $mesg_to_user = nickserv_msg($dt, $mlang_indwr['nu_loginiv'][$G_lang]);
+                        break;
+                    }
+                    if (filter_var($cli_email, FILTER_VALIDATE_EMAIL) === FALSE) {
+                        $mesg_to_user = nickserv_msg($dt, $mlang_indwr['nu_emailiv'][$G_lang]);
+                        break;
+                    }
 
                     // check for already used fields
                     if (($idret = $bdb->check_record_by_login_or_email($cli_name, $cli_email)) != 0) {
