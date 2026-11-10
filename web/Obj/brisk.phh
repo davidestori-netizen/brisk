@@ -1125,11 +1125,30 @@ class Brisk
     }
 
     // constructor
-    static function create($crystal_filename, $ban_list, $black_list, $cloud_smasher) {
+    /* $misfit comes back TRUE when the saved room does not fit this
+       installation: the caller has to exit, and the next start makes a
+       new room */
+    static function create($crystal_filename, $ban_list, $black_list, $cloud_smasher, &$misfit = NULL) {
+        $misfit = FALSE;
         if (($brisk_ser = @file_get_contents($crystal_filename)) != FALSE) {
             if (($brisk = unserialize($brisk_ser)) != FALSE) {
                 fprintf(STDERR, "ROOM FROM FILE\n");
                 rename($crystal_filename, $crystal_filename.".old");
+
+                /* The room is saved with the arrays it was made with, and the
+                   loops walk them up to MAX_PLAYERS and TABLES_N: after an
+                   install with other -t or -n they run past the end, on null,
+                   and the daemon dies - or they stop short, leaving players
+                   at tables nobody sees. MAX_PLAYERS is 20 + PLAYERS_N *
+                   TABLES_N, so the two counts catch -n as well. The file is
+                   already .old: the next start does not find it. */
+                if (count($brisk->user) != MAX_PLAYERS || count($brisk->table) != TABLES_N) {
+                    fprintf(STDERR, "ROOM FROM FILE DISCARDED: saved with %d users and %d tables, "
+                            ."this installation has %d and %d. Exit, the next start makes a new room.\n",
+                            count($brisk->user), count($brisk->table), MAX_PLAYERS, TABLES_N);
+                    $misfit = TRUE;
+                    return (FALSE);
+                }
 
                 $brisk->reload(TRUE, $ban_list, $black_list, $cloud_smasher);
 
