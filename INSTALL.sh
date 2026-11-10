@@ -758,8 +758,8 @@ while [ $# -gt 0 ]; do
         -B*) fpm_root="$(get_param "-B" "$1" "$2")"; sh=$?;;
         -I*) front_ip="$(get_param "-I" "$1" "$2")"; sh=$?;;
         system) action=system ; sh=1;;
-        -W) web_only="TRUE";;
-        -x) test_add="TRUE";;
+        -W) web_only="TRUE"; sh=1;;
+        -x) test_add="TRUE"; sh=1;;
         -h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
     esac
