@@ -375,7 +375,7 @@ SELECT usr.*, guar.login AS guar_login
 <body>
 <h2> New imported users management.</h2>
      <?php if ($status != "") { echo "$status"; } ?>
-<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+<form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
 <table class="the_tab">
 <?php
      echo $tab_lines;
@@ -493,7 +493,7 @@ SELECT usr.*, guar.login AS guar_login
 <body>
 <h2> New mailed users management.</h2>
      <?php if ($status != "") { echo "$status"; } ?>
-<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+<form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
 <table class="the_tab">
 <?php
      echo $tab_lines;
@@ -736,7 +736,7 @@ SELECT usr.*, guar.login AS guar_login
      <body>
      <h2> E-mail verified user management.</h2>
      <?php if ($status != "") { echo "$status"; } ?>
-     <form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+     <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
      <table class="the_tab">
      <?php
      echo $tab_lines;

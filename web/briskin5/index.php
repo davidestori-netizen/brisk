@@ -66,6 +66,20 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 
     $deck = (isset($cookie['CO_bin5_pref_deck']) ? $cookie['CO_bin5_pref_deck'] : 'xx');
 
+    /* All four come from the request and are written into the page, in
+       the html and in the javascript, and the page is served to anybody:
+       written as they came, a link could run its own code in the page of
+       whoever opens it, with the session cookie of brisk at hand. Only
+       what has the expected shape gets in. */
+    if (isset($table_idx))
+        $table_idx = (int)$table_idx;
+    if (isset($laststate))
+        $laststate = (int)$laststate;
+    if (isset($sess) && !preg_match('/^[0-9a-f]{'.SESS_LEN.'}$/', $sess))
+        unset($sess);
+    if (!in_array($deck, deck_keys(), TRUE))
+        $deck = 'xx';
+
 // header('Content-type: text/html; charset="utf-8"',true);
     ?>
 <html>
@@ -128,7 +142,7 @@ window.onload = function() {
   preferences_init();
   preferences_update();
 
-  sess = "<?php echo "$sess"; ?>";
+  sess = <?php echo json_encode(isset($sess) ? $sess : ""); ?>;
   xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>, 2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
   xstm.hbit_set(heartbit);
 

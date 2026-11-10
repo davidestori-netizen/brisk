@@ -1133,13 +1133,15 @@ for i in $(find web "${find_names[@]}" | sed 's/^....//g'); do
     install -m 644 "web/$i" "${web_path}__/$i"
 done
 
-# hardlink for nginx managed websocket files.
-ln "${web_path}__/xynt_test01.php" "${web_path}__/xynt_test01_wss.php"
-
+# The pages of webtest/ are laboratory tools, installed only with -x: they
+# write what they are asked into the page as it comes, and on a production
+# site a link to one of them would run its own code in the pages of brisk.
 if [ "$test_add" = "TRUE" ]; then
     for i in $(find webtest -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^........//g'); do
         install -m 644 "webtest/$i" "${web_path}__/$i"
     done
+    # hardlink for nginx managed websocket files.
+    ln "${web_path}__/xynt_test01.php" "${web_path}__/xynt_test01_wss.php"
 fi
 
 # brisk-spush.php is the daemon itself: on the frontend it would be an entry
