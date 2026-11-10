@@ -990,9 +990,20 @@ class Client_prefs {
             else {
                 $json = $json_s;
             }
-            if ($this->listen < 0 || $this->listen > 2)
+            /* listen comes from the client: checked before it is taken, and
+               as an integer, because store() shifts it into the flags and
+               from php 8 on a shift of anything else is a TypeError that
+               takes the daemon down. The client sends it as a string, the
+               value of a radio button. */
+            if (!isset($json->listen))
                 break;
-            $this->listen = $json->listen;
+            $listen = $json->listen;
+            if (!(is_int($listen) || (is_string($listen) && ctype_digit($listen))))
+                break;
+            $listen = (int)$listen;
+            if ($listen < 0 || $listen > 2)
+                break;
+            $this->listen = $listen;
 
             if (mb_strlen($json->supp_comp, "ASCII") != 12)
                 break;
