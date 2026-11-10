@@ -129,6 +129,12 @@ partial.py      forces a short write on the daemon and checks what comes out
                 its declared length, or one without its terminator, is the
                 resumption after the short write going wrong.
                   partial.py [user] [socket] [rcvbuf] [pause]
+hangup.py       client gone while the daemon prepares the answer: it sends a
+                login to a daemon socket and closes a few milliseconds
+                later, as nginx does when the browser goes away. The write
+                fails on the closed peer, and the daemon has to drop the
+                page, not die on it at the next flush.
+                  hangup.py [socket] [user] [rounds]
 
 
 At the end of a session

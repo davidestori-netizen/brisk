@@ -252,6 +252,11 @@ class PendingPage {
           $this->status != PENDINGPAGE_CONTINUE)
           return (FALSE);
 
+      /* a socket closed elsewhere: from php 8 on, writing on it is a
+         TypeError that no @ silences, and it takes the daemon down */
+      if (!is_resource($this->socket))
+          return TRUE;
+
       if ($this->kalive < $curtime) {
           // printf("TRY FLUSH CLOSE 1\n");
           @fclose($this->socket);
@@ -259,8 +264,12 @@ class PendingPage {
       }   
 
       $wret = @fwrite($this->socket, $this->msg, mb_strlen($this->msg, "ASCII"));
-      if ($wret == FALSE && $wret !== FALSE) {
-          // printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE [%d]\n", mb_strlen($this->msg, "ASCII"));
+      /* 0 is a full buffer, to be tried again; FALSE is an error, like the
+         EPIPE of a client gone while the answer was being prepared: there
+         is nobody left to write to */
+      if ($wret === FALSE) {
+          @fclose($this->socket);
+          return TRUE;
       }
       if ($wret == $this->msg_sz) {
           if ($this->status == PENDINGPAGE_CONTINUE) {

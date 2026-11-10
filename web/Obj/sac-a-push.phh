@@ -747,10 +747,13 @@ class Sac_a_push {
                                                            $header,           $get, $post, $cookie,
                                                              $path,          $addr, $rest, $cont);
 
-        $pendpage->try_flush($this->curtime);
-        // Add $pendpage to the pendpage array (in any case)
+        // Add $pendpage to the pendpage array, unless try_flush has
+        // already closed its socket: a closed one in the select set is a
+        // TypeError
         // fprintf(STDERR, "IMPORTANT: Pendadd: %d\n", $pendpage->status);
-        $this->pendpage_add($pendpage);
+        if ($pendpage->try_flush($this->curtime) == FALSE) {
+            $this->pendpage_add($pendpage);
+        }
     }
 
     function pendpage_try_addflush(&$new_socket, $tout, $enc, $header_out, $content)
@@ -1093,6 +1096,13 @@ class Sac_a_push {
                                         $this->s2u[$id]->rd_socket_set(NULL);
                                     }
                                     unset($this->s2u[$id]);
+                                }
+                                /* a page still waiting on this socket - an answer
+                                   not yet delivered, a request not yet complete -
+                                   leaves with it: left in the list, its next
+                                   try_flush would write on the closed socket */
+                                if (isset($this->s2p[$id])) {
+                                    $this->pendpage_rem($this->s2p[$id]);
                                 }
                             }
                             if ($postclose != NULL) {
