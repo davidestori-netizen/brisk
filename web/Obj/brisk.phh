@@ -1501,8 +1501,13 @@ class Brisk
             $ret .= $this->table_content($user, $i);
 
             $ret .=  $this->table[$i]->act_content($user);
+            /* wag_com is kept as the player wrote it: escaped here as it is
+               where the message is sent first, or whoever enters the room
+               later runs whatever it holds */
             if ($this->table[$i]->wag_own != -1)
-                $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->user[$this->table[$i]->wag_own]->name, $this->table[$i]->wag_com);
+                $ret .= sprintf('tra.add(%d, "%s"); ', $i,
+                                xcape(sprintf("%s: %s", $this->user[$this->table[$i]->wag_own]->name,
+                                              $this->table[$i]->wag_com)));
             else
                 $ret .= sprintf('tra.rem(%d); ', $i);
         }
