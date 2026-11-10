@@ -836,7 +836,16 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 }
 
                 // Take parameters
-                $table_idx = (int)$argz[1];
+                /* the index comes from the request: out of range, the table
+                   is null and the first method call on it is a fatal error
+                   that takes the whole room down. And it has to be checked
+                   before the reference below, which would create the
+                   missing element. */
+                $table_idx = (isset($argz[1]) ? (int)$argz[1] : -1);
+                if ($table_idx < 0 || $table_idx >= TABLES_N) {
+                    log_wr("INFO:SKIP:argz == sitdown && table out of range => ignore request.");
+                    return FALSE;
+                }
                 $table = &$brisk->table[$table_idx];
 
                 $not_allowed_msg = "";

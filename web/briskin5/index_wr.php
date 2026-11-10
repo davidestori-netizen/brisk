@@ -412,14 +412,18 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                 if (strpos($a_y, "px") != FALSE)
                     $a_y = substr($a_y,0,-2);
 
-                $loggo = sprintf("A_play %s, table_pos %d == %d, mazzo %d, gstart %d, card_stat %d, card_own %d",
+                /* the card comes from the request: read it only once its
+                   index is known to be in range */
+                $a_inrange = ($a_play >= 0 && $a_play < (BIN5_CARD_HAND * BIN5_PLAYERS_N));
+                $loggo = sprintf("A_play %s, table_pos %d == %d, mazzo %d, gstart %d, card_stat %s, card_own %s",
                                  $a_play, $user->table_pos, ($table->gstart % BIN5_PLAYERS_N),
                                  $table->mazzo, $table->gstart,
-                                 $table->card[$a_play]->stat, $table->card[$a_play]->owner);
+                                 ($a_inrange ? $table->card[$a_play]->stat : "-"),
+                                 ($a_inrange ? $table->card[$a_play]->owner : "-"));
                 log_wr("CIC".$loggo);
 
                 /* se era il suo turno e la carta era sua ed era in mano */
-                if ($a_play >=0 && $a_play < (BIN5_CARD_HAND * BIN5_PLAYERS_N) &&
+                if ($a_inrange &&
                     ($user->table_pos == (($table->gstart + $table->turn) % BIN5_PLAYERS_N)) &&
                     $table->card[$a_play]->stat == 'hand' &&
                     $table->card[$a_play]->owner == $user->table_pos) {
