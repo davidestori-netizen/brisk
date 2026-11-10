@@ -1343,6 +1343,9 @@ class Sac_a_push {
             foreach ($this->pending_pages as $k => $pendpage) {
                 // TODO: try_flush if exists in the class
                 if ($pendpage->try_flush($this->curtime) == TRUE) {
+                    /* the socket is closed: out of the select set too, or
+                       socks and s2p keep a dead entry for every page */
+                    $this->socks_unset($pendpage->socket_get());
                     unset($this->pending_pages[$k]);
                 }
             }

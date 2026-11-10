@@ -135,6 +135,11 @@ hangup.py       client gone while the daemon prepares the answer: it sends a
                 fails on the closed peer, and the daemon has to drop the
                 page, not die on it at the next flush.
                   hangup.py [socket] [user] [rounds]
+halfhead.py     half a request and then silence: half of a head, and a POST
+                with half of its body, neither written to nor closed. The
+                daemon has to close both at the deadline of their pending
+                page, 20 seconds, instead of holding them until it restarts.
+                  halfhead.py [socket] [wait]
 
 
 At the end of a session

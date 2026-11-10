@@ -248,14 +248,27 @@ class PendingPage {
   function try_flush($curtime)
   {
       // fprintf(STDERR, "IMPORTANT: TRY_FLUSH: start %d\n", $this->status);
-      if ($this->status != PENDINGPAGE_FLUSH &&
-          $this->status != PENDINGPAGE_CONTINUE)
-          return (FALSE);
-
       /* a socket closed elsewhere: from php 8 on, writing on it is a
          TypeError that no @ silences, and it takes the daemon down */
       if (!is_resource($this->socket))
           return TRUE;
+
+      /* nothing to write while the head or the body of the request is
+         awaited, but the wait has the same deadline: a client that sends
+         half of it and then neither writes nor closes would hold the
+         page and its socket until the daemon restarts */
+      if ($this->status == PENDINGPAGE_WAITHEAD ||
+          $this->status == PENDINGPAGE_WAITDATA) {
+          if ($this->kalive < $curtime) {
+              @fclose($this->socket);
+              return TRUE;
+          }
+          return (FALSE);
+      }
+
+      if ($this->status != PENDINGPAGE_FLUSH &&
+          $this->status != PENDINGPAGE_CONTINUE)
+          return (FALSE);
 
       if ($this->kalive < $curtime) {
           // printf("TRY FLUSH CLOSE 1\n");
