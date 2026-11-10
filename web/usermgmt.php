@@ -253,7 +253,7 @@ SELECT usr.*, guar.login AS guar_login
                         fprintf(STDERR, "ERROR: store mail FAILED\n");
                         break;
                     }
-                    $status .= sprintf("status change for %s: SUCCESS<br>", $usr_obj->login);
+                    $status .= sprintf("status change for %s: SUCCESS<br>", eschtml($usr_obj->login));
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -319,7 +319,7 @@ SELECT usr.*, guar.login AS guar_login
                         break;
                     }
 
-                    $status .= sprintf("User %s removed: SUCCESS<br>", $usr_obj->login);
+                    $status .= sprintf("User %s removed: SUCCESS<br>", eschtml($usr_obj->login));
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -557,7 +557,7 @@ SELECT usr.*, guar.login AS guar_login
                 }
                 $usr_obj = pg_fetch_object($usr_pg, 0);
 
-                printf("KEY: %s: %s %s<br>\n", $id, $value, $usr_obj->login);
+                printf("KEY: %s: %s %s<br>\n", $id, eschtml($value), eschtml($usr_obj->login));
                 // change state
                 $passwd = passwd_gen();
 
@@ -680,7 +680,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
                     }
-                    $status .= sprintf("user delete for %s: SUCCESS<br>", $usr_obj->login);
+                    $status .= sprintf("user delete for %s: SUCCESS<br>", eschtml($usr_obj->login));
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -690,7 +690,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                         $bdb->transaction('ROLLBACK');
                     break;
                 }
-                printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, $usr_obj->login);
+                printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, eschtml($usr_obj->login));
             }
         }
         else {
