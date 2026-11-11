@@ -839,15 +839,21 @@ class Sac_a_push {
     function check_globals()
     {
         GLOBAL $_globals_list;
+        /* all the missing ones on one line: stopping at the first one made
+           it one name per restart */
+        $missing = array();
         foreach ($_globals_list as $g) {
             /* by name: array_search looked for a global whose value was the
                name, with ==, and found one only by chance - any 0 under
                php 7, only a TRUE under php 8, so with no option switched on
                every name looked missing */
             if (!array_key_exists($g, $GLOBALS) || !isset($GLOBALS[$g])) {
-                error_log(sprintf("Global [%s] not declared", $g));
-                return FALSE;
+                $missing[] = $g;
             }
+        }
+        if (count($missing) > 0) {
+            error_log(sprintf("Globals not declared: [%s]", implode("] [", $missing)));
+            return FALSE;
         }
         return TRUE;
     }
@@ -868,9 +874,11 @@ class Sac_a_push {
         GLOBAL $G_with_topbanner;
         GLOBAL $G_tos_vers, $G_tos_fname, $G_tos_dtsoft, $G_tos_dthard, $G_tos_idx, $G_doc_path;
 
+        /* a warning, not a stop: the line stays in the log. The sleep(10)
+           that followed only kept the players out for ten seconds, and at
+           a reload froze the whole room, the loop being one for everybody */
         if (!$this->check_globals()) {
             fprintf(STDERR, "Take a look to the phplog file, GLOBALS missing!\n");
-            sleep(10);
         }
 
         if ($this->main_loop) {
@@ -1145,7 +1153,6 @@ class Sac_a_push {
                                                        $G_cloud_smasher);
                                     if (!$this->check_globals()) {
                                         fprintf(STDERR, "Take a look to the phplog file, GLOBALS missing!\n");
-                                        sleep(10);
                                     }
                                     global_dump();
                                 }
