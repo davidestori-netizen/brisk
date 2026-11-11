@@ -175,8 +175,10 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         $argz = explode('|', xcapemesg($mesg));
 
         if ($argz[0] == 'getchallenge') {
-            if (isset($get['cli_name']))
-                $cli_name = $get['cli_name'];
+            /* without a name in the query the answer is a failure, 1|, as
+               ever; left undefined it also put two lines of php warnings
+               into the log of the daemon */
+            $cli_name = (isset($get['cli_name']) ? $get['cli_name'] : "");
             if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) {
                 log_main("chal lock data success");
 
