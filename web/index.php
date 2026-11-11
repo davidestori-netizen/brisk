@@ -451,8 +451,14 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                     log_main("user stat: ".$user->stat);
                     if ($user->stat == "table") {
                         $cookies = new Cookies();
-                        $cookies->add("table_token", $user->table_token, $curtime + 31536000);
-                        $cookies->add("table_idx", $user->table, $curtime + 31536000);
+                        $cookies->add("table_token", $user->table_token, $curtime + 31536000, SITE_PREFIX);
+                        $cookies->add("table_idx", $user->table, $curtime + 31536000, SITE_PREFIX);
+                        /* drop the copies written by older versions without a Path, under the
+                           default path "/brisk": the browser would send them after these ones */
+                        if (SITE_PREFIX != "/") {
+                            $cookies->add("table_token", "deleted", 1, rtrim(SITE_PREFIX, "/"));
+                            $cookies->add("table_idx", "deleted", 1, rtrim(SITE_PREFIX, "/"));
+                        }
                         $header_out['cookies'] = $cookies;
                         $header_out['Location'] = "briskin5/index.php";
                         return TRUE;
@@ -492,8 +498,14 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                 // recovery lost game
                 if ($user->stat == "table") {
                     $cookies = new Cookies();
-                    $cookies->add("table_token", $user->table_token, $curtime + 31536000);
-                    $cookies->add("table_idx", $user->table, $curtime + 31536000);
+                    $cookies->add("table_token", $user->table_token, $curtime + 31536000, SITE_PREFIX);
+                    $cookies->add("table_idx", $user->table, $curtime + 31536000, SITE_PREFIX);
+                    /* drop the copies written by older versions without a Path, under the
+                       default path "/brisk": the browser would send them after these ones */
+                    if (SITE_PREFIX != "/") {
+                        $cookies->add("table_token", "deleted", 1, rtrim(SITE_PREFIX, "/"));
+                        $cookies->add("table_idx", "deleted", 1, rtrim(SITE_PREFIX, "/"));
+                    }
                     $header_out['cookies'] = $cookies;
                     $header_out['Location'] = "briskin5/index.php";
                     return TRUE;
