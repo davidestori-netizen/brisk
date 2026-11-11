@@ -413,8 +413,13 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     $a_y = substr($a_y,0,-2);
 
                 /* the card comes from the request: read it only once its
-                   index is known to be in range */
-                $a_inrange = ($a_play >= 0 && $a_play < (BIN5_CARD_HAND * BIN5_PLAYERS_N));
+                   index is known to be in range. Digits only, then an
+                   integer: "1 " passes a numeric comparison in php 8, but as
+                   a key it is the string "1 ", which is no card */
+                $a_inrange = (ctype_digit((string)$a_play)
+                              && (int)$a_play < (BIN5_CARD_HAND * BIN5_PLAYERS_N));
+                if ($a_inrange)
+                    $a_play = (int)$a_play;
                 $loggo = sprintf("A_play %s, table_pos %d == %d, mazzo %d, gstart %d, card_stat %s, card_own %s",
                                  $a_play, $user->table_pos, ($table->gstart % BIN5_PLAYERS_N),
                                  $table->mazzo, $table->gstart,
