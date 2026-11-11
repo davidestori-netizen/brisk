@@ -3511,11 +3511,14 @@ function validate_sess($sess)
 }
 
 /* The name is written into html and javascript, and into the blocks of
-   the stream, everywhere: the characters that close a string or an
-   attribute, open a tag, split the commands (|) or mark the blocks (@),
-   the control characters and the unicode line terminators are refused.
-   Everything else stays, the hearts and the spades of the players
-   included. At least one ascii letter or digit is still required. */
+   the stream, everywhere: the characters that close a double quoted
+   string or attribute, open a tag, split the commands (|), the control
+   characters and the unicode line terminators are refused. Everything
+   else stays, the hearts and the spades of the players included, and the
+   ' @ \ & that many logins of the site hold: the server writes names
+   only through xcape, inside double quotes, where those are harmless, and
+   the client only as text. At least one ascii letter or digit is still
+   required. */
 function validate_name($name)
 {
     if (!mb_check_encoding($name, "UTF-8"))
@@ -3523,7 +3526,7 @@ function validate_name($name)
 
     $name_new = str_replace(' ', '_', mb_substr(trim($name),0,12, "UTF-8"));
 
-    if (preg_match('/[\x{00}-\x{1f}\x{7f}-\x{9f}\x{2028}\x{2029}"\'<>&`\\\\|@]/u', $name_new))
+    if (preg_match('/[\x{00}-\x{1f}\x{7f}-\x{9f}\x{2028}\x{2029}"<>`|]/u', $name_new))
         return (FALSE);
     if (!preg_match('/[a-zA-Z0-9]/', $name_new))
         return (FALSE);
