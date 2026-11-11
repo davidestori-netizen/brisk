@@ -157,6 +157,25 @@ nginx-brisk-server.conf, nginx-brisk-daemon.inc) and the systemd unit
     sudo systemctl daemon-reload
     sudo systemctl enable --now brisk
 
+Then reload php-fpm, here and after every later install:
+
+    sudo systemctl reload php8.4-fpm
+
+With the debian defaults it is not strictly needed: opcache checks the
+date of the files (opcache.validate_timestamps = 1) at most every two
+seconds (opcache.revalidate_freq = 2), and INSTALL.sh gives every file
+the date of the install, so the pages served by php-fpm pick the new
+code up by themselves. The reload makes it certain instead of a matter
+of dates and intervals, and costs nothing: running requests finish on
+the old processes, the new ones start with an empty opcache. It is
+needed for real when a php setting changes (the .ini files under
+/etc/php/8.4/fpm/, read only at start) or when opcache is told not to
+check the files (opcache.validate_timestamps = 0).
+
+The daemon is not served by php-fpm: after a later install it is
+"sudo systemctl restart brisk" that brings its new code in, saving the
+room and loading it back.
+
 
 ==== 8. The site in nginx ====
 
