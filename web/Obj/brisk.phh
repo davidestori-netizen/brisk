@@ -200,11 +200,13 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dt><b>Comandi della chat</b>
 <!-- <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname -->
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti
-<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
+<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\", \\"sigaretta\\", \\"coniglio\\", \\"calcio\\", \\"pupo\\", \\"pulizie\\", \\"babbo\\", \\"renna\\", \\"pupazzo\\" oppure \\"vischio\\"
 <dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
+<dd><b>/rules <i>&lt;numero&gt;</i></b> - al tavolo, prima che inizi l\'asta, chiede di giocare con altre regole: 1 = regole vecchie (con pareggio), 2 = regole nuove (senza pareggio), 4 = regole del torneo \\"insieme per gioco\\"; le regole cambiano quando tutti e 5 i giocatori chiedono le stesse
 <dd><b>/info <i>&lt;login&gt;</i></b> - mostra lo stato corrente dell\'utente passato come argomento e in che relazione siete
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
+<dd><b>/diag</b> - nella sala mostra o nasconde, in fondo alla pagina, il riquadro con la diagnostica della connessione (lo stesso che si ottiene cliccando sull\'icona dello stato della connessione); utile per segnalare problemi di collegamento
 <!-- <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all) -->
 </dl>
 </div>
@@ -231,13 +233,15 @@ Durante la partita, se vorrete ricaricare la pagina, usate l\'apposito bottone \
 Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri giocatori di sbloccarla cliccando sul lucchetto. Se non si segue questa prassi, una volta usciti, non vi potrete sedere a nessun tavolo per '.floor(BAN_TIME/60).' minuti.
 <dl>
 <dt><b>Comandi della chat</b>
-<dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
+<!-- <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname -->
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti
-<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
+<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\", \\"sigaretta\\", \\"coniglio\\", \\"calcio\\", \\"pupo\\", \\"pulizie\\", \\"babbo\\", \\"renna\\", \\"pupazzo\\" oppure \\"vischio\\"
 <dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
+<dd><b>/rules <i>&lt;numero&gt;</i></b> - al tavolo, prima che inizi l\'asta, chiede di giocare con altre regole: 1 = regole vecchie (con pareggio), 2 = regole nuove (senza pareggio), 4 = regole del torneo \\"insieme per gioco\\"; le regole cambiano quando tutti e 5 i giocatori chiedono le stesse
 <dd><b>/info <i>&lt;login&gt;</i></b> - mostra lo stato corrente dell\'utente passato come argomento e in che relazione siete
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
+<dd><b>/diag</b> - nella sala mostra o nasconde, in fondo alla pagina, il riquadro con la diagnostica della connessione (lo stesso che si ottiene cliccando sull\'icona dello stato della connessione); utile per segnalare problemi di collegamento
 <!-- <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all) -->
 </dl>
 </div>
