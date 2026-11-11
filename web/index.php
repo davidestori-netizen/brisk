@@ -1011,9 +1011,15 @@ google_color_url = "000000";
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 '.($user->flags & USER_FLAG_AUTH ? '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_signal'.langtolng($G_lang).'.png" title="'.$mlang_room['tit_mesg'][$G_lang].'" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.poll_dom()
- : '
+ : ''
+/* "password" button (how to get a password) for the users who come in
+   without one: disabled for now, it will be reactivated later by putting
+   this string in place of the '' above
+ '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_password.png" title="Come ottenere una password su Brisk." onmouseover="menu_hide(0,0);" onclick="act_passwdhowto();">
-').'
+'
+*/
+).'
 
 ' : '').'
 
