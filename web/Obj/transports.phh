@@ -379,7 +379,11 @@ class Transport_websocket {
         $payload = $this->partialMessage . $this->extractPayload($message,$headers);
 
         if ($pongReply) {
-            $reply = $this->frame($payload,$this,'pong');
+            /* frame($message, $messageType, $messageContinues): passed as
+               ($payload, $this, 'pong') no type matched, the reply went out
+               with opcode 0, and 'pong' taken for "continues" left every
+               later frame of the stream marked as a continuation */
+            $reply = $this->frame($payload, 'pong');
             // TODO FIXME ALL socket_write management
             // socket_write($user->socket,$reply,mb_strlen($reply, "ASCII"));
             @fwrite($socket, $reply, mb_strlen($reply, "ASCII"));
