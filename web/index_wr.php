@@ -321,7 +321,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     break;
                 }
 
-                if (brisk_mail($cli_email, 'Utente Brisk {$cli_name}',
+                if (brisk_mail($cli_email, "Utente Brisk {$cli_name}",
                                $subj, $body_txt, $body_htm) == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
@@ -523,7 +523,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
 
-                    if (brisk_mail($cli_email, 'Utente Brisk {$cli_name}', $subj, $body_txt, $body_htm) == FALSE) {
+                    if (brisk_mail($cli_email, "Utente Brisk {$cli_name}", $subj, $body_txt, $body_htm) == FALSE) {
                         // mail error
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
