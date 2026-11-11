@@ -168,14 +168,12 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "5.10.0";
+$G_brisk_version = "6.0.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuove immagini per le carte e utilizzo della tecnologia sprite per minimizzare le richieste al server.' ),
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITÀ</b>: port a PHP 8.4, corretti diversi errori che impattavano sull\'esperienza utente, nuovo layout, occhio verde/arancio/rosso cliccabile.' ),
                                        # , 'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'EN Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: puoi creare la tua rete di amicizie con /info,',
-                                       'vedere cosa pensano i tuoi amici degli altri utenti e tavoli riservati per registrati e apprendisti.',
-                                       'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ) );
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: port to PHP 8.4, fixed several bugs that affected the user experience, new layout, clickable green/orange/red eye.' ) );
 
 $G_room_help = array( 'it' => '
 <div style=\\"text-align: left; padding: 8px;\\">
