@@ -840,7 +840,11 @@ class Sac_a_push {
     {
         GLOBAL $_globals_list;
         foreach ($_globals_list as $g) {
-            if (!array_search($g, $GLOBALS) || !isset($GLOBALS[$g])) {
+            /* by name: array_search looked for a global whose value was the
+               name, with ==, and found one only by chance - any 0 under
+               php 7, only a TRUE under php 8, so with no option switched on
+               every name looked missing */
+            if (!array_key_exists($g, $GLOBALS) || !isset($GLOBALS[$g])) {
                 error_log(sprintf("Global [%s] not declared", $g));
                 return FALSE;
             }
