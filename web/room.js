@@ -875,3 +875,49 @@ sideslide.prototype = {
     }
 
 }
+
+
+/* easy signup (iscriviti.php): the nickname given in the link (index.php?n=nick) is
+   written in the login form, and at the first entry with a temporary nickname a
+   welcome window explains the "*" (once per browser). The leading ';' closes the
+   statement above, that has no semicolon of its own */
+;(function () {
+    function isc_welcome(nick) {
+        var velo = document.createElement('div'), box = document.createElement('div');
+        velo.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483100;background:transparent;' +
+            'display:flex;align-items:center;justify-content:center;padding:16px';
+        box.style.cssText = 'background-color:white;background-image:url(img/brisk-bg-light.png);background-attachment:fixed;' +
+            'border:1px solid black;border-radius:8px;color:black;max-width:680px;width:100%;padding:16px 20px 14px;' +
+            'font-size:19px;line-height:1.5;text-align:center';
+        box.innerHTML = '<div style="font-weight:bold;font-size:22px;margin:2px 0 10px;padding-bottom:8px;border-bottom:1px solid gray">' +
+            'Benvenuto, ' + nick + '! &#127183;</div>' +
+            '<div style="margin:0 0 12px;text-align:left">Il tuo account &egrave; pronto: <b>puoi giocare subito</b>.<br><br>' +
+            'Accanto al tuo nome vedi un piccolo asterisco <span style="color:#888">&#10033;</span>: vuol dire che il tuo nome &egrave; provvisorio. ' +
+            'Quando i moderatori approvano il nome che hai scelto ti arriva un\'email, e da l&igrave; entri con quello.<br><br>' +
+            'Nell\'<b>email</b> che ti abbiamo mandato trovi il tuo nome e la tua password: <b>conservala</b>.</div>' +
+            '<input type="button" class="button" value="Iniziamo!" style="font-size:18px;padding:8px 18px;margin:8px 4px">';
+        velo.appendChild(box); document.body.appendChild(velo);
+        box.getElementsByTagName('input')[0].onclick = function () { if (velo.parentNode) velo.parentNode.removeChild(velo); };
+    }
+    function isc_start() {
+        try {
+            var m = /[?&]n=([^&]*)/.exec(location.search), ni = document.getElementById('nameid');
+            if (m && ni && ni.value == '') {
+                ni.value = decodeURIComponent(m[1].replace(/\+/g, ' '));
+                var pi = document.getElementById('passid');
+                /* after the onload of the page, that puts the cursor on the nickname */
+                if (pi) setTimeout(function () { pi.focus(); }, 300);
+            }
+        } catch (e) { }
+        var tries = 0, t = setInterval(function () {
+            if (++tries > 120) { clearInterval(t); return; }
+            if (typeof window.myname == 'undefined' || !window.myname) return;
+            clearInterval(t);
+            if (!window.myname_tmp) return;
+            var k = 'brisk_benv_' + String(window.myname).toLowerCase();
+            try { if (localStorage.getItem(k) == '1') return; localStorage.setItem(k, '1'); } catch (e) { }
+            isc_welcome(window.myname);
+        }, 500);
+    }
+    if (window.addEventListener) window.addEventListener('load', isc_start);
+})();
