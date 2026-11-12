@@ -1100,6 +1100,11 @@ if [ "$web_only" = "FALSE" ]; then
 fi
 
 bsk_busting="$(git rev-parse --short HEAD 2>/dev/null|| true)"
+# with uncommitted changes the commit alone does not change between two
+# installs, and the browsers keep the old .css and .js: add the time
+if [ "$bsk_busting" != "" ] && [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+    bsk_busting="${bsk_busting}-$(date +%s)"
+fi
 if [ "$bsk_busting" = "" ]; then
     bsk_busting=$(grep '^\$G_brisk_version'  web/Obj/brisk.phh | sed 's/^[^"'"'"']*["'"'"']/v/g;s/["'"'"'].*//g')
 fi
