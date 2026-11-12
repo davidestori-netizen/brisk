@@ -670,3 +670,10 @@ div.diagbox.diag_on {
 img.stm_stat {
     cursor: pointer;
 }
+
+/* one-line company details at the bottom of the room ($G_company_line) */
+div.company_line {
+    text-align: center;
+    font-size: 80%;
+    padding: 0px 4px 2px 4px;
+}

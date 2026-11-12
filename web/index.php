@@ -360,7 +360,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
     GLOBAL $G_sidebanner, $G_sidebanner_idx;
-    GLOBAL $G_with_poll;
+    GLOBAL $G_with_poll, $G_company_line;
     GLOBAL $G_lang, $G_lng, $mlang_room;
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER, $_COOKIE;
     GLOBAL $G_base;
@@ -1452,6 +1452,11 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
 </div>
+<?php
+    if (isset($G_company_line) && $G_company_line != '') {
+        printf('<div class="company_line">%s</div>', $G_company_line);
+    }
+?>
 </div>
 
 <div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">
