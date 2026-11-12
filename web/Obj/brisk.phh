@@ -171,9 +171,9 @@ $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
 $G_brisk_version = "6.0.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITÀ</b>: port a PHP 8.4, corretti diversi errori che impattavano sull\'esperienza utente, nuovo layout, occhio verde/arancio/rosso cliccabile.' ),
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITÀ</b>: port a PHP 8.4, corretti diversi errori che impattavano sull\'esperienza utente, nuovo layout, occhio verde/arancio/rosso cliccabile, chat espandibile.' ),
                                        # , 'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: port to PHP 8.4, fixed several bugs that affected the user experience, new layout, clickable green/orange/red eye.' ) );
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: port to PHP 8.4, fixed several bugs that affected the user experience, new layout, clickable green/orange/red eye, expandable chat.' ) );
 
 $G_room_help = array( 'it' => '
 <div style=\\"text-align: left; padding: 8px;\\">
@@ -186,6 +186,7 @@ Occorre abilitare i cookies.<br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
 Se al vostro tavolo si raggiungono i 5 giocatori inizia automaticamente la partita.<br>
+Con un doppio click sulla chat la si espande verso l\'alto (diventa quattro volte pi&ugrave; alta e copre il resto della sala); con un altro doppio click torna com\'era.<br>
 <br>
 <b>Partita</b><br>
 All\'inizio vengono distribuite le carte e parte l\'asta; per partecipare all\'asta, quando sar&agrave; il vostro turno, potrete scegliere se andare avanti o passare cliccando sulle icone corrispondenti. Se si arriva ai punti, scrivete nella textbox il vostro rilancio e cliccate PUNTI.<br><br>
@@ -221,6 +222,7 @@ Occorre abilitare i cookies.<br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
 Se al vostro tavolo si raggiungono i 5 giocatori inizia automaticamente la partita.<br>
+Con un doppio click sulla chat la si espande verso l\'alto (diventa quattro volte pi&ugrave; alta e copre il resto della sala); con un altro doppio click torna com\'era.<br>
 <br>
 <b>Partita</b><br>
 All\'inizio vengono distribuite le carte e parte l\'asta; per partecipare all\'asta, quando sar&agrave; il vostro turno, potrete scegliere se andare avanti o passare cliccando sulle icone corrispondenti. Se si arriva ai punti, scrivete nella textbox il vostro rilancio e cliccate PUNTI.<br><br>

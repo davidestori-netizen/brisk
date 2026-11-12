@@ -334,6 +334,25 @@ div.esco {
 
     /* white at 25% (75% transparent): the big logo of the body shows through */
     background-color: rgba(255, 255, 255, 0.25);
+
+    /* a double tap is a double click, not a zoom of the page */
+    touch-action: manipulation;
+}
+
+/*
+ *  the chat enlarged by a double click (chatt_big_toggle() in room.js):
+ *  four times higher, upwards over the standing players and the tables
+ *  (the negative margin keeps its place in the page, so nothing below
+ *  moves), opaque so what is behind does not disturb. Over the title and
+ *  the buttons of the standing players (z-index: 20), under the menu
+ *  (.webstart, z-index: 50)
+ */
+.chatt.chatt_big {
+    position: relative;
+    z-index: 21;
+    height: 400px;
+    margin-top: -300px;
+    background-color: #ffffff;
 }
 
 .txtt {

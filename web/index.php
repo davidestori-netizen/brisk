@@ -1379,7 +1379,7 @@ cookie_law(null);
 <!--  =========== bottom ===========  -->
 <div id="bottom" class="bottom">
 <b>Chat</b> <span id="list_info" style="color: red;"></span><br>
-<div id="txt" class="chatt">
+<div id="txt" class="chatt" ondblclick="chatt_big_toggle(this);">
 </div>
 <div style="text-align: center; ">
     <!-- MLANG: scrivi un invito al tavolo e clicca -->
