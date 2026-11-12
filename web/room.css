@@ -641,3 +641,32 @@ body.explain h5 {
     font-size: 120%;
     background-color: #fafafa;
 }
+
+/*
+ *  diagnostic area (watchdog, loaded images, ...): hidden at every page
+ *  load, diag_toggle() (commons.js) shows it
+ */
+div.diagbox {
+    display: none;
+    text-align: left;
+    font-family: monospace;
+    font-size: 80%;
+    padding: 2px 4px;
+    margin: 2px;
+    overflow-wrap: anywhere;
+
+    /* the colors of .webstart_hilite (start, actions, ... menu), background at 50% */
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    background-color: rgba(255, 215, 128, 0.5);   /* #ffd780 */
+    border: 1px solid #ffae00;
+}
+
+div.diagbox.diag_on {
+    display: block;
+}
+
+img.stm_stat {
+    cursor: pointer;
+}

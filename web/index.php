@@ -122,6 +122,8 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
 
                      'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
                                              'en' => 'write an invitation at the table and click'),
+                     'tit_diag'     => array('it' => 'stato della connessione: clicca per mostrare o nascondere la diagnostica (anche col comando /diag in chat)',
+                                             'en' => 'connection status: click to show or hide the diagnostics (also with the /diag chat command)'),
                      'itm_warr'     => array('it' => 'garantisci',
                                              'en' => 'guarantee'),
                      'warr_desc'    => array('it' => 'garantisci per un tuo conoscente',
@@ -1049,7 +1051,7 @@ supported by:<br>
 (!$G_is_local && $_cookie_law_3party == 'true') ?
 '<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>
 ' : '' ) . '<div id="proaudioext" class="proaudioext"><div id="proaudio" class="proaudio"></div></div>
-<img id="stm_stat" class="nobo" style="margin-top: 4px;" src="img/line-status_b.png">
+<img id="stm_stat" class="nobo stm_stat" style="margin-top: 4px;" src="img/line-status_b.png" title="'.$mlang_room['tit_diag'][$G_lang].'" onclick="diag_toggle();">
 %s
 %s
 </div>';
@@ -1436,6 +1438,9 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </table>
     </form>
     </div>
+<!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
+     shown by a click on the connection status icon or by the /diag chat command -->
+<div id="diagbox" class="diagbox">
 <div id="heartbit"></div>
 <div id="sandbox"></div>
 <div id="imgct"></div>
@@ -1446,6 +1451,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrstart"></div>
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
+</div>
 </div>
 
 <div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">

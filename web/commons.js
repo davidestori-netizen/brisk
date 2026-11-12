@@ -387,10 +387,31 @@ function chatt_checksend(obj,e)
 	obj.value = "";
     }
 }
+/*
+ *  show or hide the diagnostic area of the room (watchdog, loaded images, ...)
+ */
+function diag_toggle()
+{
+    var box = $("diagbox");
+
+    if (box == null)
+        return false;
+    if (box.className.match(/\bdiag_on\b/)) {
+        box.className = box.className.replace(/\s*\bdiag_on\b/, "");
+    }
+    else {
+        box.className += " diag_on";
+    }
+    return true;
+}
+
 function act_chatt(value)
 {
     if (value.substring(0, 6) == "/info ") {
         info_show(value.substring(6));
+    }
+    else if (value == "/diag" && diag_toggle()) {
+        /* handled here: the diagnostic area is in this page */
     }
     else {
         send_mesg("chatt|", value);
