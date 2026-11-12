@@ -388,19 +388,33 @@ function chatt_checksend(obj,e)
     }
 }
 /*
- *  show or hide the diagnostic area of the room (watchdog, loaded images, ...)
+ *  show or hide the diagnostic area of the room (watchdog, loaded images, ...);
+ *  the traffic line is drawn only while the area is shown
  */
 function diag_toggle()
 {
     var box = $("diagbox");
+    var shown;
 
     if (box == null)
         return false;
     if (box.className.match(/\bdiag_on\b/)) {
         box.className = box.className.replace(/\s*\bdiag_on\b/, "");
+        shown = false;
     }
     else {
         box.className += " diag_on";
+        shown = true;
+    }
+    if (typeof(xstm) != 'undefined' && xstm != null && typeof(xstm.hlog_set) == 'function'
+        && typeof(heartbit_line) == 'function') {
+        if (shown) {
+            heartbit_line_reset();
+            xstm.hlog_set(heartbit_line);
+        }
+        else {
+            xstm.hlog_set(null);
+        }
     }
     return true;
 }
