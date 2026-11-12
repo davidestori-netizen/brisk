@@ -182,8 +182,17 @@ table.macro td {
     text-align: center;
 }
 
+/*
+ *  the list of the tables follows the height of the window: 2.8 rows
+ *  (346px; every row is a 120px cell plus 4px of border-spacing) at least,
+ *  four whole rows (500px: 4px + 4 x 124px) at most. 373px is the rest of
+ *  the room: header, standing players, chat, its input and the company
+ *  line, so from 719px to 873px of window the room fills it exactly
+ */
 div.room_tab {
     height: 346px;
+    height: clamp(346px, 100vh - 373px, 500px);
+    height: clamp(346px, 100dvh - 373px, 500px);
     margin-left: auto;
     margin-right: auto;
     min-width: 680px;
@@ -676,4 +685,22 @@ div.company_line {
     text-align: center;
     font-size: 80%;
     padding: 0px 4px 2px 4px;
+}
+
+/*
+ *  on windows taller than the room the spare space goes one third above
+ *  it and two thirds below, instead of being all below: a little high is
+ *  handier on the mobile devices. The other children of the body are
+ *  popups out of the flow or empty elements, and do not take space
+ */
+body.room {
+    display: grid;
+    grid-template-rows: 1fr auto 2fr;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+body.room > div.container {
+    grid-row: 2;
 }

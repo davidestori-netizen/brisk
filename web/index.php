@@ -1343,7 +1343,7 @@ cookie_law(null);
     if (!$G_is_local && $_cookie_law_3party == 'true') {
 ?>
 <!-- if myconsole <body onunload="deconsole();"> -->
-<body xmlns:fb="http://ogp.me/ns/fb#">
+<body class="room" xmlns:fb="http://ogp.me/ns/fb#">
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
@@ -1356,7 +1356,7 @@ cookie_law(null);
     }
     else {
 ?>
-<body>
+<body class="room">
 <?php
     }
     printf($brisk_header_form);
