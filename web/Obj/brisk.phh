@@ -3631,16 +3631,91 @@ class Poll {
     }
 }
 
-function carousel_top()
+/*
+ *  $pfx is the path from the page to the root of the site: "" for the
+ *  pages in the root (the room), "../" for the ones in a subdirectory (the
+ *  table)
+ */
+function carousel_top($pfx = "")
 {
     $what = rand(1,2);
     if ($what == 1) {
         $rn = rand(1, 3);
-        return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" alt="il negozio virtuale di Brisk" title="il negozio virtuale di Brisk" src="img/briskshop%d.gif"></a>', $rn));
+        return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" alt="il negozio virtuale di Brisk" title="il negozio virtuale di Brisk" src="%simg/briskshop%d.gif"></a>', $pfx, $rn));
         }
     else {
-        return (sprintf('<a target="_blank" href="http://www.alternativeoutput.it/briskblog"><img class="nobo" alt="il nuovo blog di Brisk" title="il nuovo blog di Brisk" style="display: inline; border: 1px solid #808080;" src="img/briskblog_bannersmall.png"></a>'));
+        return (sprintf('<a target="_blank" href="http://www.alternativeoutput.it/briskblog"><img class="nobo" alt="il nuovo blog di Brisk" title="il nuovo blog di Brisk" style="display: inline; border: 1px solid #808080;" src="%simg/briskblog_bannersmall.png"></a>', $pfx));
     }
+}
+
+$mlang_header = array( 'headline' => array('it' => 'briscola chiamata in salsa ajax',
+                                           'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>') );
+
+/*
+ *  the header of the room and of the table: a banner on each side and in
+ *  the middle the logo with the headline, beside the top banner or the
+ *  donometer when one of them is active.
+ *  $pfx is the path from the page to the root of the site (see
+ *  carousel_top()), $cookie_law_3party the choice of the user about the
+ *  third party cookies ('true' allows the advertising banners).
+ */
+function header_render($pfx, $cookie_law_3party)
+{
+    GLOBAL $G_lang, $G_is_local, $mlang_header;
+    GLOBAL $G_with_topbanner, $G_topbanner, $G_with_donors, $G_donors_cur, $G_donors_all;
+
+    $google_ad = '<script type="text/javascript"><!--
+google_ad_client = "pub-5246925322544303";
+google_ad_width = 234;
+google_ad_height = 60;
+google_ad_format = "234x60_as";
+google_ad_type = "text_image";
+google_ad_channel = "";
+google_color_border = "808080";
+google_color_bg = "f6f6f6";
+google_color_link = "ffae00";
+google_color_text = "404040";
+google_color_url = "000000";
+//-->
+</script>
+<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
+
+    if (!$G_is_local && $cookie_law_3party == 'true') {
+        if (rand(0, 1) == 0) {
+            $banner_top_left  = $google_ad;
+            $banner_top_right = carousel_top($pfx);
+        }
+        else {
+            $banner_top_left  = carousel_top($pfx);
+            $banner_top_right = $google_ad;
+        }
+    }
+    else {
+        $banner_top_left  = carousel_top($pfx);
+        $banner_top_right = carousel_top($pfx);
+    }
+
+    $with_side = ($G_with_topbanner || $G_with_donors);
+    if ($G_with_topbanner) {
+        $side = $G_topbanner;
+    }
+    else if ($G_with_donors) {
+        $side = "<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"".$pfx."donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>";
+    }
+
+    return ('<!-- =========== header ===========  -->
+<div id="header" class="header">
+<table width="100%" style="min-height: 84px;" border="0" cols="3"><tr>
+<td style="width: 33%;" align="left"><div style="padding-left: 8px;">'.$banner_top_left.'</div></td>
+<td style="width: 34%;" align="center">'.($with_side ? '<table><tr><td>' : '').'<div style="text-align: center;">
+ <img class="nobo" src="'.$pfx.'img/brisk_logo64.png">'
+/*    <img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao Prof" alt="ciao Prof">' */
+    .$mlang_header['headline'][$G_lang].'<br>
+    </div>'.($with_side ? '</td><td>'.$side.'</td></tr></table>' : '').'</td>
+<td style="width: 33%;" align="right"><div style="padding-right: 8px;">'.$banner_top_right.'</div></td>
+</tr></table>
+</div>
+');
 }
 
 function login_consistency($name)

@@ -383,3 +383,11 @@ div.company_line {
     font-size: 80%;
     padding: 0px 4px 2px 4px;
 }
+
+/* the header of the room and of the table (header_render() in brisk.phh) */
+div.header {
+    align: center;
+    text-align: center;
+    font-size: 100%;
+    clear:left;
+}

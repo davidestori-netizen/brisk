@@ -40,8 +40,6 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Your IP address is banned because trolling activity was detected from it.'),
                      'standing'     => array('it' => 'Giocatori in piedi',
                                              'en' => 'Standing players'),
-                     'headline'     => array('it' => 'briscola chiamata in salsa ajax',
-                                             'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>'),
                      'welcome'      => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola.',
                                              'en' => 'Enter your nickname to access to the tables of briscola.'),
                      'reas_unkn'    => array('it' => 'Logout per motivi sconosciuti.',
@@ -670,70 +668,8 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
         $brisk_donate = "";
 
 
-    /* MLANG: "briscola chiamata in salsa ajax", */
-
     mt_srand(make_seed());
-    if (!$G_is_local && $_cookie_law_3party == 'true') {
-        $rn = rand(0, 1);
-
-        if ($rn == 0) {
-            $banner_top_left = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
-            $banner_top_right = carousel_top();
-        }
-        else {
-            $banner_top_left = carousel_top();
-            $banner_top_right = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
-        }
-    }
-    else { // !$G_is_local
-        $banner_top_left  = carousel_top();
-        $banner_top_right = carousel_top();
-    }
-
-    $brisk_header_form = '<div class="container">
-<!-- =========== header ===========  -->
-<div id="header" class="header">
-<table width="100%%" style="min-height: 84px;" border="0" cols="3"><tr>
-<td style="width: 33%%;" align="left"><div style="padding-left: 8px;">'.$banner_top_left.'</div></td>
-<td style="width: 34%%;" align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
- <img class="nobo" src="img/brisk_logo64.png">'
-/*    <img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao Prof" alt="ciao Prof">' */
-    .$mlang_room['headline'][$G_lang].'<br>
-    </div>'.( ($G_with_topbanner || $G_with_donors) ? sprintf('</td><td>%s</td></tr></table>',
-                                                                ($G_with_topbanner ? $G_topbanner :
-"<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>
-<td style="width: 33%%;" align="right"><div style="padding-right: 8px;">'.$banner_top_right.'</div></td>
-</tr></table>
-</div>';
-// <td style="width: 33%%;" align="right">'.$banner_top_right.'</td>
+    $brisk_header_form = '<div class="container">'."\n".header_render('', $_cookie_law_3party);
 
     /* MLANG: ALL THE VERTICAL MENU */
     $brisk_vertical_menu = '
@@ -1157,7 +1093,7 @@ window.onload = function() {
 <body>
 <?php
         }
-        printf($brisk_header_form);
+        echo $brisk_header_form;
         printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
         printf($brisk_vertical_menu, '', $brisk_donate);
 
@@ -1359,7 +1295,7 @@ cookie_law(null);
 <body class="room">
 <?php
     }
-    printf($brisk_header_form);
+    echo $brisk_header_form;
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
     printf($brisk_vertical_menu, '', $brisk_donate);
 

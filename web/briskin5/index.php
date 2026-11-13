@@ -68,6 +68,9 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 
     $deck = (isset($cookie['CO_bin5_pref_deck']) ? $cookie['CO_bin5_pref_deck'] : 'xx');
 
+    /* the choice of the user about the third party cookies, as in the room */
+    $_cookie_law_3party = (isset($cookie['_cookie_law_3party']) ? $cookie['_cookie_law_3party'] : 'true');
+
     /* All four come from the request and are written into the page, in
        the html and in the javascript, and the page is served to anybody:
        written as they came, a link could run its own code in the page of
@@ -166,6 +169,7 @@ window.onload = function() {
 </script>
 </head>
 <body>
+<?php echo header_render('../', $_cookie_law_3party); ?>
 <div id="bg" class="area">
 
 <div id="remark" class="remark0"></div>
