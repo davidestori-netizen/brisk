@@ -24,6 +24,12 @@
 
 $G_base = "";
 
+foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
+    if (isset($_SERVER[$i])) {
+        $$i = $_SERVER[$i];
+        }
+    }
+
 require_once("Obj/brisk.phh");
 require_once("Obj/dbase_pgsql.phh");
 
@@ -246,7 +252,7 @@ main();
     echo "$cont";
 ?>
 <b>Append users from a file</b><br>
-<form accept-charset="utf-8" method="post" action="<?php echo $PHP_SELF;?>">
+<form accept-charset="utf-8" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
       <input type="hidden" name="F_ACT" value="append">
       <table><tr><td>Admin Password:</td>
       <td><input name="F_pass_private" type="password" value=""></td></tr>
@@ -257,7 +263,7 @@ main();
 </form>
 <hr>
 <b>Points importer from file to db</b><br>
-<form accept-charset="utf-8" method="post" action="<?php echo $PHP_SELF;?>">
+<form accept-charset="utf-8" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
       <input type="hidden" name="F_ACT" value="pointsimp">
       <table><tr><td>Admin Password:</td>
       <td><input name="F_pass_private" type="password" value=""></td></tr>

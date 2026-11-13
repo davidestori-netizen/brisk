@@ -534,7 +534,7 @@ class Transport_websocket {
 
     static function close()
     {
-        return(chr(0x88).chr(0x02).chr(0xe8).chr(0x03));
+        return(chr(0x88).chr(0x02).chr(0x03).chr(0xe8));
     }
 
     function postclose_get($sock, $curtime)

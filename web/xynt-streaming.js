@@ -616,6 +616,7 @@ xynt_streaming.prototype = {
     cookiepath: "/brisk/",
     watchdog_hdl:      null,
     hbit:              function () {},
+    hlog:              null,  /* traffic line, set only while it is shown */
     keepalive_old:    -1,
     keepalive_new:    -1,
     keepalives_equal:  0,
@@ -790,6 +791,10 @@ xynt_streaming.prototype = {
         this.hbit = hbit;
     },
 
+    hlog_set: function (hlog) { /* public: null to stop it */
+        this.hlog = hlog;
+    },
+
 
     hbit_status: function () {
         var ret;
@@ -898,6 +903,7 @@ xynt_streaming.prototype = {
                 }
                 else {
                     this.log("hs::watchdog: MAX ACHIEVED "+this.keepalives_equal);
+                    if (this.hlog) this.hlog("X");
                     this.reload();
                     // alert("watchdog return reload");
                     this.hbit_status();
@@ -938,6 +944,7 @@ xynt_streaming.prototype = {
                 }
                 this.mon_update();
                 this.hbit_status();
+                if (this.hlog) this.hlog("/\\");
 
                 // else {
                 //     this.log("ctx_new.charAt(i) == '_'");
@@ -994,6 +1001,8 @@ xynt_streaming.prototype = {
 	        // alert("EXE"+gugu);
 	        // $("xhrdeltalog").innerHTML = "EVALL: "+singlecomm.replace("<", "&lt;", "g"); +"<br>";
 	        //xx this.hbit("+");
+                /* an empty command is the ping of the server */
+                if (this.hlog) this.hlog(singlecomm == "" ? "/\\" : "+");
 
                 // alert("SINGLE: ["+singlecomm+"]");
                 // window.console.log("["+singlecomm+"]");
@@ -1013,6 +1022,7 @@ xynt_streaming.prototype = {
             }
             this.watchdog_hdl = setTimeout(function(obj) { /* obj.log("tout2"); */ obj.watchdog(); }, this.watchdog_timeout, this);
             this.hbit_status();
+            if (this.hlog) this.hlog("_");
         }
         // alert("watchdog return normal");
 
