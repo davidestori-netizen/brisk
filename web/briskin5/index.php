@@ -168,7 +168,10 @@ window.onload = function() {
 }
 </script>
 </head>
-<body>
+<body class="table">
+<!-- header, table and chat: one block, so that the spare height of the window
+     can be shared above and below it (briskin5.css) -->
+<div class="table_page">
 <?php echo header_render('../', $_cookie_law_3party); ?>
 <div id="bg" class="area">
 
@@ -348,6 +351,7 @@ window.onload = function() {
         printf('<div class="company_line">%s</div>', $G_company_line);
     }
 ?>
+</div>
 </div>
 
 <div id="preferences" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 200px; top: 126px; visibility: hidden;">
