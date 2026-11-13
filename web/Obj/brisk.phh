@@ -168,14 +168,12 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "5.10.0";
+$G_brisk_version = "6.0.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuove immagini per le carte e utilizzo della tecnologia sprite per minimizzare le richieste al server.' ),
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITÀ</b>: port a PHP 8.4, corretti diversi errori che impattavano sull\'esperienza utente, nuovo layout, occhio verde/arancio/rosso cliccabile, chat espandibile.' ),
                                        # , 'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'EN Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: puoi creare la tua rete di amicizie con /info,',
-                                       'vedere cosa pensano i tuoi amici degli altri utenti e tavoli riservati per registrati e apprendisti.',
-                                       'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ) );
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: port to PHP 8.4, fixed several bugs that affected the user experience, new layout, clickable green/orange/red eye, expandable chat.' ) );
 
 $G_room_help = array( 'it' => '
 <div style=\\"text-align: left; padding: 8px;\\">
@@ -188,6 +186,7 @@ Occorre abilitare i cookies.<br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
 Se al vostro tavolo si raggiungono i 5 giocatori inizia automaticamente la partita.<br>
+Con un doppio click sulla chat la si espande verso l\'alto (diventa quattro volte pi&ugrave; alta e copre il resto della sala); con un altro doppio click torna com\'era.<br>
 <br>
 <b>Partita</b><br>
 All\'inizio vengono distribuite le carte e parte l\'asta; per partecipare all\'asta, quando sar&agrave; il vostro turno, potrete scegliere se andare avanti o passare cliccando sulle icone corrispondenti. Se si arriva ai punti, scrivete nella textbox il vostro rilancio e cliccate PUNTI.<br><br>
@@ -200,11 +199,13 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dt><b>Comandi della chat</b>
 <!-- <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname -->
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti
-<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
+<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\", \\"sigaretta\\", \\"coniglio\\", \\"calcio\\", \\"pupo\\", \\"pulizie\\", \\"babbo\\", \\"renna\\", \\"pupazzo\\" oppure \\"vischio\\"
 <dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
+<dd><b>/rules <i>&lt;numero&gt;</i></b> - al tavolo, prima che inizi l\'asta, chiede di giocare con altre regole: 1 = regole vecchie (con pareggio), 2 = regole nuove (senza pareggio), 4 = regole del torneo \\"insieme per gioco\\"; le regole cambiano quando tutti e 5 i giocatori chiedono le stesse
 <dd><b>/info <i>&lt;login&gt;</i></b> - mostra lo stato corrente dell\'utente passato come argomento e in che relazione siete
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
+<dd><b>/diag</b> - nella sala mostra o nasconde, in fondo alla pagina, il riquadro con la diagnostica della connessione (lo stesso che si ottiene cliccando sull\'icona dello stato della connessione); utile per segnalare problemi di collegamento
 <!-- <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all) -->
 </dl>
 </div>
@@ -221,6 +222,7 @@ Occorre abilitare i cookies.<br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
 Se al vostro tavolo si raggiungono i 5 giocatori inizia automaticamente la partita.<br>
+Con un doppio click sulla chat la si espande verso l\'alto (diventa quattro volte pi&ugrave; alta e copre il resto della sala); con un altro doppio click torna com\'era.<br>
 <br>
 <b>Partita</b><br>
 All\'inizio vengono distribuite le carte e parte l\'asta; per partecipare all\'asta, quando sar&agrave; il vostro turno, potrete scegliere se andare avanti o passare cliccando sulle icone corrispondenti. Se si arriva ai punti, scrivete nella textbox il vostro rilancio e cliccate PUNTI.<br><br>
@@ -231,13 +233,15 @@ Durante la partita, se vorrete ricaricare la pagina, usate l\'apposito bottone \
 Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri giocatori di sbloccarla cliccando sul lucchetto. Se non si segue questa prassi, una volta usciti, non vi potrete sedere a nessun tavolo per '.floor(BAN_TIME/60).' minuti.
 <dl>
 <dt><b>Comandi della chat</b>
-<dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
+<!-- <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname -->
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti
-<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
+<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\", \\"sigaretta\\", \\"coniglio\\", \\"calcio\\", \\"pupo\\", \\"pulizie\\", \\"babbo\\", \\"renna\\", \\"pupazzo\\" oppure \\"vischio\\"
 <dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
+<dd><b>/rules <i>&lt;numero&gt;</i></b> - al tavolo, prima che inizi l\'asta, chiede di giocare con altre regole: 1 = regole vecchie (con pareggio), 2 = regole nuove (senza pareggio), 4 = regole del torneo \\"insieme per gioco\\"; le regole cambiano quando tutti e 5 i giocatori chiedono le stesse
 <dd><b>/info <i>&lt;login&gt;</i></b> - mostra lo stato corrente dell\'utente passato come argomento e in che relazione siete
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
+<dd><b>/diag</b> - nella sala mostra o nasconde, in fondo alla pagina, il riquadro con la diagnostica della connessione (lo stesso che si ottiene cliccando sull\'icona dello stato della connessione); utile per segnalare problemi di collegamento
 <!-- <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all) -->
 </dl>
 </div>

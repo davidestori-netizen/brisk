@@ -124,6 +124,8 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
 
                      'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
                                              'en' => 'write an invitation at the table and click'),
+                     'tit_diag'     => array('it' => 'stato della connessione: clicca per mostrare o nascondere la diagnostica (anche col comando /diag in chat)',
+                                             'en' => 'connection status: click to show or hide the diagnostics (also with the /diag chat command)'),
                      'itm_warr'     => array('it' => 'garantisci',
                                              'en' => 'guarantee'),
                      'warr_desc'    => array('it' => 'garantisci per un tuo conoscente',
@@ -360,7 +362,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
     GLOBAL $G_sidebanner, $G_sidebanner_idx;
-    GLOBAL $G_with_poll;
+    GLOBAL $G_with_poll, $G_company_line;
     GLOBAL $G_lang, $G_lng, $mlang_room;
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER, $_COOKIE;
     GLOBAL $G_base;
@@ -1018,9 +1020,15 @@ google_color_url = "000000";
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 '.($user->flags & USER_FLAG_AUTH ? '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_signal'.langtolng($G_lang).'.png" title="'.$mlang_room['tit_mesg'][$G_lang].'" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.poll_dom()
- : '
+ : ''
+/* "password" button (how to get a password) for the users who come in
+   without one: disabled for now, it will be reactivated later by putting
+   this string in place of the '' above
+ '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_password.png" title="Come ottenere una password su Brisk." onmouseover="menu_hide(0,0);" onclick="act_passwdhowto();">
-').'
+'
+*/
+).'
 
 ' : '').'
 
@@ -1050,7 +1058,7 @@ supported by:<br>
 (!$G_is_local && $_cookie_law_3party == 'true') ?
 '<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>
 ' : '' ) . '<div id="proaudioext" class="proaudioext"><div id="proaudio" class="proaudio"></div></div>
-<img id="stm_stat" class="nobo" style="margin-top: 4px;" src="img/line-status_b.png">
+<img id="stm_stat" class="nobo stm_stat" style="margin-top: 4px;" src="img/line-status_b.png" title="'.$mlang_room['tit_diag'][$G_lang].'" onclick="diag_toggle();">
 %s
 %s
 </div>';
@@ -1327,7 +1335,7 @@ cookie_law(null);
     if (!$G_is_local && $_cookie_law_3party == 'true') {
 ?>
 <!-- if myconsole <body onunload="deconsole();"> -->
-<body xmlns:fb="http://ogp.me/ns/fb#">
+<body class="room" xmlns:fb="http://ogp.me/ns/fb#">
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
@@ -1340,7 +1348,7 @@ cookie_law(null);
     }
     else {
 ?>
-<body>
+<body class="room">
 <?php
     }
     printf($brisk_header_form);
@@ -1363,14 +1371,14 @@ cookie_law(null);
 <!--  =========== bottom ===========  -->
 <div id="bottom" class="bottom">
 <b>Chat</b> <span id="list_info" style="color: red;"></span><br>
-<div id="txt" class="chatt">
+<div id="txt" class="chatt" ondblclick="chatt_big_toggle(this);">
 </div>
 <div style="text-align: center; ">
     <!-- MLANG: scrivi un invito al tavolo e clicca -->
     <table style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="<?php echo $mlang_room['tit_ticker'][$G_lang];?>"></td><td style="width:1%; text-align: center;">
     <div id="myname"></div>
     </td><td>
-    <input id="txt_in" maxlength="128" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
+    <input id="txt_in" maxlength="128" type="text" autocomplete="off" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 </div>
 </div>
@@ -1422,6 +1430,9 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </table>
     </form>
     </div>
+<!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
+     shown by a click on the connection status icon or by the /diag chat command -->
+<div id="diagbox" class="diagbox">
 <div id="heartbit"></div>
 <div id="sandbox"></div>
 <div id="imgct"></div>
@@ -1432,6 +1443,12 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrstart"></div>
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
+</div>
+<?php
+    if (isset($G_company_line) && $G_company_line != '') {
+        printf('<div class="company_line">%s</div>', $G_company_line);
+    }
+?>
 </div>
 
 <div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">

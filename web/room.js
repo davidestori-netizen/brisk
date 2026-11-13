@@ -876,6 +876,25 @@ sideslide.prototype = {
 
 }
 
+/*
+ *  a double click on the chat makes it four times higher, upwards and
+ *  opaque, another one brings it back (.chatt_big in room.css); the
+ *  double click selects a word too: the selection is dropped
+ */
+function chatt_big_toggle(box)
+{
+    if (box.className.match(/\bchatt_big\b/)) {
+        box.className = box.className.replace(/\s*\bchatt_big\b/, "");
+    }
+    else {
+        box.className += " chatt_big";
+    }
+    if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+    }
+    box.scrollTop = box.scrollHeight;
+}
+
 
 /* easy signup (iscriviti.php): the nickname given in the link (index.php?n=nick) is
    written in the login form, and at the first entry with a temporary nickname a
