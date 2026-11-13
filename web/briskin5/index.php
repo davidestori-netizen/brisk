@@ -160,6 +160,11 @@ window.onload = function() {
 
   xstm.start();
 
+  /* scale the page down when the window is lower than the table and the chat,
+     or narrower than the table */
+  table_fit();
+  addEvent(window, "resize", table_fit);
+
   addEvent($('select_rules'), "change", function() { act_select_rules(this.value); } );
   addEvent($('select_deck'), "change", function() { act_select_deck(this.value); } );
   // FIXME: add this setTimeout(preload_images into data stream to avoid

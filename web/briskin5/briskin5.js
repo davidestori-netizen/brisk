@@ -413,3 +413,48 @@ function rules_set(id)
 {
     $('select_rules').value = id;
 }
+
+/*
+ *  windows lower than the table page
+ *
+ *  The core of the page is the game area and the chat, from the top of the
+ *  table to the input line of the chat: the header above it and the footer
+ *  below it (diagnostics and company line) do not count. While the window is
+ *  at least as high as the core nothing changes; on lower windows the whole
+ *  body is scaled down with the css zoom property, so that the core fits the
+ *  window exactly; the page is not scrolled, the header stays at the top and
+ *  the users scroll by themselves to the core. The body and not only
+ *  div.table_page, to scale also the popups (points, notices) hung to it.
+ *  The zoom, unlike a transform, also shrinks the space the page takes.
+ *
+ *  The same for the width: on windows narrower than the game area the page
+ *  is scaled so that the area fits the width; the smaller of the two scales
+ *  wins. The width is the one of the window without its scrollbar.
+ */
+var g_table_scale = 1;
+
+function table_fit()
+{
+    var page = document.body;
+    var chat = document.querySelector("table.chattshort_table");
+    var bg = $("bg");
+
+    if (!page || !chat || !bg)
+        return;
+
+    /* measure at natural size: no paint happens before the new zoom is set */
+    page.style.zoom = "";
+    var core_h = chat.getBoundingClientRect().bottom - bg.getBoundingClientRect().top;
+    var core_w = bg.getBoundingClientRect().width;
+    var win_w = document.documentElement.clientWidth;
+    var scale = 1;
+
+    if (core_h > 0 && window.innerHeight < core_h)
+        scale = window.innerHeight / core_h;
+    if (core_w > 0 && win_w < core_w)
+        scale = Math.min(scale, win_w / core_w);
+
+    g_table_scale = scale;
+    if (scale < 1)
+        page.style.zoom = scale;
+}

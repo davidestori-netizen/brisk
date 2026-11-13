@@ -163,8 +163,9 @@ var Drag = {
       ey = touch.pageY;
     }
 
-		var y = parseInt(o.vmode ? o.root.style.top  : o.root.style.bottom);
-		var x = parseInt(o.hmode ? o.root.style.left : o.root.style.right );
+		/* parseFloat: on a scaled page the positions are not integers */
+		var y = parseFloat(o.vmode ? o.root.style.top  : o.root.style.bottom);
+		var x = parseFloat(o.hmode ? o.root.style.left : o.root.style.right );
 		var nx, ny;
 
 		if (o.minX != null) ex = o.hmode ? Math.max(ex, o.minMouseX) : Math.min(ex, o.maxMouseX);
@@ -172,8 +173,12 @@ var Drag = {
 		if (o.minY != null) ey = o.vmode ? Math.max(ey, o.minMouseY) : Math.min(ey, o.maxMouseY);
 		if (o.maxY != null) ey = o.vmode ? Math.min(ey, o.maxMouseY) : Math.max(ey, o.minMouseY);
 
-		nx = x + ((ex - o.lastMouseX) * (o.hmode ? 1 : -1));
-		ny = y + ((ey - o.lastMouseY) * (o.vmode ? 1 : -1));
+		/* the moves of the pointer are in window pixels: on a page scaled
+		   down by table_fit() (briskin5.js) they are worth more css pixels */
+		var sc = (typeof g_table_scale != 'undefined' && g_table_scale > 0) ? g_table_scale : 1;
+
+		nx = x + ((ex - o.lastMouseX) / sc * (o.hmode ? 1 : -1));
+		ny = y + ((ey - o.lastMouseY) / sc * (o.vmode ? 1 : -1));
 
 		if (o.xMapper)		nx = o.xMapper(y)
 		else if (o.yMapper)	ny = o.yMapper(x)
