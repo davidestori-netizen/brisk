@@ -633,7 +633,11 @@ class User {
       }
       $myname = xcape($this->name,ENT_COMPAT,"UTF-8");
       /* USER_FLAG_TY_NICKTMP: temporary nickname, shown with a "*" */
-      return (sprintf('window.myname = "%s"; window.myname_tmp = %d; $("myname").innerHTML = "<span class=\"%s\">%s%s</span>";',
+      /* easy signup: the nickname asked for, to greet the player with it */
+      $myname_req = (($this->flags & USER_FLAG_TY_NICKTMP) && isset($this->rec) && is_object($this->rec)
+                     && isset($this->rec->nick_req) ? xcape($this->rec->nick_req, ENT_COMPAT, "UTF-8") : "");
+      return (sprintf('window.myname_req = "%s"; ', $myname_req) .
+              sprintf('window.myname = "%s"; window.myname_tmp = %d; $("myname").innerHTML = "<span class=\"%s\">%s%s</span>";',
                       $myname, (($this->flags & USER_FLAG_TY_NICKTMP) ? 1 : 0), $cl, $myname,
                       (($this->flags & USER_FLAG_TY_NICKTMP) ? "<span style='color:#888;font-size:75%;margin-left:2px;vertical-align:super;font-style:normal'>&#10033;</span>" : "")));
   }

@@ -901,7 +901,7 @@ function chatt_big_toggle(box)
    welcome window explains the "*" (once per browser). The leading ';' closes the
    statement above, that has no semicolon of its own */
 ;(function () {
-    function isc_welcome(nick) {
+    function isc_welcome(nick, nick_req) {
         var velo = document.createElement('div'), box = document.createElement('div');
         velo.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483100;background:transparent;' +
             'display:flex;align-items:center;justify-content:center;padding:16px';
@@ -909,7 +909,7 @@ function chatt_big_toggle(box)
             'border:1px solid black;border-radius:8px;color:black;max-width:680px;width:100%;padding:16px 20px 14px;' +
             'font-size:19px;line-height:1.5;text-align:center';
         box.innerHTML = '<div style="font-weight:bold;font-size:22px;margin:2px 0 10px;padding-bottom:8px;border-bottom:1px solid gray">' +
-            'Benvenuto, ' + nick + '! &#127183;</div>' +
+            'Benvenuto, ' + (nick_req ? nick_req : nick) + '! &#127183;</div>' +
             '<div style="margin:0 0 12px;text-align:left">Il tuo account &egrave; pronto: <b>puoi giocare subito</b>.<br><br>' +
             'Per ora nel gioco ti vedi, e ti vedono gli altri, con il nome provvisorio <b>' + nick + '</b> (con il piccolo asterisco <span style="color:#888">&#10033;</span>).<br><br>' +
             'Quando i moderatori approvano il nome che hai scelto ti arriva un\'email, e da l&igrave; tutti ti vedono con quello.<br><br>' +
@@ -940,7 +940,7 @@ function chatt_big_toggle(box)
             if (!window.myname_tmp) return;
             var k = 'brisk_benv_' + String(window.myname).toLowerCase();
             try { if (localStorage.getItem(k) == '1') return; localStorage.setItem(k, '1'); } catch (e) { }
-            isc_welcome(window.myname);
+            isc_welcome(window.myname, window.myname_req);
         }, 500);
     }
     if (window.addEventListener) window.addEventListener('load', isc_start);
