@@ -41,6 +41,8 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
                                                    'en' => 'Out'),
                            'tit_pref'    => array( 'it' => 'Prefs',
                                                    'en' => 'Prefs'),
+                           'tit_diag'    => array( 'it' => 'stato della connessione: clicca per mostrare o nascondere la diagnostica (anche col comando /diag in chat)',
+                                                   'en' => 'connection status: click to show or hide the diagnostics (also with the /diag chat command)'),
                            'itm_ringauc' => array('it' => 'riproduci un suono di notifica alla fine dell\' asta',
                                                   'en' => 'play a sound at the end of the auction'),
                            'btn_update'  => array('it' => 'Aggiorna.',
@@ -50,7 +52,7 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
 
 function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post, $cookie)
 {
-    GLOBAL $G_lang, $mlang_bin5_index;
+    GLOBAL $G_lang, $mlang_bin5_index, $G_company_line;
 
     $transp_port = ((array_key_exists("X-Forwarded-Proto", $header) &&
                      $header["X-Forwarded-Proto"] == "https") ? 443 : 80);
@@ -297,7 +299,7 @@ window.onload = function() {
 <td style="text-align: center;"><input type="button" class="button" name="xreload"  value="<?php echo $mlang_bin5_index['tit_relo'][$G_lang]; ?>" onclick="act_reload();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xout"  value="<?php echo $mlang_bin5_index['tit_out'][$G_lang]; ?>" onclick="safelogout();"></td>
 </tr><tr>
-<td style="text-align: center;"><img id="stm_stat" class="nobo" src="img/line-status_b.png"></td>
+<td style="text-align: center;"><img id="stm_stat" class="nobo stm_stat" src="img/line-status_b.png" title="<?php echo $mlang_bin5_index['tit_diag'][$G_lang]; ?>" onclick="diag_toggle();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xpref"  value="<?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?>" onclick="preferences_showhide();"></td>
 </td>
 <td style="text-align: center;"><img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"></td>
@@ -325,19 +327,23 @@ window.onload = function() {
     <input id="txt_in" maxlength="128" type="text" autocomplete="off" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 
-<div id="flasou" style="text-align: left;"></div>
-<hr>
-<div id="heartbit" style="text-align: left;"></div>
-<hr>
-<div id="imgct" style="text-align: left;">HERE</div>
-<hr>
-<div id="sandbox" style="text-align: left;"></div>
-<div id="sandbox2" style="text-align: left;"></div>
-<div id="sandbox3" style="text-align: left;"></div>
-<pre>
-<div id="xhrlog" style="text-align: left;"></div>
-</pre>
-<div id="xhrdeltalog" style="text-align: left;"></div>
+<!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
+     shown by a click on the connection status icon or by the /diag chat command -->
+<div id="diagbox" class="diagbox">
+<div id="heartbit"></div>
+<div id="flasou"></div>
+<div id="imgct"></div>
+<div id="sandbox"></div>
+<div id="sandbox2"></div>
+<div id="sandbox3"></div>
+<div id="xhrlog"></div>
+<div id="xhrdeltalog"></div>
+</div>
+<?php
+    if (isset($G_company_line) && $G_company_line != '') {
+        printf('<div class="company_line">%s</div>', $G_company_line);
+    }
+?>
 </div>
 
 <div id="preferences" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 200px; top: 126px; visibility: hidden;">
