@@ -665,22 +665,22 @@ SELECT usr.*, guar.login AS guar_login
                        the requested one is refused; the player can ask another one
                        from nickreq.php */
                     if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP) {
-                        if ($bdb->user_nick_req_set($usr_obj->code, NULL) == FALSE)
-                            break;
+                        /* the request stays: the player keeps entering with the refused
+                           nickname until he asks another one from nickreq.php */
                         $nick_page = sprintf("%s://%s/%s/nickreq.php", $G_proto, $G_domain, $G_webbase);
                         $subj = "Brisk: nickname rifiutato";
                         $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
 
 Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.
-Puoi continuare a giocare col nickname provvisorio \'%s\'
-e proporne un altro qui: <%s>
+Scegline un altro qui: <%s>
+Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.
 
-Saluti e buone partite, mop.', $usr_obj->nick_req, $usr_obj->login, $nick_page);
+Saluti e buone partite, mop.', $usr_obj->nick_req, $nick_page, $usr_obj->login);
                         $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
 Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.<br>
-Puoi continuare a giocare col nickname provvisorio \'%s\'
-e proporne un altro qui:<br>%s<br><br>
-Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($usr_obj->login), eschtml($nick_page));
+Scegline un altro qui:<br>%s<br>
+Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.<br><br>
+Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($nick_page), eschtml($usr_obj->login));
                         if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                             fprintf(STDERR, "ERROR: mail send FAILED\n");
                             break;

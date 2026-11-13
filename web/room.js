@@ -911,9 +911,9 @@ function chatt_big_toggle(box)
         box.innerHTML = '<div style="font-weight:bold;font-size:22px;margin:2px 0 10px;padding-bottom:8px;border-bottom:1px solid gray">' +
             'Benvenuto, ' + nick + '! &#127183;</div>' +
             '<div style="margin:0 0 12px;text-align:left">Il tuo account &egrave; pronto: <b>puoi giocare subito</b>.<br><br>' +
-            'Accanto al tuo nome vedi un piccolo asterisco <span style="color:#888">&#10033;</span>: vuol dire che il tuo nome &egrave; provvisorio. ' +
-            'Quando i moderatori approvano il nome che hai scelto ti arriva un\'email, e da l&igrave; entri con quello.<br><br>' +
-            'Nell\'<b>email</b> che ti abbiamo mandato trovi il tuo nome e la tua password: <b>conservala</b>.</div>' +
+            'Per ora nel gioco ti vedi, e ti vedono gli altri, con il nome provvisorio <b>' + nick + '</b> (con il piccolo asterisco <span style="color:#888">&#10033;</span>).<br><br>' +
+            'Quando i moderatori approvano il nome che hai scelto ti arriva un\'email, e da l&igrave; tutti ti vedono con quello.<br><br>' +
+            'Per entrare usi sempre <b>il nome che hai scelto</b> e la tua password: li trovi nell\'<b>email</b>, <b>conservala</b>.</div>' +
             '<input type="button" class="button" value="Iniziamo!" style="font-size:18px;padding:8px 18px;margin:8px 4px">';
         velo.appendChild(box); document.body.appendChild(velo);
         box.getElementsByTagName('input')[0].onclick = function () { if (velo.parentNode) velo.parentNode.removeChild(velo); };

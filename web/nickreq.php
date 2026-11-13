@@ -53,10 +53,10 @@ function nickreq_page($msg)
 <body>
 <h2>Proponi un nickname</h2>
 %s
-<p>Finché il tuo nickname non viene approvato giochi con quello provvisorio (con l\'asterisco).</p>
+<p>Da subito entri con il nome nuovo. Finché non viene approvato, nel gioco ti vedono con quello provvisorio (con l\'asterisco).</p>
 <form method="POST" action="nickreq.php" accept-charset="utf-8">
 <table>
-<tr><td>nickname provvisorio:</td><td><input name="f_login" type="text" size="16" maxlength="12"></td></tr>
+<tr><td>nome con cui entri:</td><td><input name="f_login" type="text" size="16" maxlength="12"></td></tr>
 <tr><td>password:</td><td><input name="f_pass" type="password" size="16" maxlength="64"></td></tr>
 <tr><td>nickname che vorresti:</td><td><input name="f_nick" type="text" size="16" maxlength="12"></td></tr>
 </table>
@@ -84,10 +84,11 @@ function main()
             break;
         }
 
-        if ($login == "" || ($usr = $bdb->getrecord_bylogin($login)) == FALSE
+        if ($login == "" || (($usr = $bdb->getrecord_bylogin($login)) == FALSE
+                             && ($usr = $bdb->getrecord_bynickreq($login)) == FALSE)
             || strcmp($usr->pass, md5($pass)) != 0
             || ($usr->type & USER_FLAG_TY_NICKTMP) != USER_FLAG_TY_NICKTMP) {
-            $msg = "Nickname provvisorio o password sbagliati.";
+            $msg = "Nome o password sbagliati.";
             break;
         }
 
@@ -103,7 +104,7 @@ function main()
             break;
         }
 
-        $msg = sprintf("Richiesta inviata: il nickname '%s' verrà controllato al più presto.", eschtml($nick));
+        $msg = sprintf("Richiesta inviata: da adesso entri con '%s'. Il nome verrà controllato al più presto.", eschtml($nick));
     } while (FALSE);
 
     nickreq_page($msg);

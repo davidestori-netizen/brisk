@@ -65,12 +65,12 @@ function isc_mail_welcome($nick_tmp, $nick, $pass, $link)
     $pass_h = ($pass === NULL ? "quella che hai scelto" : isc_h($pass));
     $subj = "Benvenuto su Brisk, " . $nick . "! Attiva il tuo account";
     $text = "Ciao " . $nick . ", benvenuto su Brisk!\n\n"
-        . "Il nome che hai scelto deve essere approvato dagli amministratori. Intanto ti abbiamo dato un nome provvisorio, "
-        . $nick_tmp . ", cosi' puoi giocare subito.\n"
-        . "Quando \"" . $nick . "\" sara' approvato ti arrivera' un'altra email, e da quel momento entrerai con il tuo nome.\n\n"
+        . "Entri subito con il tuo nome, " . $nick . ". Finche' gli amministratori non lo approvano, nel gioco ti vedono con il nome provvisorio "
+        . $nick_tmp . ".\n"
+        . "Quando \"" . $nick . "\" sara' approvato ti arrivera' un'altra email, e da quel momento tutti ti vedranno con il tuo nome.\n\n"
         . "Per ATTIVARE l'account apri questo link (vale 48 ore):\n" . $link
         . "\nFinche' non lo apri non puoi entrare."
-        . "\n\nPoi entra con:\nNome utente: " . $nick_tmp . "\nPassword: " . $pass_t
+        . "\n\nPoi entra con:\nNome utente: " . $nick . "\nPassword: " . $pass_t
         . "\n\nConserva questa email: ti ricorda la tua password.\nSe non sei stato tu a iscriverti, ignora questa email.\n\nCi vediamo ai tavoli!\n";
     /* table layout, no <br> and no <div>: isc_mail_lines() and the white-space
        of the frame around the body would turn them into empty lines. The logo is
@@ -80,14 +80,14 @@ function isc_mail_welcome($nick_tmp, $nick, $pass, $link)
     $html = '<table cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;font-family:Arial,Helvetica,sans-serif;color:#222;border-collapse:collapse">'
         . '<tr><td style="padding:10px 0 12px;border-bottom:3px solid #193747"><img src="' . isc_h($logo) . '" alt="brisk" height="48" style="display:block;border:0"></td></tr>'
         . '<tr><td style="padding:18px 0 6px;font-size:22px;font-weight:bold">Ciao ' . isc_h($nick) . ', benvenuto su Brisk!</td></tr>'
-        . '<tr><td ' . $td . '>Il nome che hai scelto deve essere approvato dagli amministratori. Intanto ti abbiamo dato un nome provvisorio, <b>' . isc_h($nick_tmp) . '</b>, così puoi giocare subito.</td></tr>'
-        . '<tr><td ' . $td . '>Quando &quot;<b>' . isc_h($nick) . '</b>&quot; sarà approvato ti arriverà un\'altra email, e da quel momento entrerai con il tuo nome.</td></tr>'
+        . '<tr><td ' . $td . '>Entri subito con il tuo nome, <b>' . isc_h($nick) . '</b>. Finché gli amministratori non lo approvano, nel gioco ti vedono con il nome provvisorio <b>' . isc_h($nick_tmp) . '</b>.</td></tr>'
+        . '<tr><td ' . $td . '>Quando &quot;<b>' . isc_h($nick) . '</b>&quot; sarà approvato ti arriverà un\'altra email, e da quel momento tutti ti vedranno con il tuo nome.</td></tr>'
         . '<tr><td style="padding:16px 0 8px;font-size:16px">Per <b>attivare</b> l\'account tocca il pulsante (vale 48 ore):</td></tr>'
         . '<tr><td style="padding:4px 0 8px"><a href="' . isc_h($link) . '" style="display:inline-block;background:#193747;color:#fff;padding:14px 26px;border-radius:6px;text-decoration:none;font-size:20px;font-weight:bold">Attiva il mio account</a></td></tr>'
         . '<tr><td style="padding:0 0 14px;font-size:12px;color:#777">Se il pulsante non funziona, apri questo indirizzo: ' . isc_h($link) . '</td></tr>'
         . '<tr><td ' . $td . '>Poi entra con:</td></tr>'
         . '<tr><td><table cellpadding="0" cellspacing="0" style="background:#fff6c8;border:1px solid #e0c34a;border-radius:6px;font-size:18px">'
-        . '<tr><td style="padding:10px 16px 4px">Nome utente: <b>' . isc_h($nick_tmp) . '</b></td></tr>'
+        . '<tr><td style="padding:10px 16px 4px">Nome utente: <b>' . isc_h($nick) . '</b></td></tr>'
         . '<tr><td style="padding:4px 16px 10px">Password: <b>' . $pass_h . '</b></td></tr></table></td></tr>'
         . '<tr><td style="padding:14px 0;font-size:14px;color:#555">Finché non attivi l\'account non puoi entrare. Conserva questa email: ti ricorda la tua password.</td></tr>'
         . '<tr><td style="padding:12px 0 0;border-top:1px solid #ddd;font-size:12px;color:#888">Se non sei stato tu a iscriverti, ignora questa email. Ci vediamo ai tavoli! &#127183;</td></tr>'
@@ -240,8 +240,8 @@ input{font-size:21px;padding:11px}
   <div class="ok" style="text-align:center;font-size:21px">Ti abbiamo mandato un'<b>email</b> a<br><b><?php echo isc_h($mail); ?></b></div>
   <p style="font-size:21px"><b>Aprila e tocca il bottone «Attiva il mio account».</b></p>
   <p><b>Finché non lo tocchi non puoi entrare.</b></p>
-  <p>Poi entri subito a giocare con il nome provvisorio <b><?php echo isc_h($nick_tmp); ?></b> e la tua password (te li abbiamo scritti anche nell'email).
-     Il nome che hai scelto, <b><?php echo isc_h($nome); ?></b>, lo controllano i moderatori: quando è approvato ti arriva un'altra email.</p>
+  <p>Poi entri subito a giocare con il tuo nome <b><?php echo isc_h($nome); ?></b> e la tua password (te li abbiamo scritti anche nell'email).
+     Finché i moderatori non approvano il tuo nome, nel gioco ti vedi e ti vedono con il nome provvisorio <b><?php echo isc_h($nick_tmp); ?></b>: quando è approvato ti arriva un'altra email.</p>
   <p class="piccolo">Non trovi l'email? Guarda anche nelle cartelle <b>Spam</b>, <b>Posta indesiderata</b> o <b>Quarantena</b>. Il link vale 48 ore.</p>
   <a class="btn blu" href="index.php">Torna all'ingresso</a>
 <?php } else { ?>
@@ -254,7 +254,7 @@ input{font-size:21px;padding:11px}
 
     <label for="nome">1. Il tuo nome nel gioco</label>
     <input id="nome" name="nome" maxlength="12" value="<?php echo isc_h($nome); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-    <div class="esito" id="enome"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano giochi con un nome provvisorio.</span></div>
+    <div class="esito" id="enome"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nome provvisorio.</span></div>
 
     <label for="pw">2. La tua password</label>
     <div class="pwriga"><input id="pw" name="pw" type="text" maxlength="30" value="<?php echo isc_h($pw); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
