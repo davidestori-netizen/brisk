@@ -916,6 +916,11 @@ function chatt_big_toggle(box)
             'Per entrare usi sempre <b>il nome che hai scelto</b> e la tua password: li trovi nell\'<b>email</b>, <b>conservala</b>.</div>' +
             '<input type="button" class="button" value="Iniziamo!" style="font-size:18px;padding:8px 18px;margin:8px 4px">';
         velo.appendChild(box); document.body.appendChild(velo);
+        /* brisk.css gives 13px to every element (* rule): the bold words and the
+           asterisk take the size of the box, the title keeps its own */
+        var el = box.getElementsByTagName('*');
+        for (var i = 0 ; i < el.length ; i++)
+            if (!el[i].style.fontSize) el[i].style.fontSize = 'inherit';
         box.getElementsByTagName('input')[0].onclick = function () { if (velo.parentNode) velo.parentNode.removeChild(velo); };
     }
     function isc_start() {
