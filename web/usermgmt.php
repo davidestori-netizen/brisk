@@ -161,6 +161,23 @@ function umgmt_log($action, $login)
     }
 }
 
+/* a moderator blocking more than one player at once confirms with his password */
+function umgmt_moder_passwd_ok()
+{
+    GLOBAL $G_dbpfx, $G_umgmt_who, $_POST;
+
+    if (!isset($_POST['f_banpass']) || $_POST['f_banpass'] == "")
+        return (FALSE);
+    if (($bdb = BriskDB::create()) == FALSE)
+        return (FALSE);
+    $sql = sprintf("SELECT pass FROM %susers WHERE login = lower('%s');",
+                   $G_dbpfx, escsql($G_umgmt_who));
+    if (($pg = pg_query($bdb->dbconn->db(), $sql)) == FALSE || pg_num_rows($pg) != 1)
+        return (FALSE);
+    $rec = pg_fetch_object($pg, 0);
+    return (hash_equals((string)$rec->pass, md5($_POST['f_banpass'])));
+}
+
 /* the moderators do not delete: deleting frees the e-mail */
 function umgmt_admin_only($role, &$status)
 {
@@ -566,6 +583,17 @@ SELECT usr.*, guar.login AS guar_login
         exit;
     }
     else { // if ($_GET['do'] ...
+        /* the buttons at the right of a row: the same action, on that player only */
+        if (isset($_POST['f_row']) && preg_match('/^(accept|delete|ban)_([0-9]+)$/', $_POST['f_row'], $m)) {
+            foreach (array_keys($_POST) as $key) {
+                if (substr($key, 0, 9) == "f_newuser")
+                    unset($_POST[$key]);
+            }
+            unset($_POST['f_accept'], $_POST['f_delete'], $_POST['f_ban']);
+            $_POST['f_newuser'.$m[2]] = "on";
+            $_POST['f_'.$m[1]] = "1";
+            $_POST['f_single'] = "1";
+        }
         if (isset($_POST['f_accept'])) {
             $action = "accept";
         }
@@ -824,6 +852,11 @@ Saluti e buone partite, mop.', $usr_obj->login);
             }
             echo $status;
         }
+        else if ($action == "ban" && $role == "moder" && !isset($_POST['f_single'])
+                 && umgmt_moder_passwd_ok() == FALSE) {
+            echo "To block more than one player at once, write your password.";
+            exit;
+        }
         else if ($action == "ban") {
             /* refuse and block (offensive nickname): the account is not deleted
                but disabled as banned, so its e-mail cannot sign up again
@@ -883,17 +916,29 @@ SELECT usr.*, guar.login AS guar_login
             }
 
             $usr_n = pg_num_rows($usr_pg);
-            $tab_lines = "<tr><th></th><th>User</th><th>Requested nick</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th></tr>";
+            $tab_lines = "<tr><th></th><th>User</th><th>Requested nick</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th><th></th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
+                /* a moderator sees only the domain of the e-mail: enough to spot
+                   the odd ones, without the address of the player */
+                $email = $usr_obj->email;
+                if ($role != "admin")
+                    $email = (($at = strrpos($email, "@")) === FALSE ? "..." : "..." . substr($email, $at));
+                $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">Accept</button> "
+                                    . "<button type=\"submit\" name=\"f_row\" value=\"delete_%d\">%s</button> "
+                                    . "<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
+                                    $usr_obj->code, $usr_obj->code, ($role == "admin" ? "Delete" : "Refuse nickname"),
+                                    $usr_obj->code, eschtml(addslashes($usr_obj->login)));
 
-                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-                                      $usr_obj->code, ($nocheck ? "" : "CHECKED"),
+                /* the moderators start with nothing checked: a wrong click on the
+                   buttons at the bottom must not touch every player */
+                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                                      $usr_obj->code, (($nocheck || $role != "admin") ? "" : "CHECKED"),
                                       eschtml($usr_obj->login) . (($usr_obj->type & USER_FLAG_TY_NICKTMP) ? "*" : ""),
                                       eschtml((string)$usr_obj->nick_req),
-                                      eschtml($usr_obj->email), eschtml($usr_obj->guar_login),
+                                      eschtml($email), eschtml($usr_obj->guar_login),
                                       ($usr_obj->type & USER_FLAG_TY_APPR ? "Yes" : "No"),
-                                      $usr_obj->lintm);
+                                      $usr_obj->lintm, $row_btns);
             }
             ?>
 <html>
@@ -912,9 +957,24 @@ SELECT usr.*, guar.login AS guar_login
      echo $tab_lines;
             ?>
             </table>
-                  <input type="submit" name="f_accept" value="Accept">
-                  <input type="submit" name="f_delete" value="<?php echo ($role == "admin" ? "Delete" : "Refuse nickname"); ?>">
-                  <input type="submit" name="f_ban" value="Refuse and block" onclick="return confirm('Refuse and block: the account is disabled and its e-mail cannot sign up again. Sure?');">
+                  <script>
+                  /* the buttons at the bottom act on the checked rows: say how many */
+                  function umgmt_n_checked() {
+                      return document.querySelectorAll('input[type=checkbox][name^=f_newuser]:checked').length;
+                  }
+                  function umgmt_bulk(what) {
+                      var n = umgmt_n_checked();
+                      if (n == 0) { alert("No player checked."); return false; }
+                      return confirm(what + " " + n + " player" + (n == 1 ? "" : "s") + "?");
+                  }
+                  </script>
+                  Checked players:
+                  <input type="submit" name="f_accept" value="Accept" onclick="return umgmt_bulk('Accept');">
+                  <input type="submit" name="f_delete" value="<?php echo ($role == "admin" ? "Delete" : "Refuse nickname"); ?>" onclick="return umgmt_bulk('<?php echo ($role == "admin" ? "Delete" : "Refuse the nickname of"); ?>');">
+                  <input type="submit" name="f_ban" value="Refuse and block" onclick="return umgmt_bulk('Refuse and block (account disabled, e-mail not usable again)');">
+                  <?php if ($role == "moder") { ?>
+                  <br>To block more than one player at once: your password <input type="password" name="f_banpass" autocomplete="current-password">
+                  <?php } ?>
                   </form>
                   </body>
                   </html>
