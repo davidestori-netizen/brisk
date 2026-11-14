@@ -664,12 +664,12 @@ body.explain h5 {
 }
 
 /*
- *  on windows taller than the room the spare space goes one third above
- *  it and two thirds below, instead of being all below: a little high is
- *  handier on the mobile devices. The other children of the body are
- *  popups out of the flow or empty elements, and do not take space
+ *  on windows taller than the room (or the login page) the spare space goes
+ *  one third above it and two thirds below, instead of being all below: a
+ *  little high is handier on the mobile devices. The other children of the
+ *  body are popups out of the flow or empty elements, and do not take space
  */
-body.room {
+body.room, body.login {
     display: grid;
     grid-template-rows: 1fr auto 2fr;
     grid-template-columns: minmax(0, 1fr);
@@ -677,6 +677,6 @@ body.room {
     min-height: 100dvh;
 }
 
-body.room > div.container {
+body.room > div.container, body.login > div.container {
     grid-row: 2;
 }

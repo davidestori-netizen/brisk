@@ -1076,7 +1076,7 @@ window.onload = function() {
         if (!$G_is_local && $_cookie_law_3party == 'true') {
 ?>
 <!-- if myconsole <body onunload="deconsole();"> -->
-<body xmlns:fb="http://ogp.me/ns/fb#">
+<body class="login" xmlns:fb="http://ogp.me/ns/fb#">
 <div id="fb-root"></div>
 <script type="text/javascript"><!--
 (function(d, s, id) {
@@ -1090,7 +1090,7 @@ window.onload = function() {
         }
         else {
 ?>
-<body>
+<body class="login">
 <?php
         }
         echo $brisk_header_form;
@@ -1157,6 +1157,8 @@ window.onload = function() {
     <div id="xhrlog"></div>
     </pre>
     <div id="xhrdeltalog"></div>
+</td></tr></table>
+</div>
 
 <script language="JavaScript">
 <!--
