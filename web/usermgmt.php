@@ -161,6 +161,16 @@ function umgmt_log($action, $login)
     }
 }
 
+/* after an action on the list: the results and the way back to the list
+   (by itself after a few seconds), instead of a page with no exit */
+function umgmt_back()
+{
+    $url = htmlspecialchars(strtok($_SERVER['REQUEST_URI'], '?')
+                            . (isset($_GET['f_nocheck']) ? '?f_nocheck=1' : ''));
+    printf("<meta http-equiv=\"refresh\" content=\"4;url=%s\">\n", $url);
+    printf("<p><a href=\"%s\">Back to the list</a> (in a few seconds by itself)</p>\n", $url);
+}
+
 /* a moderator blocking more than one player at once confirms with his password */
 function umgmt_moder_passwd_ok()
 {
@@ -708,6 +718,7 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($usr_obj
                 }
                 umgmt_log("accept", $usr_obj->login);
             }
+            umgmt_back();
             exit;
         }
         else if ($action == "delete") {
@@ -851,10 +862,12 @@ Saluti e buone partite, mop.', $usr_obj->login);
                     printf("Nickname %s refused, %s keeps playing with the temporary one<br>\n", eschtml($usr_obj->nick_req), eschtml($usr_obj->login));
             }
             echo $status;
+            umgmt_back();
         }
         else if ($action == "ban" && $role == "moder" && !isset($_POST['f_single'])
                  && umgmt_moder_passwd_ok() == FALSE) {
             echo "To block more than one player at once, write your password.";
+            umgmt_back();
             exit;
         }
         else if ($action == "ban") {
@@ -893,6 +906,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                 printf("%s refused and blocked: the e-mail cannot be used again<br>\n",
                        eschtml($usr_obj->login . ($usr_obj->nick_req ? " (" . $usr_obj->nick_req . ")" : "")));
             }
+            umgmt_back();
             exit;
         }
         else {
