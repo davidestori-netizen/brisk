@@ -767,6 +767,13 @@ SELECT usr.*, guar.login AS guar_login
                     /* new signup: the account stays with its temporary nickname, only
                        the requested one is refused; the player can ask another one
                        from nickreq.php */
+                    if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP
+                        && ($usr_obj->nick_req === NULL || $usr_obj->nick_req == "")) {
+                        $status .= sprintf("%s has not asked a nickname yet: nothing to refuse<br>",
+                                           eschtml($usr_obj->login));
+                        $res = TRUE;
+                        break;
+                    }
                     if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP) {
                         /* the request stays: the player keeps entering with the refused
                            nickname until he asks another one from nickreq.php */
@@ -860,7 +867,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                     if ($role == "admin")
                         printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, eschtml($usr_obj->login));
                 }
-                else
+                else if ($usr_obj->nick_req !== NULL && $usr_obj->nick_req != "")
                     printf("Nickname %s refused, %s keeps playing with the temporary one<br>\n", eschtml($usr_obj->nick_req), eschtml($usr_obj->login));
             }
         }
