@@ -462,3 +462,94 @@ function table_fit()
     if (scale < 1)
         page.style.zoom = scale;
 }
+
+/*
+ *  the header of the page can be hidden during the game, to give its space
+ *  to the table: a button at the left of the top edge of the table (the owl
+ *  of the logo and an arrow, down to hide and up to show) toggles it. The
+ *  choice is kept in the browser ("1" hidden, "0" shown), for the next
+ *  tables too, one for each orientation of the window (portrait when it is
+ *  higher than wide): a choice made with a phone or a tablet held upright
+ *  does not apply when it is turned. With no choice yet for the current
+ *  orientation the header is hidden on windows lower than HEADER_MIN_WIN_H,
+ *  shown on the others. When the orientation changes the header follows the
+ *  choice, or the default, of the new one.
+ */
+var HEADER_KEY = "brisk_bin5_header_hidden";
+var HEADER_MIN_WIN_H = 900;
+var g_header_portrait = null;
+
+function header_key()
+{
+    var is_portrait;
+
+    if (g_header_portrait)
+        is_portrait = g_header_portrait.matches;
+    else
+        is_portrait = (window.innerHeight > window.innerWidth);
+    return (HEADER_KEY + (is_portrait ? "_portrait" : "_landscape"));
+}
+
+function header_show(is_shown)
+{
+    var header = $("header");
+    var arrow = $("hdr_arrow");
+
+    if (!header)
+        return;
+    header.style.display = (is_shown ? "" : "none");
+    if (arrow)
+        arrow.innerHTML = (is_shown ? "&#9660;" : "&#9650;");
+}
+
+function header_toggle()
+{
+    var header = $("header");
+    var is_shown;
+
+    if (!header)
+        return;
+    is_shown = (header.style.display == "none");
+    header_show(is_shown);
+    try {
+        localStorage.setItem(header_key(), (is_shown ? "0" : "1"));
+    }
+    catch (e) { }
+    table_fit();
+}
+
+function header_restore()
+{
+    var choice = null;
+    var is_hidden;
+
+    try {
+        choice = localStorage.getItem(header_key());
+    }
+    catch (e) { }
+    if (choice == "1" || choice == "0")
+        is_hidden = (choice == "1");
+    else
+        is_hidden = (window.innerHeight < HEADER_MIN_WIN_H);
+    header_show(!is_hidden);
+}
+
+function header_orient_cb()
+{
+    header_restore();
+    table_fit();
+}
+
+/* the header as the user left it for the current orientation, and again at
+   each change of it */
+function header_init()
+{
+    if (window.matchMedia) {
+        g_header_portrait = window.matchMedia("(orientation: portrait)");
+        if (g_header_portrait.addEventListener)
+            g_header_portrait.addEventListener("change", header_orient_cb);
+        else if (g_header_portrait.addListener)  /* Safari before 14 */
+            g_header_portrait.addListener(header_orient_cb);
+    }
+    header_restore();
+}

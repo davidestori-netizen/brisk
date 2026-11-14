@@ -531,3 +531,37 @@ body.table {
 body.table > div.table_page {
     grid-row: 2;
 }
+
+/* the button that shows or hides the header (header_toggle() in briskin5.js):
+   outside the table, at the left of its top edge; the owl cut out of the
+   logo. On windows narrower than the table and the button it goes out of
+   sight: there the window is also very high, and the header is no matter */
+div.hdr_toggle {
+    position: absolute;
+    right: 100%;
+    margin-right: 4px;
+    top: 0px;
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    border: 1px solid gray;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+}
+
+div.hdr_owl {
+    width: 32px;
+    height: 34px;
+    background-image: url('../img/brisk_logo64.png');
+    background-size: 104px auto;
+    background-position: 0px 0px;
+    background-repeat: no-repeat;
+}
+
+div.hdr_arrow {
+    margin-left: 3px;
+    font-size: 14px;
+    color: #404040;
+}

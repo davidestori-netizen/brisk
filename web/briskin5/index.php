@@ -43,6 +43,8 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
                                                    'en' => 'Prefs'),
                            'tit_diag'    => array( 'it' => 'stato della connessione: clicca per mostrare o nascondere la diagnostica (anche col comando /diag in chat)',
                                                    'en' => 'connection status: click to show or hide the diagnostics (also with the /diag chat command)'),
+                           'tit_hdr'     => array( 'it' => 'mostra o nascondi l\'intestazione della pagina',
+                                                   'en' => 'show or hide the header of the page'),
                            'itm_ringauc' => array('it' => 'riproduci un suono di notifica alla fine dell\' asta',
                                                   'en' => 'play a sound at the end of the auction'),
                            'btn_update'  => array('it' => 'Aggiorna.',
@@ -160,8 +162,10 @@ window.onload = function() {
 
   xstm.start();
 
-  /* scale the page down when the window is lower than the table and the chat,
+  /* the header as the user left it for this orientation of the window, then
+     scale the page down when the window is lower than the table and the chat,
      or narrower than the table */
+  header_init();
   table_fit();
   addEvent(window, "resize", table_fit);
 
@@ -181,6 +185,8 @@ window.onload = function() {
 <div id="bg" class="area">
 
 <div id="remark" class="remark0"></div>
+<!-- the owl of the logo and an arrow: shows or hides the header (header_toggle() in briskin5.js) -->
+<div id="hdr_toggle" class="hdr_toggle" title="<?php echo $mlang_bin5_index['tit_hdr'][$G_lang]; ?>" onclick="header_toggle();"><div class="hdr_owl"></div><div id="hdr_arrow" class="hdr_arrow">&#9660;</div></div>
 <img id="card0" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
 <img id="card1" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
 <img id="card2" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
