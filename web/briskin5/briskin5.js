@@ -427,11 +427,15 @@ function rules_set(id)
  *  div.table_page, to scale also the popups (points, notices) hung to it.
  *  The zoom, unlike a transform, also shrinks the space the page takes.
  *
+ *  The height scale never goes below TABLE_FIT_MIN_VSCALE: on lower windows
+ *  the page stays at that size and the users scroll.
+ *
  *  The same for the width: on windows narrower than the game area the page
  *  is scaled so that the area fits the width; the smaller of the two scales
  *  wins. The width is the one of the window without its scrollbar.
  */
 var g_table_scale = 1;
+var TABLE_FIT_MIN_VSCALE = 0.9;
 
 function table_fit()
 {
@@ -450,7 +454,7 @@ function table_fit()
     var scale = 1;
 
     if (core_h > 0 && window.innerHeight < core_h)
-        scale = window.innerHeight / core_h;
+        scale = Math.max(window.innerHeight / core_h, TABLE_FIT_MIN_VSCALE);
     if (core_w > 0 && win_w < core_w)
         scale = Math.min(scale, win_w / core_w);
 
