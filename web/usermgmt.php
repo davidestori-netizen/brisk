@@ -684,20 +684,26 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($usr_obj
                     umgmt_log("accept-nick", $nick_old . " -> " . $usr_obj->nick_req);
                     continue;
                 }
-                // change state
+                /* change state first and the password after, in one transaction:
+                   before, the password was changed even when the account was not
+                   in the expected state, and the player got no mail */
                 $passwd = passwd_gen();
 
-                if (($bdb->user_update_passwd($usr_obj->code, $passwd)) == FALSE) {
-                    echo "fail 1.5<br>";
-                    break;
-                }
-
+                $bdb->transaction('BEGIN');
                 if (($bdb->user_update_flag_ty($usr_obj->code, USER_FLAG_TY_DISABLE,
                                                TRUE, USER_DIS_REA_NU_TOBECHK,
                                                FALSE, USER_DIS_REA_NONE)) == FALSE) {
-                    echo "fail 2<br>";
-                    break;
+                    $bdb->transaction('ROLLBACK');
+                    printf("%s is not waiting for acceptance (unexpected state), skipped<br>\n",
+                           eschtml($usr_obj->login));
+                    continue;
                 }
+                if (($bdb->user_update_passwd($usr_obj->code, $passwd)) == FALSE) {
+                    $bdb->transaction('ROLLBACK');
+                    printf("password update failed for %s, skipped<br>\n", eschtml($usr_obj->login));
+                    continue;
+                }
+                $bdb->transaction('COMMIT');
 
                 $bdb->user_update_login_time($usr_obj->code, 0);
 
