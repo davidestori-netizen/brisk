@@ -788,6 +788,11 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($nick_pa
                             fprintf(STDERR, "ERROR: mail send FAILED\n");
                             break;
                         }
+                        /* the refused request stays (the player still enters with it)
+                           but it is marked, so nobody accepts it by mistake */
+                        $bdb->query(sprintf("UPDATE %susers SET disa_reas = %d WHERE code = %d AND disa_reas = %d;",
+                                            $G_dbpfx, USER_DIS_REA_NU_NICKREF, $usr_obj->code,
+                                            USER_DIS_REA_NU_TOBECHK));
                         $status .= sprintf("nickname refused for %s: SUCCESS<br>", eschtml($usr_obj->login));
                         umgmt_log("refuse-nick", $usr_obj->login . " (" . $usr_obj->nick_req . ")");
                         $res = TRUE;
@@ -879,8 +884,8 @@ Saluti e buone partite, mop.', $usr_obj->login);
                 if ($id <= 0)
                     continue;
 
-                $usr_sql = sprintf("SELECT * FROM %susers WHERE disa_reas = %d AND code = %d;",
-                                   $G_dbpfx, USER_DIS_REA_NU_TOBECHK, $id);
+                $usr_sql = sprintf("SELECT * FROM %susers WHERE disa_reas IN (%d, %d) AND code = %d;",
+                                   $G_dbpfx, USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF, $id);
                 if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE
                     || pg_num_rows($usr_pg) != 1) {
                     printf("Inconsistency for code %d, skipped<br>\n", $id);
@@ -890,7 +895,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                 /* a new signup plays with its temporary nickname, so it is enabled */
                 $is_on = (($usr_obj->type & USER_FLAG_TY_DISABLE) == USER_FLAG_TY_DISABLE);
                 if ($bdb->user_update_flag_ty($usr_obj->code, USER_FLAG_TY_DISABLE,
-                                              $is_on, USER_DIS_REA_NU_TOBECHK,
+                                              $is_on, (int)$usr_obj->disa_reas,
                                               TRUE, USER_DIS_REA_BANNED) == FALSE) {
                     printf("Block of %s failed<br>\n", eschtml($usr_obj->login));
                     continue;
@@ -913,9 +918,9 @@ Saluti e buone partite, mop.', $usr_obj->login);
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE usr.disa_reas = %d ORDER BY usr.lintm;",
+     WHERE usr.disa_reas IN (%d, %d) ORDER BY usr.lintm;",
                                $G_dbpfx, $G_dbpfx,
-                               USER_DIS_REA_NU_TOBECHK);
+                               USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                 log_crit("stat-day: select from tournaments failed");
                 break;
@@ -930,18 +935,26 @@ SELECT usr.*, guar.login AS guar_login
                 $email = $usr_obj->email;
                 if ($role != "admin")
                     $email = (($at = strrpos($email, "@")) === FALSE ? "..." : "..." . substr($email, $at));
+                $is_ref = ($usr_obj->disa_reas == USER_DIS_REA_NU_NICKREF);
                 $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">Accept</button> "
                                     . "<button type=\"submit\" name=\"f_row\" value=\"delete_%d\">%s</button> "
                                     . "<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
                                     $usr_obj->code, $usr_obj->code, ($role == "admin" ? "Delete" : "Refuse nickname"),
                                     $usr_obj->code, eschtml(addslashes($usr_obj->login)));
+                /* refused nickname: nothing to accept until the player asks another one */
+                if ($is_ref)
+                    $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
+                                        $usr_obj->code, eschtml(addslashes($usr_obj->login)));
 
                 /* the moderators start with nothing checked: a wrong click on the
                    buttons at the bottom must not touch every player */
-                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-                                      $usr_obj->code, (($nocheck || $role != "admin") ? "" : "CHECKED"),
+                $tab_lines .= sprintf("<tr%s><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                                      ($is_ref ? " style=\"color: #888;\"" : ""),
+                                      ($is_ref ? "" : sprintf("<input name=\"f_newuser%d\" type=\"checkbox\" %s>",
+                                                               $usr_obj->code, (($nocheck || $role != "admin") ? "" : "CHECKED"))),
                                       eschtml($usr_obj->login) . (($usr_obj->type & USER_FLAG_TY_NICKTMP) ? "*" : ""),
-                                      eschtml((string)$usr_obj->nick_req),
+                                      ($is_ref ? "<s>" . eschtml((string)$usr_obj->nick_req) . "</s> refused, waiting for a new one"
+                                       : eschtml((string)$usr_obj->nick_req)),
                                       eschtml($email), eschtml($usr_obj->guar_login),
                                       ($usr_obj->type & USER_FLAG_TY_APPR ? "Yes" : "No"),
                                       $usr_obj->lintm, $row_btns);

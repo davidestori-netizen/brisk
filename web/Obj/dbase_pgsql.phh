@@ -440,8 +440,10 @@ class BriskDB
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET nick_req = %s WHERE code = %d;",
-                            $G_dbpfx, ($nick === NULL ? "NULL" : "'".escsql($nick)."'"), $code);
+        /* a new request after a refusal goes back to be checked */
+        $user_sql = sprintf("UPDATE %susers SET nick_req = %s, disa_reas = (CASE WHEN disa_reas = %d THEN %d ELSE disa_reas END) WHERE code = %d;",
+                            $G_dbpfx, ($nick === NULL ? "NULL" : "'".escsql($nick)."'"),
+                            USER_DIS_REA_NU_NICKREF, USER_DIS_REA_NU_TOBECHK, $code);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
