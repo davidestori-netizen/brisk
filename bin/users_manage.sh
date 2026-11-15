@@ -1,5 +1,9 @@
 #!/bin/bash
-act="$1" 
+if [ ~/.brisk_install ]; then
+    source ~/.brisk_install
+fi
+
+act="$1"
 if [ "$act" = "sel" -o "$act" = "qsel" -o "$act" = "selcode" -o "$act" = "sma" -o "$act" = "selblo" -o "$act" = "selapp" ]; then
     shift
     usr="$(echo "$1" | sed "s/'/''/g")"
@@ -21,6 +25,27 @@ if [ "$act" = "sel" -o "$act" = "qsel" -o "$act" = "selcode" -o "$act" = "sma" -
     else
         echo " usr.login = 'mop';"
     fi
+ elif [ "$act" = "add" ]; then
+      # "$0 add <user> <pass> <email> <guar> <type_hex>"
+      shift
+      if [ $# -ne 5 ]; then
+          echo "usage: $0 add <user> <pass> <email> <guar> <type_hex>" >&2
+          exit 1
+      fi
+      if ! echo "$5" | grep -qE '^(0[xX])?[0-9a-fA-F]+$'; then
+          echo "$0 add: type must be hexadecimal, as 10000 or 0x10000" >&2
+          exit 1
+      fi
+      usr="$(echo "$1" | tr 'A-Z' 'a-z' | sed "s/'/''/g")"
+      pass="$(echo "$2" | sed "s/'/''/g")"
+      ema="$(echo "$3" | sed "s/'/''/g")"
+      guar="$(echo "$4" | sed "s/'/''/g")"
+      ty="$(echo "$5" | sed 's/^0[xX]//')"
+      # as BriskDB::user_add(): login in lower case, the password as its md5
+      # (as user_update_passwd()), no disable reason. The guarantor comes from
+      # its login: when it does not exist nothing is inserted ("INSERT 0 0")
+      echo "INSERT INTO bsk_users (login, pass, email, type, disa_reas, guar_code, lintm) SELECT '${usr}', md5('${pass}'), '${ema}', CAST(X'${ty}' AS integer), 0, gua.code,
+  now() FROM bsk_users AS gua WHERE gua.login = '${guar}' RETURNING code, login, email, to_hex(type) AS type, guar_code;"
 elif [ "$act" = "who_guar" ]; then
     shift
     usr="$(echo "$1" | sed "s/'/''/g")"
@@ -30,7 +55,7 @@ elif [ "$act" = "guar" ]; then
     usr="$(echo "$1" | sed "s/'/''/g")"
     guar="$(echo "$2" | sed "s/'/''/g")"
     echo "UPDATE bsk_users SET (type, guar_code) = ( (type & ~(CAST (X'90000' as integer))) | (CAST (X'10000' as integer)), (SELECT code FROM bsk_users WHERE login = '${guar}')) WHERE login = '${usr}';"
-    # TO REVERT: 
+    # TO REVERT:
     # echo "UPDATE bsk_users SET (type, guar_code) = ( (type & ~(CAST (X'90000' as integer))) | (CAST (X'80000' as integer)), 3) WHERE login = '${usr}';"
 elif [ "$act" = "dis" ]; then
     shift
@@ -80,14 +105,16 @@ elif [ "$act" = "repass" ]; then
 elif [ "$act" = "unet" ]; then
     echo "select ow.login, tg.login, un.* from bsk_usersnet as un, bsk_users as ow, bsk_users as tg WHERE ow.code = un.owner AND tg.code = un.target  order by un.owner;"
 else
-    # egrep "^define\('USER_(FLAG_TY|DIS_REA)"  ~/webspace/brisk/Obj/user.phh
-    egrep "^define\('USER_DIS_REA"  ~/webspace/brisk/Obj/user.phh
+    egrep "^define\('USER_(FLAG_TY|DIS_REA)" ${web_path}/Obj/user.phh
+    egrep "^define\('USER_DIS_REA"  ${web_path}/Obj/user.phh
+    echo "$0 add <user> <pass> <email> <type> <guar_code>"
     echo "$0 sel <user>"
     echo "$0 qsel <user> (with like)"
     echo "$0 sma <user> select by email"
     echo "$0 selcode <user> select by code"
     echo "$0 selblo <user> select users with password len not standard"
     echo "$0 selapp return all apprentices"
+    echo "$0 add <user> <pass> <email> <guar> <type_hex>  - new user, <guar> is the login of the guarantor"
     echo "$0 who_guar <user>  - list of users guaranted by <user>"
     echo "$0 guar <user> <guar>  - move apprentice to guaranted status"
     echo "$0 cert <user>"
