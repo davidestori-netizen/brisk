@@ -85,8 +85,8 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                             'en' => "invalid login"),
                       'nu_emailiv' => array('it' => "email non valida",
                                             'en' => "invalid email"),
-                      'nu_msubj' => array( 'it' => 'Brisk: verifica email',
-                                           'en' => 'Brisk: email verification'),
+                      'nu_msubj' => array( 'it' => 'Brisk: verifica email utente %s',
+                                           'en' => 'Brisk: email verification user %s'),
                       // %s(guar) %s(login) %s(baseurl) %d(code) %s(hash)
                       'nu_mtext' => array( 'it' =>
 'Ciao, sono l\' amministratore del sito di Brisk.
@@ -110,7 +110,7 @@ Saluti e buone partite, mop.<br>',
 'Ciao, sono l\' amministratore del sito di Brisk.
 
 Ti sei registrato col nickname \'%s\',
-vai al link: <%s>
+vai al link: %s
 per confermare il tuo indirizzo di posta elettronica.
 
 Ciò è necessario per ottenere la password.
@@ -298,7 +298,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                 $confirm_page = sprintf("%s://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
                                         $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
-                $subj = $mlang_indwr['nu_msubj'][$G_lang];
+                $subj = sprintf($mlang_indwr['nu_msubj'][$G_lang], $cli_name);
                 $body_txt = sprintf($mlang_indwr['ap_mtext'][$G_lang],
                                     $cli_name, $confirm_page);
                 $body_htm = sprintf($mlang_indwr['ap_mhtml'][$G_lang],

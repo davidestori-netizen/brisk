@@ -48,36 +48,32 @@ function brisk_mail($to, $to_name, $subject, $text, $html, $reply_to=NULL)
         $mail->addAddress($to, $to_name);     // Add a recipient
 
         $mail->Subject = $subject;
-        /* NOTE: msgHTML() overwrites AltBody with its own conversion of the
-           html, so $text is discarded. This was already the case with 5.1:
-           the behaviour is left untouched. To really use $text, move this
-           line after the msgHTML() call. */
-        $mail->AltBody = $text;
 
         if ($html) {
-            $re_to = rawurlencode("{$reply_to[0]} <{$reply_to[1]}>");
-            // 1. Normalize line endings and split the text line by line
-            $lines = explode("\n", str_replace("\r", "", $html));
+            if ($reply_to) {
+                $re_to = rawurlencode("{$reply_to[0]} <{$reply_to[1]}>");
+                // 1. Normalize line endings and split the text line by line
+                $lines = explode("\n", str_replace("\r", "", $html));
 
-            // 2. Loop through each line and prepend the "> " citation character
-            $quoted_text = "";
-            foreach ($lines as $line) {
-                $quoted_text .= "> " . $line . "\n";
-            }
+                // 2. Loop through each line and prepend the "> " citation character
+                $quoted_text = "";
+                foreach ($lines as $line) {
+                    $quoted_text .= "> " . $line . "\n";
+                }
 
-            // 3. Construct the full response body, leaving space at the top to type the reply
-            $reply_body = "--- Original Message ---\n" . $quoted_text;
+                // 3. Construct the full response body, leaving space at the top to type the reply
+                $reply_body = "--- Original Message ---\n" . $quoted_text;
 
-            // 4. Encode the text into a URL-safe format using %20 for spaces instead of '+'
-            $encoded_body = rawurlencode($reply_body);
+                // 4. Encode the text into a URL-safe format using %20 for spaces instead of '+'
+                $encoded_body = rawurlencode($reply_body);
 
-            // 2. Converti i testi usando rawurlencode per metterli in sicurezza
-            $subject_encoded = rawurlencode($subject);
+                // 2. Converti i testi usando rawurlencode per metterli in sicurezza
+                $subject_encoded = rawurlencode($subject);
 
-            // 3. Costruisci il link mailto finale
-            $mailto_url = "mailto:{$re_to}?subject=" . $subject_encoded . "&body=" . $encoded_body;
+                // 3. Costruisci il link mailto finale
+                $mailto_url = "mailto:{$re_to}?subject=" . $subject_encoded . "&body=" . $encoded_body;
 
-            $body_html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>{$subject}</title></head><body>
+                $body_html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>{$subject}</title></head><body>
 
 
     <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; max-width: 600px;'>
@@ -98,8 +94,22 @@ function brisk_mail($to, $to_name, $subject, $text, $html, $reply_to=NULL)
         </a>
     </div>
 </body></html>";
+            }
+            else {
+                $body_html = sprintf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;"
+                                     . " charset=UTF-8\"><title>%s</title></head><body>%s</body></html>",
+                                     $subject, $html);
+                $mail->msgHTML($body_html);
+            }
             $mail->msgHTML($body_html);
         }
+
+        /* NOTE: msgHTML() overwrites AltBody with its own conversion of the
+           html, so $text is discarded. This was already the case with 5.1:
+           the behaviour is left untouched. To really use $text, move this
+           line after the msgHTML() call. */
+        $mail->AltBody = $text;
+
         // To enable debug uncomment the two statements below
         // $mail->SMTPDebug = 2;
         // $mail->Debugoutput = 'html';
