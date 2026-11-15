@@ -393,6 +393,7 @@ window.onload = function() {
 </div>
 <div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="act_preferences_update();" value="<?php echo $mlang_bin5_index['btn_update'][$G_lang]; ?>"/></div>
 </div>
+</div><!-- #preferences: it was never closed, and what came after it was hidden with it -->
 
 
 </body>
