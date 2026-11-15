@@ -1379,6 +1379,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
      shown by a click on the connection status icon or by the /diag chat command -->
 <div id="diagbox" class="diagbox">
+<div id="winsize"></div>
 <div id="heartbit"></div>
 <div id="sandbox"></div>
 <div id="imgct"></div>

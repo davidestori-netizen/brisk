@@ -348,6 +348,7 @@ window.onload = function() {
 <!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
      shown by a click on the connection status icon or by the /diag chat command -->
 <div id="diagbox" class="diagbox">
+<div id="winsize"></div>
 <div id="heartbit"></div>
 <div id="flasou"></div>
 <div id="imgct"></div>
