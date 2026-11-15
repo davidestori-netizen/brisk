@@ -71,6 +71,12 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'back to tables'),
                      'btn_exit'     => array('it' => 'Esco.',
                                              'en' => 'Exit.'),
+                     'btn_chatbig'  => array('it' => 'Espandi.',
+                                             'en' => 'Expand.'),
+                     'btn_chatsmall' => array('it' => 'Restringi.',
+                                             'en' => 'Shrink.'),
+                     'tit_chatbig'  => array('it' => 'ingrandisci o rimpicciolisci la chat',
+                                             'en' => 'enlarge or shrink the chat'),
                      'btn_save' => array('it' => 'Salva.',
                                              'en' => 'Save.'),
                      'btn_reset' => array('it' => 'Annulla.',
@@ -1322,7 +1328,11 @@ cookie_law(null);
 <!--  =========== bottom ===========  -->
 <div id="bottom" class="bottom">
 <b>Chat</b> <span id="list_info" style="color: red;"></span><br>
-<div id="txt" class="chatt" ondblclick="chatt_big_toggle(this);">
+<!-- the chat, and at its bottom right the button that enlarges it (chatt_big_toggle() in room.js) -->
+<div class="chatt_box">
+<div id="txt" class="chatt">
+</div>
+<input id="chatt_big_btn" class="button chatt_big_btn" type="button" value="<?php echo $mlang_room['btn_chatbig'][$G_lang];?>" data-big="<?php echo $mlang_room['btn_chatbig'][$G_lang];?>" data-small="<?php echo $mlang_room['btn_chatsmall'][$G_lang];?>" title="<?php echo $mlang_room['tit_chatbig'][$G_lang];?>" onclick="chatt_big_toggle($('txt'));">
 </div>
 <div style="text-align: center; ">
     <!-- MLANG: scrivi un invito al tavolo e clicca -->
