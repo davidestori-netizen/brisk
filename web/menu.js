@@ -18,7 +18,10 @@
      g_menu_tree[1][2] = $('menu_listen');
    }
        
+   /* a closed menu is also out of the layout (display: none, .webstart in
+      room.css), so that it takes no room in the page */
    function menu_show(id) {
+     $(id).style.display = 'block';
      $(id).style.visibility = 'visible';
    }
 
@@ -46,6 +49,7 @@ function menu_hide(st,lev) {
                 for (i = 0 ; i < g_menu_tree[e].length ; i++) {
                     if (g_menu_tree[e][i] != null) {
                         g_menu_tree[e][i].style.visibility = "hidden";
+                        g_menu_tree[e][i].style.display = "none";
                     }
                 }
             }

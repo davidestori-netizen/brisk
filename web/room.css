@@ -387,6 +387,10 @@ div.esco {
     background-color: white;
     left: 80px;
     z-index: 50;
+    /* closed menus take no room: only hidden, the long ones (the meetings)
+       still reached below the window and made the page scroll on the
+       lower ones, the login too (menu_show() and menu_hide() in menu.js) */
+    display: none;
     visibility: hidden;
     border: 1px solid gray;
     text-align: left;
