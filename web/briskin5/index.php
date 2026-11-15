@@ -368,11 +368,6 @@ window.onload = function() {
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
 </div>
-<?php
-    if (isset($G_company_line) && $G_company_line != '') {
-        printf('<div class="company_line">%s</div>', $G_company_line);
-    }
-?>
 </div>
 </div>
 
@@ -396,6 +391,8 @@ window.onload = function() {
 </div><!-- #preferences: it was never closed, and what came after it was hidden with it -->
 
 
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php

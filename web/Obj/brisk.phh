@@ -3652,6 +3652,21 @@ $mlang_header = array( 'headline' => array('it' => 'briscola chiamata in salsa a
                                            'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>') );
 
 /*
+ *  the one-line company details ($G_company_line, HTML allowed) of the
+ *  login, the room and the table: the last row of the page, at the bottom
+ *  of the window when the page fits in it (div.company_line in brisk.css).
+ *  Nothing when the line is empty.
+ */
+function company_line_render()
+{
+    GLOBAL $G_company_line;
+
+    if (!isset($G_company_line) || $G_company_line == '')
+        return ('');
+    return (sprintf('<div id="company_line" class="company_line">%s</div>', $G_company_line));
+}
+
+/*
  *  the header of the room and of the table: a banner on each side and in
  *  the middle the logo with the headline, beside the top banner or the
  *  donometer when one of them is active.

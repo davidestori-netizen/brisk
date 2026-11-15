@@ -380,11 +380,18 @@ img.stm_stat {
     cursor: pointer;
 }
 
-/* one-line company details at the bottom of the room and of the table ($G_company_line) */
+/*
+ *  one-line company details ($G_company_line, company_line_render() in
+ *  brisk.phh) of the login, the room and the table: the last row of the
+ *  grid of the page (room.css, briskin5.css), at the bottom of the window
+ *  when the page fits in it, after the page, reached by scrolling, when
+ *  it does not
+ */
 div.company_line {
+    grid-row: 4;
     text-align: center;
     font-size: 80%;
-    padding: 0px 4px 2px 4px;
+    padding: 2px 4px 2px 4px;
 }
 
 /* the header of the room and of the table (header_render() in brisk.phh) */

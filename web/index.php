@@ -1166,6 +1166,8 @@ window.onload = function() {
 cookie_law(null);
 // -->
 </script>
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php
@@ -1396,11 +1398,6 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
 </div>
-<?php
-    if (isset($G_company_line) && $G_company_line != '') {
-        printf('<div class="company_line">%s</div>', $G_company_line);
-    }
-?>
 </div>
 
 <div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">
@@ -1607,6 +1604,8 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 cookie_law(null);
 // -->
 </script>
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php
