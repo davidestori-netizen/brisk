@@ -476,7 +476,7 @@ function table_fit()
  *  choice, or the default, of the new one.
  */
 var HEADER_KEY = "brisk_bin5_header_hidden";
-var HEADER_MIN_WIN_H = 900;
+var HEADER_MIN_WIN_H = 720;
 var g_header_portrait = null;
 
 function header_key()
