@@ -596,43 +596,44 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                                          'url' => 'http://www.alternativeoutput.it',
                                          'content' => 'img/altout80x15.png',
                                          'content_big' => 'img/logotxt_banner.png'),
-                                 array ( 'id' => 'btn_virtualsky',
-                                         'url' => 'http://virtualsky.alternativeoutput.it',
-                                         'content' => 'img/virtualsky80x15a.gif',
-                                         'content_big' => 'img/virtualsky_big.png'),
+                                 // array ( 'id' => 'btn_virtualsky',
+                                 //         'url' => 'http://virtualsky.alternativeoutput.it',
+                                 //         'content' => 'img/virtualsky80x15a.gif',
+                                 //         'content_big' => 'img/virtualsky_big.png'),
                                  array ( 'id' => 'btn_dynamica',
                                          'url' => 'http://www.dynamica.it',
                                          'content' => 'img/dynamica.png',
                                          'content_big' => 'img/dynamica_big.png')
                                  );
 
-    $altout_support_arr = array( array ( 'id' => 'btn_brichi',
-                                         'url' => 'http://www.briscolachiamata.it',
-                                         'content' => 'img/brichi.png',
-                                         'content_big' => 'img/brichi_big.png'),
-                                 array ( 'id' => 'btn_foroli',
-                                         'url' => 'http://www.forumolimpia.it',
-                                         'content' => 'img/forumolimpia.gif',
-                                         'content_big' => 'img/forumolimpia_big.png' ),
-                                 array ( 'id'=> 'btn_niini',
-                                         'url' => 'http://www.niinivirta.it',
-                                         'content' => 'img/niinivirta.png',
-                                         'content_big' => 'img/niinivirta_big.png') );
+    $altout_support_arr = array();
+    // $altout_support_arr = array( array ( 'id' => 'btn_brichi',
+    //                                      'url' => 'http://www.briscolachiamata.it',
+    //                                      'content' => 'img/brichi.png',
+    //                                      'content_big' => 'img/brichi_big.png'),
+    //                              array ( 'id' => 'btn_foroli',
+    //                                      'url' => 'http://www.forumolimpia.it',
+    //                                      'content' => 'img/forumolimpia.gif',
+    //                                      'content_big' => 'img/forumolimpia_big.png' ),
+    //                              array ( 'id'=> 'btn_niini',
+    //                                      'url' => 'http://www.niinivirta.it',
+    //                                      'content' => 'img/niinivirta.png',
+    //                                      'content_big' => 'img/niinivirta_big.png') );
 
 
 
     $altout_support = "";
     $altout_support_big = "";
-    for ($i = 0 ; $i < 4 ; $i++) {
-        $ii = ($i < 3 ? $i : 0);
+    // for ($i = 0 ; $i < 4 ; $i++) {
+    //     $ii = ($i < 3 ? $i : 0);
 
-        $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
-                                   $i * 20, $altout_support_arr[$ii]['url'],
-                                   $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
+    //     $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
+    //                                $i * 20, $altout_support_arr[$ii]['url'],
+    //                                $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
 
-        $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
-                                       $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
-    }
+    //     $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
+    //                                    $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
+    // }
 
 
     // seed with microseconds since last "whole" second
@@ -640,8 +641,8 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     // $randval = rand(0,count($altout_sponsor_arr)-1);
     $altout_sponsor = "";
     $altout_sponsor_big = "";
-    for ($i = 0 ; $i < 4 ; $i++) {
-        $ii = ($i < 3 ? $i : 0);
+    for ($i = 0 ; $i < 3 ; $i++) {
+        $ii = ($i < 2 ? $i : 0);
 
         $altout_sponsor .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
                                    $i * 20, $altout_sponsor_arr[$ii]['url'],
@@ -972,6 +973,8 @@ sponsored by:<br>
 '.$altout_sponsor_big.'
 </div>
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+<!--
+
 supported by:<br>
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 4px; font-size: 1px;"></div>
 <div id="supp_caro" style="overflow: hidden; height: 18px; /* border: 1px solid red; */">
@@ -982,6 +985,8 @@ supported by:<br>
 <div style="position: absolute;">
 '.$altout_support_big.'
 </div>
+
+-->
 <a style="/* position: absolute; top: 40px; left: 6px; */" target="_blank" href="https://www.facebook.com/groups/59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
 ' . ( /* NOTE: here facebook or fake facebook */
 (!$G_is_local && $_cookie_law_3party == 'true') ?

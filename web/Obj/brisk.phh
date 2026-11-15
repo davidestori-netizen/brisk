@@ -3664,45 +3664,48 @@ function header_render($pfx, $cookie_law_3party)
     GLOBAL $G_lang, $G_is_local, $mlang_header;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_with_donors, $G_donors_cur, $G_donors_all;
 
-    $google_ad = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
+//    $google_ad = '<script type="text/javascript"><!--
+// google_ad_client = "pub-5246925322544303";
+// google_ad_width = 234;
+// google_ad_height = 60;
+// google_ad_format = "234x60_as";
+// google_ad_type = "text_image";
+// google_ad_channel = "";
+// google_color_border = "808080";
+// google_color_bg = "f6f6f6";
+// google_color_link = "ffae00";
+// google_color_text = "404040";
+// google_color_url = "000000";
+// //-->
+// </script>
+// <script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
 
-    if (!$G_is_local && $cookie_law_3party == 'true') {
-        if (rand(0, 1) == 0) {
-            $banner_top_left  = $google_ad;
-            $banner_top_right = carousel_top($pfx);
-        }
-        else {
-            $banner_top_left  = carousel_top($pfx);
-            $banner_top_right = $google_ad;
-        }
-    }
-    else {
-        $banner_top_left  = carousel_top($pfx);
-        $banner_top_right = carousel_top($pfx);
-    }
+//     if (!$G_is_local && $cookie_law_3party == 'true') {
+//         if (rand(0, 1) == 0) {
+//             $banner_top_left  = $google_ad;
+//             $banner_top_right = carousel_top($pfx);
+//         }
+//         else {
+//             $banner_top_left  = carousel_top($pfx);
+//             $banner_top_right = $google_ad;
+//         }
+//     }
+//     else {
+//         $banner_top_left  = carousel_top($pfx);
+//         $banner_top_right = carousel_top($pfx);
+//     }
 
-    $with_side = ($G_with_topbanner || $G_with_donors);
-    if ($G_with_topbanner) {
-        $side = $G_topbanner;
-    }
-    else if ($G_with_donors) {
-        $side = "<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"".$pfx."donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>";
-    }
-
+//     $with_side = ($G_with_topbanner || $G_with_donors);
+//     if ($G_with_topbanner) {
+//         $side = $G_topbanner;
+//     }
+//     else if ($G_with_donors) {
+//         $side = "<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"".$pfx."donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>";
+//     }
+    $banner_top_left = '';
+    $banner_top_right = '';
+    $with_side = FALSE;
+    $side = '';
     return ('<!-- =========== header ===========  -->
 <div id="header" class="header">
 <table width="100%" style="min-height: 84px;" border="0" cols="3"><tr>

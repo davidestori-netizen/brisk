@@ -20,7 +20,6 @@ require_once("{$G_base}Obj/PHPMailer/src/SMTP.php");
 
 if (file_exists("$DOCUMENT_ROOT/Etc/brisk_mail_secrets.pho")) {
     require("$DOCUMENT_ROOT/Etc/brisk_mail_secrets.pho");
-    printf("secrets file found\n");
 }
 
 if (!function_exists('mail_secrets')) {
