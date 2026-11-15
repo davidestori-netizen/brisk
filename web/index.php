@@ -73,7 +73,7 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Exit.'),
                      'btn_chatbig'  => array('it' => 'Espandi.',
                                              'en' => 'Expand.'),
-                     'btn_chatsmall' => array('it' => 'Restringi.',
+                     'btn_chatsmall' => array('it' => 'Riduci.',
                                              'en' => 'Shrink.'),
                      'tit_chatbig'  => array('it' => 'ingrandisci o rimpicciolisci la chat',
                                              'en' => 'enlarge or shrink the chat'),
@@ -1328,7 +1328,7 @@ cookie_law(null);
 <!--  =========== bottom ===========  -->
 <div id="bottom" class="bottom">
 <b>Chat</b> <span id="list_info" style="color: red;"></span><br>
-<!-- the chat, and at its bottom right the button that enlarges it (chatt_big_toggle() in room.js) -->
+<!-- the chat, and at its bottom right the button that enlarges it (chatt_big_toggle() in commons.js) -->
 <div class="chatt_box">
 <div id="txt" class="chatt">
 </div>

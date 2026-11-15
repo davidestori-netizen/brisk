@@ -876,26 +876,3 @@ sideslide.prototype = {
 
 }
 
-/*
- *  the button at the bottom right of the chat makes it four times higher,
- *  upwards and opaque, another click brings it back (.chatt_big in
- *  room.css); the label of the button says what the next click does
- *  (data-big and data-small, in the language of the page)
- */
-function chatt_big_toggle(box)
-{
-    var btn = $("chatt_big_btn");
-    var is_big;
-
-    if (box.className.match(/\bchatt_big\b/)) {
-        box.className = box.className.replace(/\s*\bchatt_big\b/, "");
-        is_big = false;
-    }
-    else {
-        box.className += " chatt_big";
-        is_big = true;
-    }
-    if (btn)
-        btn.value = btn.getAttribute(is_big ? "data-small" : "data-big");
-    box.scrollTop = box.scrollHeight;
-}

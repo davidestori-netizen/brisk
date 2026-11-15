@@ -43,6 +43,12 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
                                                    'en' => 'Prefs'),
                            'tit_diag'    => array( 'it' => 'stato della connessione: clicca per mostrare o nascondere la diagnostica (anche col comando /diag in chat)',
                                                    'en' => 'connection status: click to show or hide the diagnostics (also with the /diag chat command)'),
+                           'btn_chatbig' => array( 'it' => 'Espandi.',
+                                                   'en' => 'Expand.'),
+                           'btn_chatsmall' => array( 'it' => 'Riduci.',
+                                                   'en' => 'Shrink.'),
+                           'tit_chatbig' => array( 'it' => 'ingrandisci o rimpicciolisci la chat',
+                                                   'en' => 'enlarge or shrink the chat'),
                            'tit_hdr'     => array( 'it' => 'mostra o nascondi l\'intestazione della pagina',
                                                    'en' => 'show or hide the header of the page'),
                            'itm_ringauc' => array('it' => 'riproduci un suono di notifica alla fine dell\' asta',
@@ -338,7 +344,11 @@ window.onload = function() {
 
 
 <div class="subarea">
+<!-- the chat, and at its bottom right the button that enlarges it (chatt_big_toggle() in commons.js) -->
+<div class="chatt_box">
 <div id="txt" class="chattshort"></div>
+<input id="chatt_big_btn" class="button chatt_big_btn" type="button" value="<?php echo $mlang_bin5_index['btn_chatbig'][$G_lang];?>" data-big="<?php echo $mlang_bin5_index['btn_chatbig'][$G_lang];?>" data-small="<?php echo $mlang_bin5_index['btn_chatsmall'][$G_lang];?>" title="<?php echo $mlang_bin5_index['tit_chatbig'][$G_lang];?>" onclick="chatt_big_toggle($('txt'));">
+</div>
     <table class="chattshort_table"><tr><td style="width:1%; text-align: right;">
     <div id="myname"></div>
     </td><td>

@@ -334,26 +334,8 @@ div.esco {
     background-color: rgba(255, 255, 255, 0.25);
 }
 
-/* holds the chat and its button, placed from its bottom right corner */
-div.chatt_box {
-    position: relative;
-}
-
 /*
- *  the button that enlarges the chat (chatt_big_toggle() in room.js): at
- *  the bottom right of the chat, as far from its outer edges (7 and 5
- *  pixels, border included) as the "Exit" button of the standing players
- *  (div.esco) is from theirs; over the enlarged chat (z-index: 21)
- */
-input.chatt_big_btn {
-    position: absolute;
-    bottom: 4px;
-    right: 6px;
-    z-index: 22;
-}
-
-/*
- *  the chat enlarged by its button (chatt_big_toggle() in room.js):
+ *  the chat enlarged by its button (chatt_big_toggle() in commons.js):
  *  four times higher, upwards over the standing players and the tables
  *  (the negative margin keeps its place in the page, so nothing below
  *  moves), opaque so what is behind does not disturb. Over the title and

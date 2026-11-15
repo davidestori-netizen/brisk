@@ -394,3 +394,22 @@ div.header {
     font-size: 100%;
     clear:left;
 }
+
+/* holds the chat and its button, placed from its bottom right corner */
+div.chatt_box {
+    position: relative;
+}
+
+/*
+ *  the button that enlarges the chat (chatt_big_toggle() in commons.js): at
+ *  the bottom right of the chat, in the room and at the table, as far
+ *  from its outer edges (7 and 5 pixels, border included) as the "Exit"
+ *  button of the standing players (div.esco) is from theirs; over the
+ *  enlarged chat (z-index: 21 in the room, see briskin5.css for the table)
+ */
+input.chatt_big_btn {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    z-index: 22;
+}

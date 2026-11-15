@@ -38,6 +38,33 @@ body::before {
     border: 1px solid gray;
     vertical-align: text-bottom;
     text-align: left;
+
+    /* as the chat of the room (.chatt in room.css): rounded corners, and
+       the lines do not touch the left edge */
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    padding-left: 6px;
+}
+
+/*
+ *  the chat enlarged by its button (chatt_big_toggle() in commons.js), as
+ *  in the room: four times higher, upwards over the table (the negative
+ *  margin keeps its place in the page, so nothing below moves and the
+ *  scale of the page does not change), opaque. Over the cards and the
+ *  names (z-index up to 100), under the notices (z-index: 200)
+ */
+.chattshort.chatt_big {
+    position: relative;
+    z-index: 150;
+    height: 280px;
+    margin-top: -210px;
+    background-color: #ffffff;
+}
+
+/* its button over it */
+div.subarea input.chatt_big_btn {
+    z-index: 151;
 }
 
 table.chattshort_table {
@@ -161,11 +188,26 @@ img.seed3 {
     text-align: center;
     width:  800px;
     height: 600px;
+
+    /* bordered and rounded as the chat and the areas of the room; the
+       background of the table follows the corners by itself, nothing is
+       clipped (the button of the header stays outside, at the left). The
+       line is an outline drawn 1 pixel inside the edge, not a border: the
+       table stays 800 x 600, what is placed in it keeps its coordinates
+       and the line is drawn over it */
+    outline: 1px solid gray;
+    outline-offset: -1px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
 }
 
 .subarea {
     top: 0px;	
     text-align: center;
+    /* the chat a little away from the edges of the window, as in the room
+       (div.bottom in room.css) */
+    padding: 2px;
 }
 
 .points {
@@ -494,6 +536,10 @@ div.table_commands {
     top: 475px;
     width: 200px;
     height: 125px;
+    /* it sits in the bottom left corner of the table (.area): rounded as it */
+    -webkit-border-bottom-left-radius: 8px;
+    -moz-border-radius-bottomleft: 8px;
+    border-bottom-left-radius: 8px;
 }
 
 .callerinfo {
