@@ -1158,16 +1158,6 @@ window.onload = function() {
 <?php echo $mlang_room['browwarn'][$G_lang];?><br>
     </div>
 
-    <div id="imgct"></div>
-    <div id="logz"></div>
-    <div id="sandbox"></div>
-    <div id="sandbox2"></div>
-    <div id="response"></div>
-    <div id="xhrstart"></div>
-    <pre>
-    <div id="xhrlog"></div>
-    </pre>
-    <div id="xhrdeltalog"></div>
 </td></tr></table>
 </div>
 
