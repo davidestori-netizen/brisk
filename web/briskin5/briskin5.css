@@ -38,6 +38,33 @@ body::before {
     border: 1px solid gray;
     vertical-align: text-bottom;
     text-align: left;
+
+    /* as the chat of the room (.chatt in room.css): rounded corners, and
+       the lines do not touch the left edge */
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    padding-left: 6px;
+}
+
+/*
+ *  the chat enlarged by its button (chatt_big_toggle() in commons.js), as
+ *  in the room: four times higher, upwards over the table (the negative
+ *  margin keeps its place in the page, so nothing below moves and the
+ *  scale of the page does not change), opaque. Over the cards and the
+ *  names (z-index up to 100), under the notices (z-index: 200)
+ */
+.chattshort.chatt_big {
+    position: relative;
+    z-index: 150;
+    height: 280px;
+    margin-top: -210px;
+    background-color: #ffffff;
+}
+
+/* its button over it */
+div.subarea input.chatt_big_btn {
+    z-index: 151;
 }
 
 table.chattshort_table {
@@ -161,11 +188,26 @@ img.seed3 {
     text-align: center;
     width:  800px;
     height: 600px;
+
+    /* bordered and rounded as the chat and the areas of the room; the
+       background of the table follows the corners by itself, nothing is
+       clipped (the button of the header stays outside, at the left). The
+       line is an outline drawn 1 pixel inside the edge, not a border: the
+       table stays 800 x 600, what is placed in it keeps its coordinates
+       and the line is drawn over it */
+    outline: 1px solid gray;
+    outline-offset: -1px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
 }
 
 .subarea {
     top: 0px;	
     text-align: center;
+    /* the chat a little away from the edges of the window, as in the room
+       (div.bottom in room.css) */
+    padding: 2px;
 }
 
 .points {
@@ -494,6 +536,10 @@ div.table_commands {
     top: 475px;
     width: 200px;
     height: 125px;
+    /* it sits in the bottom left corner of the table (.area): rounded as it */
+    -webkit-border-bottom-left-radius: 8px;
+    -moz-border-radius-bottomleft: 8px;
+    border-bottom-left-radius: 8px;
 }
 
 .callerinfo {
@@ -512,4 +558,56 @@ img#callerimg {
 div#preferences_child div div {
     text-align: center;
     margin-bottom: 8px;
+}
+
+/*
+ *  as in the room (room.css): on windows taller than the table page the
+ *  spare space goes one third above it and two thirds below, instead of
+ *  being all below. The other children of the body are popups out of the
+ *  flow and do not take space
+ */
+body.table {
+    display: grid;
+    grid-template-rows: 1fr auto 2fr auto;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+body.table > div.table_page {
+    grid-row: 2;
+}
+
+/* the button that shows or hides the header (header_toggle() in briskin5.js):
+   outside the table, at the left of its top edge; the owl cut out of the
+   logo. On windows narrower than the table and the button it goes out of
+   sight: there the window is also very high, and the header is no matter */
+div.hdr_toggle {
+    position: absolute;
+    right: 100%;
+    margin-right: 4px;
+    top: 0px;
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    border: 1px solid gray;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+}
+
+div.hdr_owl {
+    width: 32px;
+    height: 34px;
+    background-image: url('../img/brisk_logo64.png');
+    background-size: 104px auto;
+    background-position: 0px 0px;
+    background-repeat: no-repeat;
+}
+
+div.hdr_arrow {
+    margin-left: 3px;
+    font-size: 14px;
+    color: #404040;
 }

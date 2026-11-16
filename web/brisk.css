@@ -42,7 +42,10 @@ body {
     align: center;
 }
 
-/* the big logo, once, in the middle of the window; its edges are white.
+/* the big logo, once, centered in the width of the window; in the height
+   the spare space goes one third above it and two thirds below, as for the
+   pages (a percentage places that fraction of the spare space before the
+   image); with no spare space it fills the height. Its edges are white.
    It is a layer fixed to the window behind the page, not the background of
    the body: Safari on iPhone and iPad ignores background-attachment: fixed,
    and the logo would scroll with the page and sit in the middle of all of it */
@@ -56,7 +59,7 @@ body::before {
     z-index: -1;
     pointer-events: none;
     background-image: url('img/brisk-big-bg.jpg');
-    background-position: center center;
+    background-position: center 33.333%;
     background-size: var(--bg-logo-w) auto;
     background-repeat: no-repeat;
 }
@@ -348,4 +351,101 @@ div.apprentice {
     background-color: #ffd780;
     border: 1px solid #ffae00;
     padding: 8px;
+}
+
+/*
+ *  diagnostic area of the room and of the table (watchdog, loaded images,
+ *  ...): hidden at every page load, diag_toggle() (commons.js) shows it
+ */
+div.diagbox {
+    display: none;
+    text-align: left;
+    font-family: monospace;
+    font-size: 80%;
+    padding: 2px 4px;
+    margin: 2px;
+    overflow-wrap: anywhere;
+
+    /* the colors of .webstart_hilite (start, actions, ... menu), background at 50% */
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    background-color: rgba(255, 215, 128, 0.5);   /* #ffd780 */
+    border: 1px solid #ffae00;
+}
+
+div.diagbox.diag_on {
+    display: block;
+}
+
+img.stm_stat {
+    cursor: pointer;
+}
+
+/*
+ *  one-line company details ($G_company_line, company_line_render() in
+ *  brisk.phh) of the login, the room and the table: the last row of the
+ *  grid of the page (room.css, briskin5.css), at the bottom of the window
+ *  when the page fits in it, after the page, reached by scrolling, when
+ *  it does not
+ */
+div.company_line {
+    grid-row: 4;
+    text-align: center;
+    font-size: 80%;
+    padding: 2px 4px 2px 4px;
+}
+
+/* the orange links, without underline: in the login, the room and the
+   table (here from room.css, that the table does not load) */
+a.flat:link {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    text-decoration: none;
+}
+
+a.flat:visited {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    text-decoration: none;
+}
+
+a.flat:hover {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* in the company details the links keep the height of the line (a.flat
+   sets 20px, more than the small text of the details) */
+div.company_line a.flat {
+    line-height: inherit;
+}
+
+/* the header of the room and of the table (header_render() in brisk.phh) */
+div.header {
+    align: center;
+    text-align: center;
+    font-size: 100%;
+    clear:left;
+}
+
+/* holds the chat and its button, placed from its bottom right corner */
+div.chatt_box {
+    position: relative;
+}
+
+/*
+ *  the button that enlarges the chat (chatt_big_toggle() in commons.js): at
+ *  the bottom right of the chat, in the room and at the table, as far
+ *  from its outer edges (7 and 5 pixels, border included) as the "Exit"
+ *  button of the standing players (div.esco) is from theirs; over the
+ *  enlarged chat (z-index: 21 in the room, see briskin5.css for the table)
+ */
+input.chatt_big_btn {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    z-index: 22;
 }

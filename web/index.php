@@ -42,8 +42,6 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Your IP address is banned because trolling activity was detected from it.'),
                      'standing'     => array('it' => 'Giocatori in piedi',
                                              'en' => 'Standing players'),
-                     'headline'     => array('it' => 'briscola chiamata in salsa ajax',
-                                             'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>'),
                      'welcome'      => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola.',
                                              'en' => 'Enter your nickname to access to the tables of briscola.'),
                      'reas_unkn'    => array('it' => 'Logout per motivi sconosciuti.',
@@ -75,6 +73,12 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'back to tables'),
                      'btn_exit'     => array('it' => 'Esco.',
                                              'en' => 'Exit.'),
+                     'btn_chatbig'  => array('it' => 'Espandi.',
+                                             'en' => 'Expand.'),
+                     'btn_chatsmall' => array('it' => 'Riduci.',
+                                             'en' => 'Shrink.'),
+                     'tit_chatbig'  => array('it' => 'ingrandisci o rimpicciolisci la chat',
+                                             'en' => 'enlarge or shrink the chat'),
                      'btn_save' => array('it' => 'Salva.',
                                              'en' => 'Save.'),
                      'btn_reset' => array('it' => 'Annulla.',
@@ -605,43 +609,44 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                                          'url' => 'http://www.alternativeoutput.it',
                                          'content' => 'img/altout80x15.png',
                                          'content_big' => 'img/logotxt_banner.png'),
-                                 array ( 'id' => 'btn_virtualsky',
-                                         'url' => 'http://virtualsky.alternativeoutput.it',
-                                         'content' => 'img/virtualsky80x15a.gif',
-                                         'content_big' => 'img/virtualsky_big.png'),
+                                 // array ( 'id' => 'btn_virtualsky',
+                                 //         'url' => 'http://virtualsky.alternativeoutput.it',
+                                 //         'content' => 'img/virtualsky80x15a.gif',
+                                 //         'content_big' => 'img/virtualsky_big.png'),
                                  array ( 'id' => 'btn_dynamica',
                                          'url' => 'http://www.dynamica.it',
                                          'content' => 'img/dynamica.png',
                                          'content_big' => 'img/dynamica_big.png')
                                  );
 
-    $altout_support_arr = array( array ( 'id' => 'btn_brichi',
-                                         'url' => 'http://www.briscolachiamata.it',
-                                         'content' => 'img/brichi.png',
-                                         'content_big' => 'img/brichi_big.png'),
-                                 array ( 'id' => 'btn_foroli',
-                                         'url' => 'http://www.forumolimpia.it',
-                                         'content' => 'img/forumolimpia.gif',
-                                         'content_big' => 'img/forumolimpia_big.png' ),
-                                 array ( 'id'=> 'btn_niini',
-                                         'url' => 'http://www.niinivirta.it',
-                                         'content' => 'img/niinivirta.png',
-                                         'content_big' => 'img/niinivirta_big.png') );
+    $altout_support_arr = array();
+    // $altout_support_arr = array( array ( 'id' => 'btn_brichi',
+    //                                      'url' => 'http://www.briscolachiamata.it',
+    //                                      'content' => 'img/brichi.png',
+    //                                      'content_big' => 'img/brichi_big.png'),
+    //                              array ( 'id' => 'btn_foroli',
+    //                                      'url' => 'http://www.forumolimpia.it',
+    //                                      'content' => 'img/forumolimpia.gif',
+    //                                      'content_big' => 'img/forumolimpia_big.png' ),
+    //                              array ( 'id'=> 'btn_niini',
+    //                                      'url' => 'http://www.niinivirta.it',
+    //                                      'content' => 'img/niinivirta.png',
+    //                                      'content_big' => 'img/niinivirta_big.png') );
 
 
 
     $altout_support = "";
     $altout_support_big = "";
-    for ($i = 0 ; $i < 4 ; $i++) {
-        $ii = ($i < 3 ? $i : 0);
+    // for ($i = 0 ; $i < 4 ; $i++) {
+    //     $ii = ($i < 3 ? $i : 0);
 
-        $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
-                                   $i * 20, $altout_support_arr[$ii]['url'],
-                                   $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
+    //     $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
+    //                                $i * 20, $altout_support_arr[$ii]['url'],
+    //                                $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
 
-        $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
-                                       $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
-    }
+    //     $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
+    //                                    $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
+    // }
 
 
     // seed with microseconds since last "whole" second
@@ -649,8 +654,8 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     // $randval = rand(0,count($altout_sponsor_arr)-1);
     $altout_sponsor = "";
     $altout_sponsor_big = "";
-    for ($i = 0 ; $i < 4 ; $i++) {
-        $ii = ($i < 3 ? $i : 0);
+    for ($i = 0 ; $i < 3 ; $i++) {
+        $ii = ($i < 2 ? $i : 0);
 
         $altout_sponsor .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
                                    $i * 20, $altout_sponsor_arr[$ii]['url'],
@@ -677,70 +682,8 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
         $brisk_donate = "";
 
 
-    /* MLANG: "briscola chiamata in salsa ajax", */
-
     mt_srand(make_seed());
-    if (!$G_is_local && $_cookie_law_3party == 'true') {
-        $rn = rand(0, 1);
-
-        if ($rn == 0) {
-            $banner_top_left = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
-            $banner_top_right = carousel_top();
-        }
-        else {
-            $banner_top_left = carousel_top();
-            $banner_top_right = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
-        }
-    }
-    else { // !$G_is_local
-        $banner_top_left  = carousel_top();
-        $banner_top_right = carousel_top();
-    }
-
-    $brisk_header_form = '<div class="container">
-<!-- =========== header ===========  -->
-<div id="header" class="header">
-<table width="100%%" style="min-height: 84px;" border="0" cols="3"><tr>
-<td style="width: 33%%;" align="left"><div style="padding-left: 8px;">'.$banner_top_left.'</div></td>
-<td style="width: 34%%;" align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
- <img class="nobo" src="img/brisk_logo64.png">'
-/*    <img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao Prof" alt="ciao Prof">' */
-    .$mlang_room['headline'][$G_lang].'<br>
-    </div>'.( ($G_with_topbanner || $G_with_donors) ? sprintf('</td><td>%s</td></tr></table>',
-                                                                ($G_with_topbanner ? $G_topbanner :
-"<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>
-<td style="width: 33%%;" align="right"><div style="padding-right: 8px;">'.$banner_top_right.'</div></td>
-</tr></table>
-</div>';
-// <td style="width: 33%%;" align="right">'.$banner_top_right.'</td>
+    $brisk_header_form = '<div class="container">'."\n".header_render('', $_cookie_law_3party);
 
     /* MLANG: ALL THE VERTICAL MENU */
     $brisk_vertical_menu = '
@@ -1043,6 +986,8 @@ sponsored by:<br>
 '.$altout_sponsor_big.'
 </div>
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+<!--
+
 supported by:<br>
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 4px; font-size: 1px;"></div>
 <div id="supp_caro" style="overflow: hidden; height: 18px; /* border: 1px solid red; */">
@@ -1053,6 +998,8 @@ supported by:<br>
 <div style="position: absolute;">
 '.$altout_support_big.'
 </div>
+
+-->
 <a style="/* position: absolute; top: 40px; left: 6px; */" target="_blank" href="https://www.facebook.com/groups/59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
 ' . ( /* NOTE: here facebook or fake facebook */
 (!$G_is_local && $_cookie_law_3party == 'true') ?
@@ -1147,7 +1094,7 @@ window.onload = function() {
         if (!$G_is_local && $_cookie_law_3party == 'true') {
 ?>
 <!-- if myconsole <body onunload="deconsole();"> -->
-<body xmlns:fb="http://ogp.me/ns/fb#">
+<body class="login" xmlns:fb="http://ogp.me/ns/fb#">
 <div id="fb-root"></div>
 <script type="text/javascript"><!--
 (function(d, s, id) {
@@ -1161,10 +1108,10 @@ window.onload = function() {
         }
         else {
 ?>
-<body>
+<body class="login">
 <?php
         }
-        printf($brisk_header_form);
+        echo $brisk_header_form;
         printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
         printf($brisk_vertical_menu, '', $brisk_donate);
 
@@ -1203,22 +1150,16 @@ window.onload = function() {
 <?php echo $mlang_room['browwarn'][$G_lang];?><br>
     </div>
 
-    <div id="imgct"></div>
-    <div id="logz"></div>
-    <div id="sandbox"></div>
-    <div id="sandbox2"></div>
-    <div id="response"></div>
-    <div id="xhrstart"></div>
-    <pre>
-    <div id="xhrlog"></div>
-    </pre>
-    <div id="xhrdeltalog"></div>
+</td></tr></table>
+</div>
 
 <script language="JavaScript">
 <!--
 cookie_law(null);
 // -->
 </script>
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php
@@ -1351,7 +1292,7 @@ cookie_law(null);
 <body class="room">
 <?php
     }
-    printf($brisk_header_form);
+    echo $brisk_header_form;
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
     printf($brisk_vertical_menu, '', $brisk_donate);
 
@@ -1371,7 +1312,11 @@ cookie_law(null);
 <!--  =========== bottom ===========  -->
 <div id="bottom" class="bottom">
 <b>Chat</b> <span id="list_info" style="color: red;"></span><br>
-<div id="txt" class="chatt" ondblclick="chatt_big_toggle(this);">
+<!-- the chat, and at its bottom right the button that enlarges it (chatt_big_toggle() in commons.js) -->
+<div class="chatt_box">
+<div id="txt" class="chatt">
+</div>
+<input id="chatt_big_btn" class="button chatt_big_btn" type="button" value="<?php echo $mlang_room['btn_chatbig'][$G_lang];?>" data-big="<?php echo $mlang_room['btn_chatbig'][$G_lang];?>" data-small="<?php echo $mlang_room['btn_chatsmall'][$G_lang];?>" title="<?php echo $mlang_room['tit_chatbig'][$G_lang];?>" onclick="chatt_big_toggle($('txt'));">
 </div>
 <div style="text-align: center; ">
     <!-- MLANG: scrivi un invito al tavolo e clicca -->
@@ -1433,6 +1378,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
      shown by a click on the connection status icon or by the /diag chat command -->
 <div id="diagbox" class="diagbox">
+<div id="winsize"></div>
 <div id="heartbit"></div>
 <div id="sandbox"></div>
 <div id="imgct"></div>
@@ -1444,11 +1390,6 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
 </div>
-<?php
-    if (isset($G_company_line) && $G_company_line != '') {
-        printf('<div class="company_line">%s</div>', $G_company_line);
-    }
-?>
 </div>
 
 <div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">
@@ -1655,6 +1596,8 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 cookie_law(null);
 // -->
 </script>
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php

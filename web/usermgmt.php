@@ -242,7 +242,7 @@ SELECT usr.*, guar.login AS guar_login
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
 
-                    if (brisk_mail($usr_obj->email, 'Utente Brisk {$usr_obj->login}', $subj, $body_txt, $body_htm) == FALSE) {
+                    if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                         // mail error
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
@@ -440,7 +440,7 @@ SELECT mail.*, usr.email AS email, user.login AS login
                     $mai_obj = pg_fetch_object($mai_pg, 0);
                     $mail = MailDBItem::MailDBItemFromRecord($mai_obj);
 
-                    if (brisk_mail($mai_obj->email, 'Utente Brisk {$mai_obj->login}', $mail->subj, $mail->body_txt, $mail->body_htm) == FALSE) {
+                    if (brisk_mail($mai_obj->email, "Utente Brisk {$mai_obj->login}", $mail->subj, $mail->body_txt, $mail->body_htm) == FALSE) {
                         // mail error
                         $status .= sprintf("Send mail filed for user id %d<br>\n", $id);
                         break;
@@ -614,7 +614,7 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($usr_obj
                 log_step(sprintf("[%s], [%s], [%s], [%s]\n", $usr_obj->email, $subj, $body_txt, $body_htm));
 
 
-                if (brisk_mail($usr_obj->email, 'Utente Brisk {$usr_obj->login}', $subj, $body_txt, $body_htm) == FALSE) {
+                if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
                     break;
@@ -702,7 +702,7 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($nick_pa
                     }
 
                     // FIXME: add to index_wr.php strings
-                    $subj = "Brisk: nickname rifiutato";
+                    $subj = sprintf("Brisk: nickname %s rifiutato", $usr_obj->login);
                     // the same for both cases:
                     //  if (($usr_obj->type & USER_FLAG_TY_APPR) == USER_FLAG_TY_APPR) {
                         $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.

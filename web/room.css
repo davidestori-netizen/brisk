@@ -21,24 +21,7 @@
  *
  */
 
-a.flat:link {
-    color: RGB(255, 174,0);
-    line-height: 20px;
-    text-decoration: none;
-}
-
-a.flat:visited {
-    color: RGB(255, 174,0);
-    line-height: 20px;
-    text-decoration: none;
-}
-
-a.flat:hover {
-    color: RGB(255, 174,0);
-    line-height: 20px;
-    font-weight: bold;
-    text-decoration: none;
-}
+/* a.flat (the orange links) is in brisk.css, for the table too */
 
 
 
@@ -52,13 +35,6 @@ div.container {
     width:100%;
     margin:0px;
     padding: 0px;
-}
-
-div.header {
-    align: center;
-    text-align: center;
-    font-size: 100%;
-    clear:left;
 }
 
 div.topmenu {
@@ -87,7 +63,10 @@ div.tables {
 
 div.bottom {
     position: relative;
-    top: -13px;
+    /* 13 pixels up, over the bottom of the tables: a margin, not "top",
+       so that the page also ends 13 pixels higher and no empty space is
+       left under the chat */
+    margin-top: -13px;
     align: center:
     text-align: center;
     padding:2px;
@@ -328,19 +307,21 @@ div.esco {
     border: 1px solid gray;
     vertical-align: text-bottom;
 
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
+    /* the lines do not touch the left edge (as the title of the standing
+       players, div.room_tit) */
+    padding-left: 6px;
+
+    /* rounded as the tables and the standing players */
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
 
     /* white at 25% (75% transparent): the big logo of the body shows through */
     background-color: rgba(255, 255, 255, 0.25);
-
-    /* a double tap is a double click, not a zoom of the page */
-    touch-action: manipulation;
 }
 
 /*
- *  the chat enlarged by a double click (chatt_big_toggle() in room.js):
+ *  the chat enlarged by its button (chatt_big_toggle() in commons.js):
  *  four times higher, upwards over the standing players and the tables
  *  (the negative margin keeps its place in the page, so nothing below
  *  moves), opaque so what is behind does not disturb. Over the title and
@@ -392,6 +373,10 @@ div.esco {
     background-color: white;
     left: 80px;
     z-index: 50;
+    /* closed menus take no room: only hidden, the long ones (the meetings)
+       still reached below the window and made the page scroll on the
+       lower ones, the login too (menu_show() and menu_hide() in menu.js) */
+    display: none;
     visibility: hidden;
     border: 1px solid gray;
     text-align: left;
@@ -671,55 +656,19 @@ body.explain h5 {
 }
 
 /*
- *  diagnostic area (watchdog, loaded images, ...): hidden at every page
- *  load, diag_toggle() (commons.js) shows it
+ *  on windows taller than the room (or the login page) the spare space goes
+ *  one third above it and two thirds below, instead of being all below: a
+ *  little high is handier on the mobile devices. The other children of the
+ *  body are popups out of the flow or empty elements, and do not take space
  */
-div.diagbox {
-    display: none;
-    text-align: left;
-    font-family: monospace;
-    font-size: 80%;
-    padding: 2px 4px;
-    margin: 2px;
-    overflow-wrap: anywhere;
-
-    /* the colors of .webstart_hilite (start, actions, ... menu), background at 50% */
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    background-color: rgba(255, 215, 128, 0.5);   /* #ffd780 */
-    border: 1px solid #ffae00;
-}
-
-div.diagbox.diag_on {
-    display: block;
-}
-
-img.stm_stat {
-    cursor: pointer;
-}
-
-/* one-line company details at the bottom of the room ($G_company_line) */
-div.company_line {
-    text-align: center;
-    font-size: 80%;
-    padding: 0px 4px 2px 4px;
-}
-
-/*
- *  on windows taller than the room the spare space goes one third above
- *  it and two thirds below, instead of being all below: a little high is
- *  handier on the mobile devices. The other children of the body are
- *  popups out of the flow or empty elements, and do not take space
- */
-body.room {
+body.room, body.login {
     display: grid;
-    grid-template-rows: 1fr auto 2fr;
+    grid-template-rows: 1fr auto 2fr auto;
     grid-template-columns: minmax(0, 1fr);
     min-height: 100vh;
     min-height: 100dvh;
 }
 
-body.room > div.container {
+body.room > div.container, body.login > div.container {
     grid-row: 2;
 }
