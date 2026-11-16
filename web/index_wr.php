@@ -229,7 +229,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
         }
         else if ($argz[0] == 'roadmap') {
-            echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
+            echo show_notify(roadmap_get($G_lang), 0, $mlang_indwr['btn_close'][$G_lang], 500, 340);
         }
         else if ($argz[0] == 'placing') {
             require_once("briskin5/Obj/briskin5.phh");
@@ -801,7 +801,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         }
         else if ($argz[0] == 'roadmap') {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+            $user->comm[$user->step % COMM_N] .=  show_notify(roadmap_get($G_lang), 0, $mlang_indwr['btn_backtotab'][$G_lang], 500, 340);
 
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();
