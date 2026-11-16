@@ -63,7 +63,10 @@ div.tables {
 
 div.bottom {
     position: relative;
-    top: -13px;
+    /* 13 pixels up, over the bottom of the tables: a margin, not "top",
+       so that the page also ends 13 pixels higher and no empty space is
+       left under the chat */
+    margin-top: -13px;
     align: center:
     text-align: center;
     padding:2px;
