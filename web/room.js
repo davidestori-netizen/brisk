@@ -839,6 +839,10 @@ sideslide.prototype = {
     start: function() {
         var instant = this;
 
+        /* no carousel in the page (the "supported by" one is commented out
+           in index.php): nothing to scroll, the timers are not started */
+        if (this.domobj == null)
+            return;
         this.st = 'wait';
         this.id = setTimeout(function () { instant.sideslide_cb(); }, this.twait);
     },
