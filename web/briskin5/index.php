@@ -41,6 +41,16 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
                                                    'en' => 'Out'),
                            'tit_pref'    => array( 'it' => 'Prefs',
                                                    'en' => 'Prefs'),
+                           'tit_diag'    => array( 'it' => 'stato della connessione: clicca per mostrare o nascondere la diagnostica (anche col comando /diag in chat)',
+                                                   'en' => 'connection status: click to show or hide the diagnostics (also with the /diag chat command)'),
+                           'btn_chatbig' => array( 'it' => 'Espandi.',
+                                                   'en' => 'Expand.'),
+                           'btn_chatsmall' => array( 'it' => 'Riduci.',
+                                                   'en' => 'Shrink.'),
+                           'tit_chatbig' => array( 'it' => 'ingrandisci o rimpicciolisci la chat',
+                                                   'en' => 'enlarge or shrink the chat'),
+                           'tit_hdr'     => array( 'it' => 'mostra o nascondi l\'intestazione della pagina',
+                                                   'en' => 'show or hide the header of the page'),
                            'itm_ringauc' => array('it' => 'riproduci un suono di notifica alla fine dell\' asta',
                                                   'en' => 'play a sound at the end of the auction'),
                            'btn_update'  => array('it' => 'Aggiorna.',
@@ -50,7 +60,7 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
 
 function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post, $cookie)
 {
-    GLOBAL $G_lang, $mlang_bin5_index;
+    GLOBAL $G_lang, $mlang_bin5_index, $G_company_line;
 
     $transp_port = ((array_key_exists("X-Forwarded-Proto", $header) &&
                      $header["X-Forwarded-Proto"] == "https") ? 443 : 80);
@@ -65,6 +75,9 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
     fprintf(STDERR, "PREF_DECK SET %s", (isset($cookie['CO_bin5_pref_deck']) ? "YES" : "NO"));
 
     $deck = (isset($cookie['CO_bin5_pref_deck']) ? $cookie['CO_bin5_pref_deck'] : 'xx');
+
+    /* the choice of the user about the third party cookies, as in the room */
+    $_cookie_law_3party = (isset($cookie['_cookie_law_3party']) ? $cookie['_cookie_law_3party'] : 'true');
 
     /* All four come from the request and are written into the page, in
        the html and in the javascript, and the page is served to anybody:
@@ -155,6 +168,13 @@ window.onload = function() {
 
   xstm.start();
 
+  /* the header as the user left it for this orientation of the window, then
+     scale the page down when the window is lower than the table and the chat,
+     or narrower than the table */
+  header_init();
+  table_fit();
+  addEvent(window, "resize", table_fit);
+
   addEvent($('select_rules'), "change", function() { act_select_rules(this.value); } );
   addEvent($('select_deck'), "change", function() { act_select_deck(this.value); } );
   // FIXME: add this setTimeout(preload_images into data stream to avoid
@@ -163,10 +183,16 @@ window.onload = function() {
 }
 </script>
 </head>
-<body>
+<body class="table">
+<!-- header, table and chat: one block, so that the spare height of the window
+     can be shared above and below it (briskin5.css) -->
+<div class="table_page">
+<?php echo header_render('../', $_cookie_law_3party); ?>
 <div id="bg" class="area">
 
 <div id="remark" class="remark0"></div>
+<!-- the owl of the logo and an arrow: shows or hides the header (header_toggle() in briskin5.js) -->
+<div id="hdr_toggle" class="hdr_toggle" title="<?php echo $mlang_bin5_index['tit_hdr'][$G_lang]; ?>" onclick="header_toggle();"><div class="hdr_owl"></div><div id="hdr_arrow" class="hdr_arrow">&#9660;</div></div>
 <img id="card0" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
 <img id="card1" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
 <img id="card2" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
@@ -297,7 +323,7 @@ window.onload = function() {
 <td style="text-align: center;"><input type="button" class="button" name="xreload"  value="<?php echo $mlang_bin5_index['tit_relo'][$G_lang]; ?>" onclick="act_reload();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xout"  value="<?php echo $mlang_bin5_index['tit_out'][$G_lang]; ?>" onclick="safelogout();"></td>
 </tr><tr>
-<td style="text-align: center;"><img id="stm_stat" class="nobo" src="img/line-status_b.png"></td>
+<td style="text-align: center;"><img id="stm_stat" class="nobo stm_stat" src="img/line-status_b.png" title="<?php echo $mlang_bin5_index['tit_diag'][$G_lang]; ?>" onclick="diag_toggle();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xpref"  value="<?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?>" onclick="preferences_showhide();"></td>
 </td>
 <td style="text-align: center;"><img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"></td>
@@ -318,26 +344,31 @@ window.onload = function() {
 
 
 <div class="subarea">
+<!-- the chat, and at its bottom right the button that enlarges it (chatt_big_toggle() in commons.js) -->
+<div class="chatt_box">
 <div id="txt" class="chattshort"></div>
+<input id="chatt_big_btn" class="button chatt_big_btn" type="button" value="<?php echo $mlang_bin5_index['btn_chatbig'][$G_lang];?>" data-big="<?php echo $mlang_bin5_index['btn_chatbig'][$G_lang];?>" data-small="<?php echo $mlang_bin5_index['btn_chatsmall'][$G_lang];?>" title="<?php echo $mlang_bin5_index['tit_chatbig'][$G_lang];?>" onclick="chatt_big_toggle($('txt'));">
+</div>
     <table class="chattshort_table"><tr><td style="width:1%; text-align: right;">
     <div id="myname"></div>
     </td><td>
     <input id="txt_in" maxlength="128" type="text" autocomplete="off" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 
-<div id="flasou" style="text-align: left;"></div>
-<hr>
-<div id="heartbit" style="text-align: left;"></div>
-<hr>
-<div id="imgct" style="text-align: left;">HERE</div>
-<hr>
-<div id="sandbox" style="text-align: left;"></div>
-<div id="sandbox2" style="text-align: left;"></div>
-<div id="sandbox3" style="text-align: left;"></div>
-<pre>
-<div id="xhrlog" style="text-align: left;"></div>
-</pre>
-<div id="xhrdeltalog" style="text-align: left;"></div>
+<!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
+     shown by a click on the connection status icon or by the /diag chat command -->
+<div id="diagbox" class="diagbox">
+<div id="winsize"></div>
+<div id="heartbit"></div>
+<div id="flasou"></div>
+<div id="imgct"></div>
+<div id="sandbox"></div>
+<div id="sandbox2"></div>
+<div id="sandbox3"></div>
+<div id="xhrlog"></div>
+<div id="xhrdeltalog"></div>
+</div>
+</div>
 </div>
 
 <div id="preferences" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 200px; top: 126px; visibility: hidden;">
@@ -357,8 +388,11 @@ window.onload = function() {
 </div>
 <div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="act_preferences_update();" value="<?php echo $mlang_bin5_index['btn_update'][$G_lang]; ?>"/></div>
 </div>
+</div><!-- #preferences: it was never closed, and what came after it was hidden with it -->
 
 
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php

@@ -388,6 +388,39 @@ function chatt_checksend(obj,e)
     }
 }
 /*
+ *  the size of the window the page is drawn in, with what depends on it at
+ *  the table (scale of the page, header), in the diagnostic area: written
+ *  when the area is shown, not kept up to date while it stays open
+ */
+function diag_winsize()
+{
+    var div = $("winsize");
+    var portrait, txt, header, choice = null;
+
+    if (div == null)
+        return;
+    portrait = (window.matchMedia ? window.matchMedia("(orientation: portrait)").matches
+                : (window.innerHeight > window.innerWidth));
+    txt = "window: " + window.innerWidth + " x " + window.innerHeight
+        + " (" + (portrait ? "portrait" : "landscape") + ")"
+        + ", screen: " + screen.width + " x " + screen.height
+        + ", dpr: " + (window.devicePixelRatio || 1);
+    if (typeof(g_table_scale) != 'undefined')
+        txt += ", scale: " + Math.round(g_table_scale * 1000) / 1000;
+    if (typeof(header_key) == 'function' && (header = $("header")) != null) {
+        try {
+            choice = localStorage.getItem(header_key());
+        }
+        catch (e) { }
+        txt += ", header: " + (header.style.display == "none" ? "hidden" : "shown")
+            + " (" + (choice == "1" || choice == "0" ? "chosen" :
+                      "default, " + (typeof(HEADER_MIN_WIN_H) != 'undefined' ? HEADER_MIN_WIN_H : "?")
+                      + " px rule") + ")";
+    }
+    div.textContent = txt;
+}
+
+/*
  *  show or hide the diagnostic area of the room (watchdog, loaded images, ...);
  *  the traffic line is drawn only while the area is shown
  */
@@ -405,6 +438,7 @@ function diag_toggle()
     else {
         box.className += " diag_on";
         shown = true;
+        diag_winsize();
     }
     if (typeof(xstm) != 'undefined' && xstm != null && typeof(xstm.hlog_set) == 'function'
         && typeof(heartbit_line) == 'function') {
@@ -417,6 +451,31 @@ function diag_toggle()
         }
     }
     return true;
+}
+
+/*
+ *  the button at the bottom right of the chat, in the room and at the
+ *  table, makes it four times higher, upwards and opaque, another click
+ *  brings it back (.chatt_big in room.css and briskin5.css); the label of
+ *  the button says what the next click does (data-big and data-small, in
+ *  the language of the page)
+ */
+function chatt_big_toggle(box)
+{
+    var btn = $("chatt_big_btn");
+    var is_big;
+
+    if (box.className.match(/\bchatt_big\b/)) {
+        box.className = box.className.replace(/\s*\bchatt_big\b/, "");
+        is_big = false;
+    }
+    else {
+        box.className += " chatt_big";
+        is_big = true;
+    }
+    if (btn)
+        btn.value = btn.getAttribute(is_big ? "data-small" : "data-big");
+    box.scrollTop = box.scrollHeight;
 }
 
 function act_chatt(value)

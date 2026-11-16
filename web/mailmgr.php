@@ -96,7 +96,7 @@ function main() {
                 isc_page_activated(($usr_rec->nick_req != "" ? $usr_rec->nick_req : $usr_rec->login));
             }
             else {
-                singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Riceverai a breve una email con la tua nuova password.<br>Benvenuto!");
+                singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Se il tuo nickname passerà il vaglio dei moderatori<br>riceverai una email con la password per accedere al sito.<br>Benvenuto!");
             }
             $errcode = 0;
         } while (FALSE);

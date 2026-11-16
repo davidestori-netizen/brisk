@@ -839,6 +839,10 @@ sideslide.prototype = {
     start: function() {
         var instant = this;
 
+        /* no carousel in the page (the "supported by" one is commented out
+           in index.php): nothing to scroll, the timers are not started */
+        if (this.domobj == null)
+            return;
         this.st = 'wait';
         this.id = setTimeout(function () { instant.sideslide_cb(); }, this.twait);
     },
@@ -875,26 +879,6 @@ sideslide.prototype = {
     }
 
 }
-
-/*
- *  a double click on the chat makes it four times higher, upwards and
- *  opaque, another one brings it back (.chatt_big in room.css); the
- *  double click selects a word too: the selection is dropped
- */
-function chatt_big_toggle(box)
-{
-    if (box.className.match(/\bchatt_big\b/)) {
-        box.className = box.className.replace(/\s*\bchatt_big\b/, "");
-    }
-    else {
-        box.className += " chatt_big";
-    }
-    if (window.getSelection) {
-        window.getSelection().removeAllRanges();
-    }
-    box.scrollTop = box.scrollHeight;
-}
-
 
 /* easy signup (iscriviti.php): the nickname given in the link (index.php?n=nick) is
    written in the login form, and at the first entry with a temporary nickname a
