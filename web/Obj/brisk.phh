@@ -3655,15 +3655,19 @@ $mlang_header = array( 'headline' => array('it' => 'briscola chiamata in salsa a
  *  the one-line company details ($G_company_line, HTML allowed) of the
  *  login, the room and the table: the last row of the page, at the bottom
  *  of the window when the page fits in it (div.company_line in brisk.css).
- *  Nothing when the line is empty.
+ *  The table has its own shorter version, $G_company_line_table, when it
+ *  is set and not empty. Nothing when the line is empty.
  */
-function company_line_render()
+function company_line_render($is_table = FALSE)
 {
-    GLOBAL $G_company_line;
+    GLOBAL $G_company_line, $G_company_line_table;
 
-    if (!isset($G_company_line) || $G_company_line == '')
+    $line = (isset($G_company_line) ? $G_company_line : '');
+    if ($is_table && isset($G_company_line_table) && $G_company_line_table != '')
+        $line = $G_company_line_table;
+    if ($line == '')
         return ('');
-    return (sprintf('<div id="company_line" class="company_line">%s</div>', $G_company_line));
+    return (sprintf('<div id="company_line" class="company_line">%s</div>', $line));
 }
 
 /*

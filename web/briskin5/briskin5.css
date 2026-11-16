@@ -601,6 +601,13 @@ body.table > div.table_page {
     grid-row: 2;
 }
 
+/* the company details (company_line_render() in brisk.phh) a couple of
+   lines away from the input of the chat: their links were often clicked
+   by mistake when clicking the input to write */
+body.table div.company_line {
+    margin-top: 3em;
+}
+
 /* the button that shows or hides the header (header_toggle() in briskin5.js):
    outside the table, at the left of its top edge; the owl cut out of the
    logo. On windows narrower than the table and the button it goes out of
