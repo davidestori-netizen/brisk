@@ -22,6 +22,8 @@
  *
  */
 
+date_default_timezone_set('Europe/Rome');
+
 require_once("Obj/user.phh");
 require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
@@ -38,8 +40,6 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Your IP address is banned because trolling activity was detected from it.'),
                      'standing'     => array('it' => 'Giocatori in piedi',
                                              'en' => 'Standing players'),
-                     'headline'     => array('it' => 'briscola chiamata in salsa ajax',
-                                             'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>'),
                      'welcome'      => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola.',
                                              'en' => 'Enter your nickname to access to the tables of briscola.'),
                      'reas_unkn'    => array('it' => 'Logout per motivi sconosciuti.',
@@ -71,6 +71,12 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'back to tables'),
                      'btn_exit'     => array('it' => 'Esco.',
                                              'en' => 'Exit.'),
+                     'btn_chatbig'  => array('it' => 'Espandi.',
+                                             'en' => 'Expand.'),
+                     'btn_chatsmall' => array('it' => 'Riduci.',
+                                             'en' => 'Shrink.'),
+                     'tit_chatbig'  => array('it' => 'ingrandisci o rimpicciolisci la chat',
+                                             'en' => 'enlarge or shrink the chat'),
                      'btn_save' => array('it' => 'Salva.',
                                              'en' => 'Save.'),
                      'btn_reset' => array('it' => 'Annulla.',
@@ -120,6 +126,8 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
 
                      'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
                                              'en' => 'write an invitation at the table and click'),
+                     'tit_diag'     => array('it' => 'stato della connessione: clicca per mostrare o nascondere la diagnostica (anche col comando /diag in chat)',
+                                             'en' => 'connection status: click to show or hide the diagnostics (also with the /diag chat command)'),
                      'itm_warr'     => array('it' => 'garantisci',
                                              'en' => 'guarantee'),
                      'warr_desc'    => array('it' => 'garantisci per un tuo conoscente',
@@ -356,9 +364,18 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
     GLOBAL $G_sidebanner, $G_sidebanner_idx;
-    GLOBAL $G_with_poll;
+    GLOBAL $G_with_poll, $G_company_line;
     GLOBAL $G_lang, $G_lng, $mlang_room;
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER, $_COOKIE;
+    GLOBAL $G_base;
+
+    /* custom.js is optional: it holds the customisations of the single site
+       and may not be distributed. The hook it uses (custom_bedge) is already
+       guarded in room.js, but without this check the browser would ask for a
+       file that does not exist on every page. */
+    $custom_js = (file_exists($G_base."custom.js") ?
+                  sprintf('<script type="text/javascript" src="custom.js?v=%s"></script>',
+                          BSK_BUSTING) : "");
 
     $transp_port = ((array_key_exists("X-Forwarded-Proto", $header) &&
                      $header["X-Forwarded-Proto"] == "https") ? 443 : 80);
@@ -440,8 +457,14 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                     log_main("user stat: ".$user->stat);
                     if ($user->stat == "table") {
                         $cookies = new Cookies();
-                        $cookies->add("table_token", $user->table_token, $curtime + 31536000);
-                        $cookies->add("table_idx", $user->table, $curtime + 31536000);
+                        $cookies->add("table_token", $user->table_token, $curtime + 31536000, SITE_PREFIX);
+                        $cookies->add("table_idx", $user->table, $curtime + 31536000, SITE_PREFIX);
+                        /* drop the copies written by older versions without a Path, under the
+                           default path "/brisk": the browser would send them after these ones */
+                        if (SITE_PREFIX != "/") {
+                            $cookies->add("table_token", "deleted", 1, rtrim(SITE_PREFIX, "/"));
+                            $cookies->add("table_idx", "deleted", 1, rtrim(SITE_PREFIX, "/"));
+                        }
                         $header_out['cookies'] = $cookies;
                         $header_out['Location'] = "briskin5/index.php";
                         return TRUE;
@@ -481,8 +504,14 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                 // recovery lost game
                 if ($user->stat == "table") {
                     $cookies = new Cookies();
-                    $cookies->add("table_token", $user->table_token, $curtime + 31536000);
-                    $cookies->add("table_idx", $user->table, $curtime + 31536000);
+                    $cookies->add("table_token", $user->table_token, $curtime + 31536000, SITE_PREFIX);
+                    $cookies->add("table_idx", $user->table, $curtime + 31536000, SITE_PREFIX);
+                    /* drop the copies written by older versions without a Path, under the
+                       default path "/brisk": the browser would send them after these ones */
+                    if (SITE_PREFIX != "/") {
+                        $cookies->add("table_token", "deleted", 1, rtrim(SITE_PREFIX, "/"));
+                        $cookies->add("table_idx", "deleted", 1, rtrim(SITE_PREFIX, "/"));
+                    }
                     $header_out['cookies'] = $cookies;
                     $header_out['Location'] = "briskin5/index.php";
                     return TRUE;
@@ -573,43 +602,44 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                                          'url' => 'http://www.alternativeoutput.it',
                                          'content' => 'img/altout80x15.png',
                                          'content_big' => 'img/logotxt_banner.png'),
-                                 array ( 'id' => 'btn_virtualsky',
-                                         'url' => 'http://virtualsky.alternativeoutput.it',
-                                         'content' => 'img/virtualsky80x15a.gif',
-                                         'content_big' => 'img/virtualsky_big.png'),
+                                 // array ( 'id' => 'btn_virtualsky',
+                                 //         'url' => 'http://virtualsky.alternativeoutput.it',
+                                 //         'content' => 'img/virtualsky80x15a.gif',
+                                 //         'content_big' => 'img/virtualsky_big.png'),
                                  array ( 'id' => 'btn_dynamica',
                                          'url' => 'http://www.dynamica.it',
                                          'content' => 'img/dynamica.png',
                                          'content_big' => 'img/dynamica_big.png')
                                  );
 
-    $altout_support_arr = array( array ( 'id' => 'btn_brichi',
-                                         'url' => 'http://www.briscolachiamata.it',
-                                         'content' => 'img/brichi.png',
-                                         'content_big' => 'img/brichi_big.png'),
-                                 array ( 'id' => 'btn_foroli',
-                                         'url' => 'http://www.forumolimpia.it',
-                                         'content' => 'img/forumolimpia.gif',
-                                         'content_big' => 'img/forumolimpia_big.png' ),
-                                 array ( 'id'=> 'btn_niini',
-                                         'url' => 'http://www.niinivirta.it',
-                                         'content' => 'img/niinivirta.png',
-                                         'content_big' => 'img/niinivirta_big.png') );
+    $altout_support_arr = array();
+    // $altout_support_arr = array( array ( 'id' => 'btn_brichi',
+    //                                      'url' => 'http://www.briscolachiamata.it',
+    //                                      'content' => 'img/brichi.png',
+    //                                      'content_big' => 'img/brichi_big.png'),
+    //                              array ( 'id' => 'btn_foroli',
+    //                                      'url' => 'http://www.forumolimpia.it',
+    //                                      'content' => 'img/forumolimpia.gif',
+    //                                      'content_big' => 'img/forumolimpia_big.png' ),
+    //                              array ( 'id'=> 'btn_niini',
+    //                                      'url' => 'http://www.niinivirta.it',
+    //                                      'content' => 'img/niinivirta.png',
+    //                                      'content_big' => 'img/niinivirta_big.png') );
 
 
 
     $altout_support = "";
     $altout_support_big = "";
-    for ($i = 0 ; $i < 4 ; $i++) {
-        $ii = ($i < 3 ? $i : 0);
+    // for ($i = 0 ; $i < 4 ; $i++) {
+    //     $ii = ($i < 3 ? $i : 0);
 
-        $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
-                                   $i * 20, $altout_support_arr[$ii]['url'],
-                                   $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
+    //     $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
+    //                                $i * 20, $altout_support_arr[$ii]['url'],
+    //                                $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
 
-        $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
-                                       $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
-    }
+    //     $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
+    //                                    $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
+    // }
 
 
     // seed with microseconds since last "whole" second
@@ -617,8 +647,8 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     // $randval = rand(0,count($altout_sponsor_arr)-1);
     $altout_sponsor = "";
     $altout_sponsor_big = "";
-    for ($i = 0 ; $i < 4 ; $i++) {
-        $ii = ($i < 3 ? $i : 0);
+    for ($i = 0 ; $i < 3 ; $i++) {
+        $ii = ($i < 2 ? $i : 0);
 
         $altout_sponsor .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>'."\n",
                                    $i * 20, $altout_sponsor_arr[$ii]['url'],
@@ -631,8 +661,13 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
 
 
     /* NOTE: Brisk donate or donate fake if local */
-    if (!$G_is_local)
-        $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
+    if (!$G_is_local) {
+        /* the file is optional, and an installation with no donation button
+           must not write a warning in the log on every page */
+        $brisk_donate_path = FTOK_PATH."/brisk_donate.txt";
+        $brisk_donate = (file_exists($brisk_donate_path) ?
+                         file_get_contents($brisk_donate_path) : FALSE);
+    }
     else
         $brisk_donate = '<div style="background-color: #ff0; height: 27px; margin-top: 4px;">BRISK_DONATE</div>';
 
@@ -640,70 +675,8 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
         $brisk_donate = "";
 
 
-    /* MLANG: "briscola chiamata in salsa ajax", */
-
     mt_srand(make_seed());
-    if (!$G_is_local && $_cookie_law_3party == 'true') {
-        $rn = rand(0, 1);
-
-        if ($rn == 0) {
-            $banner_top_left = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
-            $banner_top_right = carousel_top();
-        }
-        else {
-            $banner_top_left = carousel_top();
-            $banner_top_right = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
-        }
-    }
-    else { // !$G_is_local
-        $banner_top_left  = carousel_top();
-        $banner_top_right = carousel_top();
-    }
-
-    $brisk_header_form = '<div class="container">
-<!-- =========== header ===========  -->
-<div id="header" class="header">
-<table width="100%%" style="min-height: 84px;" border="0" cols="3"><tr>
-<td style="width: 33%%;" align="left"><div style="padding-left: 8px;">'.$banner_top_left.'</div></td>
-<td style="width: 34%%;" align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
- <img class="nobo" src="img/brisk_logo64.png">'
-/*    <img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao Prof" alt="ciao Prof">' */
-    .$mlang_room['headline'][$G_lang].'<br>
-    </div>'.( ($G_with_topbanner || $G_with_donors) ? sprintf('</td><td>%s</td></tr></table>',
-                                                                ($G_with_topbanner ? $G_topbanner :
-"<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>
-<td style="width: 33%%;" align="right"><div style="padding-right: 8px;">'.$banner_top_right.'</div></td>
-</tr></table>
-</div>';
-// <td style="width: 33%%;" align="right">'.$banner_top_right.'</td>
+    $brisk_header_form = '<div class="container">'."\n".header_render('', $_cookie_law_3party);
 
     /* MLANG: ALL THE VERTICAL MENU */
     $brisk_vertical_menu = '
@@ -983,9 +956,15 @@ google_color_url = "000000";
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 '.($user->flags & USER_FLAG_AUTH ? '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_signal'.langtolng($G_lang).'.png" title="'.$mlang_room['tit_mesg'][$G_lang].'" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.poll_dom()
- : '
+ : ''
+/* "password" button (how to get a password) for the users who come in
+   without one: disabled for now, it will be reactivated later by putting
+   this string in place of the '' above
+ '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_password.png" title="Come ottenere una password su Brisk." onmouseover="menu_hide(0,0);" onclick="act_passwdhowto();">
-').'
+'
+*/
+).'
 
 ' : '').'
 
@@ -1000,6 +979,8 @@ sponsored by:<br>
 '.$altout_sponsor_big.'
 </div>
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+<!--
+
 supported by:<br>
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 4px; font-size: 1px;"></div>
 <div id="supp_caro" style="overflow: hidden; height: 18px; /* border: 1px solid red; */">
@@ -1010,12 +991,14 @@ supported by:<br>
 <div style="position: absolute;">
 '.$altout_support_big.'
 </div>
+
+-->
 <a style="/* position: absolute; top: 40px; left: 6px; */" target="_blank" href="https://www.facebook.com/groups/59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
 ' . ( /* NOTE: here facebook or fake facebook */
 (!$G_is_local && $_cookie_law_3party == 'true') ?
 '<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>
 ' : '' ) . '<div id="proaudioext" class="proaudioext"><div id="proaudio" class="proaudio"></div></div>
-<img id="stm_stat" class="nobo" style="margin-top: 4px;" src="img/line-status_b.png">
+<img id="stm_stat" class="nobo stm_stat" style="margin-top: 4px;" src="img/line-status_b.png" title="'.$mlang_room['tit_diag'][$G_lang].'" onclick="diag_toggle();">
 %s
 %s
 </div>';
@@ -1030,35 +1013,36 @@ supported by:<br>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script type="text/javascript" src="commons.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="fieldify.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="prefs.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="info.js?v=<? echo BSK_BUSTING; ?>"></script>
-<!-- <script type="text/javascript" src="myconsole.js?v=<? echo BSK_BUSTING; ?>"></script> -->
-<script type="text/javascript" src="menu.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="room.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="md5.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="probrowser.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="json2.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="/cookie_law.js?v=<? echo BSK_BUSTING; ?>"></script>
-<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="brisk.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="room.css?v=<? echo BSK_BUSTING; ?>">
+<script type="text/javascript" src="commons.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="fieldify.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="prefs.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="info.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<!-- <script type="text/javascript" src="myconsole.js?v=<?php echo BSK_BUSTING; ?>"></script> -->
+<script type="text/javascript" src="menu.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="heartbit.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<?php echo $custom_js; ?>
+<script type="text/javascript" src="room.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="md5.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="probrowser.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="json2.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="/cookie_law.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="brisk.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="room.css?v=<?php echo BSK_BUSTING; ?>">
 
 <script type="text/javascript"><!--
 var $$ = jQuery.noConflict();
 
 var myname = null;
 var g_debug = 0;
-var g_lang = "<? echo $G_lang; ?>";
-var g_lng = "<? echo $G_lng; ?>";
-var g_tables_n = <? echo TABLES_N; ?>;
-var g_tables_appr_n = <? echo TABLES_APPR_N; ?>;
-var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
-var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
+var g_lang = "<?php echo $G_lang; ?>";
+var g_lng = "<?php echo $G_lng; ?>";
+var g_tables_n = <?php echo TABLES_N; ?>;
+var g_tables_appr_n = <?php echo TABLES_APPR_N; ?>;
+var g_tables_auth_n = <?php echo TABLES_AUTH_N; ?>;
+var g_tables_cert_n = <?php echo TABLES_CERT_N; ?>;
 var g_prefs, g_prefs_new = null;
 var g_jukebox = null;
 var g_is_spawn = 0;
@@ -1103,7 +1087,7 @@ window.onload = function() {
         if (!$G_is_local && $_cookie_law_3party == 'true') {
 ?>
 <!-- if myconsole <body onunload="deconsole();"> -->
-<body xmlns:fb="http://ogp.me/ns/fb#">
+<body class="login" xmlns:fb="http://ogp.me/ns/fb#">
 <div id="fb-root"></div>
 <script type="text/javascript"><!--
 (function(d, s, id) {
@@ -1117,12 +1101,12 @@ window.onload = function() {
         }
         else {
 ?>
-<body>
+<body class="login">
 <?php
         }
-        printf($brisk_header_form);
+        echo $brisk_header_form;
         printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
-        printf($brisk_vertical_menu, '', '');
+        printf($brisk_vertical_menu, '', $brisk_donate);
 
         sidebanners_render($G_sidebanner, $G_sidebanner_idx);
         printf("</td><td>");
@@ -1174,22 +1158,16 @@ window.onload = function() {
 <?php echo $mlang_room['browwarn'][$G_lang];?><br>
     </div>
 
-    <div id="imgct"></div>
-    <div id="logz"></div>
-    <div id="sandbox"></div>
-    <div id="sandbox2"></div>
-    <div id="response"></div>
-    <div id="xhrstart"></div>
-    <pre>
-    <div id="xhrlog"></div>
-    </pre>
-    <div id="xhrdeltalog"></div>
+</td></tr></table>
+</div>
 
 <script language="JavaScript">
 <!--
 cookie_law(null);
 // -->
 </script>
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php
@@ -1203,34 +1181,35 @@ cookie_law(null);
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script type="text/javascript" src="commons.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="fieldify.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="prefs.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="info.js?v=<? echo BSK_BUSTING; ?>"></script>
-<!-- <script type="text/javascript" src="myconsole.js?v=<? echo BSK_BUSTING; ?>"></script> -->
-<script type="text/javascript" src="menu.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="ticker.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="room.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="probrowser.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="json2.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="/cookie_law.js?v=<? echo BSK_BUSTING; ?>"></script>
-<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="brisk.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="room.css?v=<? echo BSK_BUSTING; ?>">
+<script type="text/javascript" src="commons.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="fieldify.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="prefs.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="info.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<!-- <script type="text/javascript" src="myconsole.js?v=<?php echo BSK_BUSTING; ?>"></script> -->
+<script type="text/javascript" src="menu.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="ticker.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="heartbit.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<?php echo $custom_js; ?>
+<script type="text/javascript" src="room.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="probrowser.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="json2.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="/cookie_law.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="brisk.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="room.css?v=<?php echo BSK_BUSTING; ?>">
 <script type="text/javascript"><!--
    var $$ = jQuery.noConflict();
 
    var sess = "not_connected";
    var g_debug = 0;
-   var g_lang = "<? echo $G_lang; ?>";
-   var g_lng = "<? echo $G_lng; ?>";
-   var g_tables_n = <? echo TABLES_N; ?>;
-   var g_tables_appr_n = <? echo TABLES_APPR_N; ?>;
-   var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
-   var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
+   var g_lang = "<?php echo $G_lang; ?>";
+   var g_lng = "<?php echo $G_lng; ?>";
+   var g_tables_n = <?php echo TABLES_N; ?>;
+   var g_tables_appr_n = <?php echo TABLES_APPR_N; ?>;
+   var g_tables_auth_n = <?php echo TABLES_AUTH_N; ?>;
+   var g_tables_cert_n = <?php echo TABLES_CERT_N; ?>;
    var g_prefs, g_prefs_new = null;
    var g_is_spawn = 0;
    var g_jukebox = null;
@@ -1305,7 +1284,7 @@ cookie_law(null);
     if (!$G_is_local && $_cookie_law_3party == 'true') {
 ?>
 <!-- if myconsole <body onunload="deconsole();"> -->
-<body xmlns:fb="http://ogp.me/ns/fb#">
+<body class="room" xmlns:fb="http://ogp.me/ns/fb#">
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
@@ -1318,10 +1297,10 @@ cookie_law(null);
     }
     else {
 ?>
-<body>
+<body class="room">
 <?php
     }
-    printf($brisk_header_form);
+    echo $brisk_header_form;
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
     printf($brisk_vertical_menu, '', $brisk_donate);
 
@@ -1341,14 +1320,18 @@ cookie_law(null);
 <!--  =========== bottom ===========  -->
 <div id="bottom" class="bottom">
 <b>Chat</b> <span id="list_info" style="color: red;"></span><br>
+<!-- the chat, and at its bottom right the button that enlarges it (chatt_big_toggle() in commons.js) -->
+<div class="chatt_box">
 <div id="txt" class="chatt">
+</div>
+<input id="chatt_big_btn" class="button chatt_big_btn" type="button" value="<?php echo $mlang_room['btn_chatbig'][$G_lang];?>" data-big="<?php echo $mlang_room['btn_chatbig'][$G_lang];?>" data-small="<?php echo $mlang_room['btn_chatsmall'][$G_lang];?>" title="<?php echo $mlang_room['tit_chatbig'][$G_lang];?>" onclick="chatt_big_toggle($('txt'));">
 </div>
 <div style="text-align: center; ">
     <!-- MLANG: scrivi un invito al tavolo e clicca -->
     <table style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="<?php echo $mlang_room['tit_ticker'][$G_lang];?>"></td><td style="width:1%; text-align: center;">
     <div id="myname"></div>
     </td><td>
-    <input id="txt_in" maxlength="128" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
+    <input id="txt_in" maxlength="128" type="text" autocomplete="off" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 </div>
 </div>
@@ -1400,6 +1383,10 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </table>
     </form>
     </div>
+<!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
+     shown by a click on the connection status icon or by the /diag chat command -->
+<div id="diagbox" class="diagbox">
+<div id="winsize"></div>
 <div id="heartbit"></div>
 <div id="sandbox"></div>
 <div id="imgct"></div>
@@ -1410,6 +1397,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrstart"></div>
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
+</div>
 </div>
 
 <div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">
@@ -1616,6 +1604,8 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 cookie_law(null);
 // -->
 </script>
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php

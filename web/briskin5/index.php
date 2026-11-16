@@ -22,6 +22,8 @@
  *
  */
 
+date_default_timezone_set('Europe/Rome');
+
 /* MLANG: le img dell'asta */
 
 $G_base = "../";
@@ -39,6 +41,16 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
                                                    'en' => 'Out'),
                            'tit_pref'    => array( 'it' => 'Prefs',
                                                    'en' => 'Prefs'),
+                           'tit_diag'    => array( 'it' => 'stato della connessione: clicca per mostrare o nascondere la diagnostica (anche col comando /diag in chat)',
+                                                   'en' => 'connection status: click to show or hide the diagnostics (also with the /diag chat command)'),
+                           'btn_chatbig' => array( 'it' => 'Espandi.',
+                                                   'en' => 'Expand.'),
+                           'btn_chatsmall' => array( 'it' => 'Riduci.',
+                                                   'en' => 'Shrink.'),
+                           'tit_chatbig' => array( 'it' => 'ingrandisci o rimpicciolisci la chat',
+                                                   'en' => 'enlarge or shrink the chat'),
+                           'tit_hdr'     => array( 'it' => 'mostra o nascondi l\'intestazione della pagina',
+                                                   'en' => 'show or hide the header of the page'),
                            'itm_ringauc' => array('it' => 'riproduci un suono di notifica alla fine dell\' asta',
                                                   'en' => 'play a sound at the end of the auction'),
                            'btn_update'  => array('it' => 'Aggiorna.',
@@ -48,7 +60,7 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
 
 function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post, $cookie)
 {
-    GLOBAL $G_lang, $mlang_bin5_index;
+    GLOBAL $G_lang, $mlang_bin5_index, $G_company_line;
 
     $transp_port = ((array_key_exists("X-Forwarded-Proto", $header) &&
                      $header["X-Forwarded-Proto"] == "https") ? 443 : 80);
@@ -64,6 +76,23 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 
     $deck = (isset($cookie['CO_bin5_pref_deck']) ? $cookie['CO_bin5_pref_deck'] : 'xx');
 
+    /* the choice of the user about the third party cookies, as in the room */
+    $_cookie_law_3party = (isset($cookie['_cookie_law_3party']) ? $cookie['_cookie_law_3party'] : 'true');
+
+    /* All four come from the request and are written into the page, in
+       the html and in the javascript, and the page is served to anybody:
+       written as they came, a link could run its own code in the page of
+       whoever opens it, with the session cookie of brisk at hand. Only
+       what has the expected shape gets in. */
+    if (isset($table_idx))
+        $table_idx = (int)$table_idx;
+    if (isset($laststate))
+        $laststate = (int)$laststate;
+    if (isset($sess) && !preg_match('/^[0-9a-f]{'.SESS_LEN.'}$/', $sess))
+        unset($sess);
+    if (!in_array($deck, deck_keys(), TRUE))
+        $deck = 'xx';
+
 // header('Content-type: text/html; charset="utf-8"',true);
     ?>
 <html>
@@ -71,20 +100,20 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
-<link rel="stylesheet" type="text/css" href="../brisk.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="briskin5.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="cards_<? echo $deck; ?>.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="../brisk.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="briskin5.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="cards_<?php echo $deck; ?>.css?v=<?php echo BSK_BUSTING; ?>">
 <script type="text/javascript">
    var g_deck = "<?php echo "$deck"; ?>";
 </script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script type="text/javascript" src="../commons.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="../heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="../xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="dnd.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="dom-drag.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="briskin5.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="../commons.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="../heartbit.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="../xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="dnd.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="dom-drag.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="briskin5.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript">
    var $$ = jQuery.noConflict();
 
@@ -126,7 +155,7 @@ window.onload = function() {
   preferences_init();
   preferences_update();
 
-  sess = "<?php echo "$sess"; ?>";
+  sess = <?php echo json_encode(isset($sess) ? $sess : ""); ?>;
   xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>, 2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
   xstm.hbit_set(heartbit);
 
@@ -139,6 +168,13 @@ window.onload = function() {
 
   xstm.start();
 
+  /* the header as the user left it for this orientation of the window, then
+     scale the page down when the window is lower than the table and the chat,
+     or narrower than the table */
+  header_init();
+  table_fit();
+  addEvent(window, "resize", table_fit);
+
   addEvent($('select_rules'), "change", function() { act_select_rules(this.value); } );
   addEvent($('select_deck'), "change", function() { act_select_deck(this.value); } );
   // FIXME: add this setTimeout(preload_images into data stream to avoid
@@ -147,55 +183,61 @@ window.onload = function() {
 }
 </script>
 </head>
-<body>
+<body class="table">
+<!-- header, table and chat: one block, so that the spare height of the window
+     can be shared above and below it (briskin5.css) -->
+<div class="table_page">
+<?php echo header_render('../', $_cookie_law_3party); ?>
 <div id="bg" class="area">
 
 <div id="remark" class="remark0"></div>
-<img id="card0" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card1" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card2" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card3" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card4" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card5" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card6" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card7" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="takes" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne0" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne1" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne2" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne3" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne4" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne5" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne6" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne7" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="takes_ne" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw0" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw1" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw2" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw3" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw4" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw5" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw6" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw7" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="takes_nw" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ea0" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea1" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea2" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea3" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea4" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea5" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea6" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea7" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="takes_ea" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_we0" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we1" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we2" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we3" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we4" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we5" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we6" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we7" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="takes_we" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
+<!-- the owl of the logo and an arrow: shows or hides the header (header_toggle() in briskin5.js) -->
+<div id="hdr_toggle" class="hdr_toggle" title="<?php echo $mlang_bin5_index['tit_hdr'][$G_lang]; ?>" onclick="header_toggle();"><div class="hdr_owl"></div><div id="hdr_arrow" class="hdr_arrow">&#9660;</div></div>
+<img id="card0" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card1" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card2" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card3" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card4" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card5" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card6" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card7" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="takes" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne0" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne1" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne2" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne3" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne4" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne5" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne6" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne7" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="takes_ne" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw0" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw1" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw2" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw3" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw4" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw5" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw6" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw7" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="takes_nw" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ea0" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea1" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea2" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea3" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea4" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea5" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea6" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea7" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="takes_ea" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_we0" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we1" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we2" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we3" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we4" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we5" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we6" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we7" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="takes_we" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
 
 <div id="asta" class="asta">
   <img id="asta0" src="img/asta0.png" class="astacard">
@@ -262,17 +304,17 @@ window.onload = function() {
 </div>
 <div id="chooseed" class="chooseed">
                            <?php echo $mlang_bin5_index['aucwin'][$G_lang]; ?>
-<img id="seed0" src="img/cards_<? echo $deck; ?>_empty.png" class="seed0"/>
-<img id="seed1" src="img/cards_<? echo $deck; ?>_empty.png" class="seed1"/>
-<img id="seed2" src="img/cards_<? echo $deck; ?>_empty.png" class="seed2"/>
-<img id="seed3" src="img/cards_<? echo $deck; ?>_empty.png" class="seed3"/>
+<img id="seed0" src="img/cards_<?php echo $deck; ?>_empty.png" class="seed0"/>
+<img id="seed1" src="img/cards_<?php echo $deck; ?>_empty.png" class="seed1"/>
+<img id="seed2" src="img/cards_<?php echo $deck; ?>_empty.png" class="seed2"/>
+<img id="seed3" src="img/cards_<?php echo $deck; ?>_empty.png" class="seed3"/>
 
                            
 </div>
 <div id="caller" class="caller">
 <div id="callerinfo" class="callerinfo">Info</div>
                            <!-- probably FIXME -->
-<img id="callerimg" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png">
+<img id="callerimg" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png">
 </div>
 <div class="table_commands">
 <table>
@@ -281,7 +323,7 @@ window.onload = function() {
 <td style="text-align: center;"><input type="button" class="button" name="xreload"  value="<?php echo $mlang_bin5_index['tit_relo'][$G_lang]; ?>" onclick="act_reload();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xout"  value="<?php echo $mlang_bin5_index['tit_out'][$G_lang]; ?>" onclick="safelogout();"></td>
 </tr><tr>
-<td style="text-align: center;"><img id="stm_stat" class="nobo" src="img/line-status_b.png"></td>
+<td style="text-align: center;"><img id="stm_stat" class="nobo stm_stat" src="img/line-status_b.png" title="<?php echo $mlang_bin5_index['tit_diag'][$G_lang]; ?>" onclick="diag_toggle();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xpref"  value="<?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?>" onclick="preferences_showhide();"></td>
 </td>
 <td style="text-align: center;"><img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"></td>
@@ -302,26 +344,31 @@ window.onload = function() {
 
 
 <div class="subarea">
+<!-- the chat, and at its bottom right the button that enlarges it (chatt_big_toggle() in commons.js) -->
+<div class="chatt_box">
 <div id="txt" class="chattshort"></div>
+<input id="chatt_big_btn" class="button chatt_big_btn" type="button" value="<?php echo $mlang_bin5_index['btn_chatbig'][$G_lang];?>" data-big="<?php echo $mlang_bin5_index['btn_chatbig'][$G_lang];?>" data-small="<?php echo $mlang_bin5_index['btn_chatsmall'][$G_lang];?>" title="<?php echo $mlang_bin5_index['tit_chatbig'][$G_lang];?>" onclick="chatt_big_toggle($('txt'));">
+</div>
     <table class="chattshort_table"><tr><td style="width:1%; text-align: right;">
     <div id="myname"></div>
     </td><td>
-    <input id="txt_in" maxlength="128" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
+    <input id="txt_in" maxlength="128" type="text" autocomplete="off" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 
-<div id="flasou" style="text-align: left;"></div>
-<hr>
-<div id="heartbit" style="text-align: left;"></div>
-<hr>
-<div id="imgct" style="text-align: left;">HERE</div>
-<hr>
-<div id="sandbox" style="text-align: left;"></div>
-<div id="sandbox2" style="text-align: left;"></div>
-<div id="sandbox3" style="text-align: left;"></div>
-<pre>
-<div id="xhrlog" style="text-align: left;"></div>
-</pre>
-<div id="xhrdeltalog" style="text-align: left;"></div>
+<!-- diagnostic area (watchdog, loaded images, ...): hidden at every page load,
+     shown by a click on the connection status icon or by the /diag chat command -->
+<div id="diagbox" class="diagbox">
+<div id="winsize"></div>
+<div id="heartbit"></div>
+<div id="flasou"></div>
+<div id="imgct"></div>
+<div id="sandbox"></div>
+<div id="sandbox2"></div>
+<div id="sandbox3"></div>
+<div id="xhrlog"></div>
+<div id="xhrdeltalog"></div>
+</div>
+</div>
 </div>
 
 <div id="preferences" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 200px; top: 126px; visibility: hidden;">
@@ -341,8 +388,11 @@ window.onload = function() {
 </div>
 <div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="act_preferences_update();" value="<?php echo $mlang_bin5_index['btn_update'][$G_lang]; ?>"/></div>
 </div>
+</div><!-- #preferences: it was never closed, and what came after it was hidden with it -->
 
 
+<!-- the company details, the last row of the page (div.company_line in brisk.css) -->
+<?php echo company_line_render(); ?>
 </body>
 </html>
 <?php

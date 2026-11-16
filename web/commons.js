@@ -387,10 +387,104 @@ function chatt_checksend(obj,e)
 	obj.value = "";
     }
 }
+/*
+ *  the size of the window the page is drawn in, with what depends on it at
+ *  the table (scale of the page, header), in the diagnostic area: written
+ *  when the area is shown, not kept up to date while it stays open
+ */
+function diag_winsize()
+{
+    var div = $("winsize");
+    var portrait, txt, header, choice = null;
+
+    if (div == null)
+        return;
+    portrait = (window.matchMedia ? window.matchMedia("(orientation: portrait)").matches
+                : (window.innerHeight > window.innerWidth));
+    txt = "window: " + window.innerWidth + " x " + window.innerHeight
+        + " (" + (portrait ? "portrait" : "landscape") + ")"
+        + ", screen: " + screen.width + " x " + screen.height
+        + ", dpr: " + (window.devicePixelRatio || 1);
+    if (typeof(g_table_scale) != 'undefined')
+        txt += ", scale: " + Math.round(g_table_scale * 1000) / 1000;
+    if (typeof(header_key) == 'function' && (header = $("header")) != null) {
+        try {
+            choice = localStorage.getItem(header_key());
+        }
+        catch (e) { }
+        txt += ", header: " + (header.style.display == "none" ? "hidden" : "shown")
+            + " (" + (choice == "1" || choice == "0" ? "chosen" :
+                      "default, " + (typeof(HEADER_MIN_WIN_H) != 'undefined' ? HEADER_MIN_WIN_H : "?")
+                      + " px rule") + ")";
+    }
+    div.textContent = txt;
+}
+
+/*
+ *  show or hide the diagnostic area of the room (watchdog, loaded images, ...);
+ *  the traffic line is drawn only while the area is shown
+ */
+function diag_toggle()
+{
+    var box = $("diagbox");
+    var shown;
+
+    if (box == null)
+        return false;
+    if (box.className.match(/\bdiag_on\b/)) {
+        box.className = box.className.replace(/\s*\bdiag_on\b/, "");
+        shown = false;
+    }
+    else {
+        box.className += " diag_on";
+        shown = true;
+        diag_winsize();
+    }
+    if (typeof(xstm) != 'undefined' && xstm != null && typeof(xstm.hlog_set) == 'function'
+        && typeof(heartbit_line) == 'function') {
+        if (shown) {
+            heartbit_line_reset();
+            xstm.hlog_set(heartbit_line);
+        }
+        else {
+            xstm.hlog_set(null);
+        }
+    }
+    return true;
+}
+
+/*
+ *  the button at the bottom right of the chat, in the room and at the
+ *  table, makes it four times higher, upwards and opaque, another click
+ *  brings it back (.chatt_big in room.css and briskin5.css); the label of
+ *  the button says what the next click does (data-big and data-small, in
+ *  the language of the page)
+ */
+function chatt_big_toggle(box)
+{
+    var btn = $("chatt_big_btn");
+    var is_big;
+
+    if (box.className.match(/\bchatt_big\b/)) {
+        box.className = box.className.replace(/\s*\bchatt_big\b/, "");
+        is_big = false;
+    }
+    else {
+        box.className += " chatt_big";
+        is_big = true;
+    }
+    if (btn)
+        btn.value = btn.getAttribute(is_big ? "data-small" : "data-big");
+    box.scrollTop = box.scrollHeight;
+}
+
 function act_chatt(value)
 {
     if (value.substring(0, 6) == "/info ") {
         info_show(value.substring(6));
+    }
+    else if (value == "/diag" && diag_toggle()) {
+        /* handled here: the diagnostic area is in this page */
     }
     else {
         send_mesg("chatt|", value);
@@ -1087,7 +1181,7 @@ function user_dec_and_state(el)
     var val_el;
 
     content = user_decorator(el, true);
-    content += state_add(el[0],(typeof(el[2]) != 'undefined' ? el[2] : null));
+    content += state_add(el[1], el[0],(typeof(el[2]) != 'undefined' ? el[2] : null));
 
     return (content);
 }
@@ -1108,13 +1202,16 @@ function chatt_sub(dt,data,str)
 
     // alert("ARRIVA NAME: "+ name + "  STR:"+str);
     if (chatt_lines_n == CHATT_MAXLINES) {
-        $("txt").innerHTML = "";
+        /* shift by one line and rewrite the box once. Before, every line was
+           appended to innerHTML on its own, and each += forces the browser to
+           reserialise and reparse the whole content: that was
+           CHATT_MAXLINES+1 rebuilds of the DOM for every message received.
+           In a crowded room the browser grinds to a halt. */
         for (i = 0 ; i < (CHATT_MAXLINES - 1) ; i++) {
             chatt_lines[i] = chatt_lines[i+1];
-            $("txt").innerHTML += chatt_lines[i];
         }
         chatt_lines[i] = dt+name+": "+str+ "<br>";
-        $("txt").innerHTML += chatt_lines[i];
+        $("txt").innerHTML = chatt_lines.join("");
     }
     else {
         chatt_lines[chatt_lines_n] = dt+name+": "+str+ "<br>";

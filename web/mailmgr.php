@@ -42,7 +42,7 @@ ini_set("max_execution_time", "240");
 require_once($G_base."Obj/brisk.phh");
 require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
-require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
+require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
 require_once($G_base."Obj/singlemsg.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
@@ -85,7 +85,7 @@ function main() {
             }
             $bdb->transaction('COMMIT');
 
-            singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Riceverai a breve una email con la tua nuova password.<br>Benvenuto!");
+            singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Se il tuo nickname passerà il vaglio dei moderatori<br>riceverai una email con la password per accedere al sito.<br>Benvenuto!");
             $errcode = 0;
         } while (FALSE);
         if ($errcode) {

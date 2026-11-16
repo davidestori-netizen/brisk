@@ -322,6 +322,7 @@ function set_iscalling(idx)
 var preferences = new Preferences(true, 'xx', 'xx');
 // FIXME move it in the html dynamic generation scope
 var deck_list = { 'xx': 'Normal cards',
+                  'nb': 'No border cards',
                   'yy': 'Slim cards' }
 function preferences_init()
 {
@@ -411,4 +412,144 @@ function act_select_deck(deck_id)
 function rules_set(id)
 {
     $('select_rules').value = id;
+}
+
+/*
+ *  windows lower than the table page
+ *
+ *  The core of the page is the game area and the chat, from the top of the
+ *  table to the input line of the chat: the header above it and the footer
+ *  below it (diagnostics and company line) do not count. While the window is
+ *  at least as high as the core nothing changes; on lower windows the whole
+ *  body is scaled down with the css zoom property, so that the core fits the
+ *  window exactly; the page is not scrolled, the header stays at the top and
+ *  the users scroll by themselves to the core. The body and not only
+ *  div.table_page, to scale also the popups (points, notices) hung to it.
+ *  The zoom, unlike a transform, also shrinks the space the page takes.
+ *
+ *  The height scale never goes below TABLE_FIT_MIN_VSCALE: on lower windows
+ *  the page stays at that size and the users scroll.
+ *
+ *  The same for the width: on windows narrower than the game area the page
+ *  is scaled so that the area fits the width; the smaller of the two scales
+ *  wins. The width is the one of the window without its scrollbar.
+ */
+var g_table_scale = 1;
+var TABLE_FIT_MIN_VSCALE = 0.9;
+
+function table_fit()
+{
+    var page = document.body;
+    var chat = document.querySelector("table.chattshort_table");
+    var bg = $("bg");
+
+    if (!page || !chat || !bg)
+        return;
+
+    /* measure at natural size: no paint happens before the new zoom is set */
+    page.style.zoom = "";
+    var core_h = chat.getBoundingClientRect().bottom - bg.getBoundingClientRect().top;
+    var core_w = bg.getBoundingClientRect().width;
+    var win_w = document.documentElement.clientWidth;
+    var scale = 1;
+
+    if (core_h > 0 && window.innerHeight < core_h)
+        scale = Math.max(window.innerHeight / core_h, TABLE_FIT_MIN_VSCALE);
+    if (core_w > 0 && win_w < core_w)
+        scale = Math.min(scale, win_w / core_w);
+
+    g_table_scale = scale;
+    if (scale < 1)
+        page.style.zoom = scale;
+}
+
+/*
+ *  the header of the page can be hidden during the game, to give its space
+ *  to the table: a button at the left of the top edge of the table (the owl
+ *  of the logo and an arrow, down to hide and up to show) toggles it. The
+ *  choice is kept in the browser ("1" hidden, "0" shown), for the next
+ *  tables too, one for each orientation of the window (portrait when it is
+ *  higher than wide): a choice made with a phone or a tablet held upright
+ *  does not apply when it is turned. With no choice yet for the current
+ *  orientation the header is hidden on windows lower than HEADER_MIN_WIN_H,
+ *  shown on the others. When the orientation changes the header follows the
+ *  choice, or the default, of the new one.
+ */
+var HEADER_KEY = "brisk_bin5_header_hidden";
+var HEADER_MIN_WIN_H = 720;
+var g_header_portrait = null;
+
+function header_key()
+{
+    var is_portrait;
+
+    if (g_header_portrait)
+        is_portrait = g_header_portrait.matches;
+    else
+        is_portrait = (window.innerHeight > window.innerWidth);
+    return (HEADER_KEY + (is_portrait ? "_portrait" : "_landscape"));
+}
+
+function header_show(is_shown)
+{
+    var header = $("header");
+    var arrow = $("hdr_arrow");
+
+    if (!header)
+        return;
+    header.style.display = (is_shown ? "" : "none");
+    if (arrow)
+        arrow.innerHTML = (is_shown ? "&#9660;" : "&#9650;");
+}
+
+function header_toggle()
+{
+    var header = $("header");
+    var is_shown;
+
+    if (!header)
+        return;
+    is_shown = (header.style.display == "none");
+    header_show(is_shown);
+    try {
+        localStorage.setItem(header_key(), (is_shown ? "0" : "1"));
+    }
+    catch (e) { }
+    table_fit();
+}
+
+function header_restore()
+{
+    var choice = null;
+    var is_hidden;
+
+    try {
+        choice = localStorage.getItem(header_key());
+    }
+    catch (e) { }
+    if (choice == "1" || choice == "0")
+        is_hidden = (choice == "1");
+    else
+        is_hidden = (window.innerHeight < HEADER_MIN_WIN_H);
+    header_show(!is_hidden);
+}
+
+function header_orient_cb()
+{
+    header_restore();
+    table_fit();
+}
+
+/* the header as the user left it for the current orientation, and again at
+   each change of it */
+function header_init()
+{
+    if (window.matchMedia) {
+        g_header_portrait = window.matchMedia("(orientation: portrait)");
+        if (g_header_portrait.addEventListener)
+            g_header_portrait.addEventListener("change", header_orient_cb);
+        else if (g_header_portrait.addListener)  /* Safari before 14 */
+            g_header_portrait.addListener(header_orient_cb);
+    }
+    header_restore();
 }
