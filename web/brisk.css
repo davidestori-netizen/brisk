@@ -394,6 +394,33 @@ div.company_line {
     padding: 2px 4px 2px 4px;
 }
 
+/* the orange links, without underline: in the login, the room and the
+   table (here from room.css, that the table does not load) */
+a.flat:link {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    text-decoration: none;
+}
+
+a.flat:visited {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    text-decoration: none;
+}
+
+a.flat:hover {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* in the company details the links keep the height of the line (a.flat
+   sets 20px, more than the small text of the details) */
+div.company_line a.flat {
+    line-height: inherit;
+}
+
 /* the header of the room and of the table (header_render() in brisk.phh) */
 div.header {
     align: center;
