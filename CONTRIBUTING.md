@@ -5,12 +5,14 @@ Thank you for helping with Brisk. These are the few rules for a contribution
 
 ## License
 
-Brisk is free software, released under the GNU General Public License,
-version 2 or (at your option) any later version: see `COPYING`. By
-contributing you release your contribution under the same license. You keep
-the copyright on what you wrote: add your name to `AUTHORS`, and to the
-copyright line of the files you create or substantially change, for
-example:
+Brisk is free software, released under the GNU Affero General Public
+License, version 3 or (at your option) any later version: see `COPYING`.
+Brisk is a service used over the network: whoever runs a modified version
+of it for others has to offer them its source code (section 13 of the
+license). By contributing you release your contribution under the same
+license. You keep the copyright on what you wrote: add your name to
+`AUTHORS`, and to the copyright line of the files you create or
+substantially change, for example:
 
     Copyright (C) 2006-2026 Matteo Nastasi and contributors (see AUTHORS)
 
