@@ -118,7 +118,8 @@ function auth_ask($cmd)
 }
 
 /* "admin" for who knows the password of the site, as before; "moder" for
-   a login of $G_moderators with its own session; FALSE for the others.
+   a user with USER_FLAG_TY_MODER (bin/users_manage.sh moder <user>) with
+   its own session; FALSE for the others.
    $G_umgmt_who: who is acting, for the log of the actions */
 $G_umgmt_who = "";
 

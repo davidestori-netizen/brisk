@@ -61,6 +61,7 @@ define('USER_FLAG_TY_CERT',    0x040000); // done
 define('USER_FLAG_TY_APPR',    0x080000); // done
 define('USER_FLAG_TY_NICKTMP', 0x100000); // temporary nickname, the requested one waits for a check
 //  ... other usefull status ...
+define('USER_FLAG_TY_MODER',   0x100000); // moderator: accepts or refuses the new users in usermgmt.php
 define('USER_FLAG_TY_FIRONLY', 0x200000); // done
 define('USER_FLAG_TY_ADMIN',   0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
@@ -376,6 +377,11 @@ class User {
   function is_auth()
   {
       return ($this->flags & USER_FLAG_AUTH);
+  }
+
+  function is_moder()
+  {
+      return (($this->flags & USER_FLAG_AUTH) && ($this->flags & USER_FLAG_TY_MODER));
   }
 
   function is_cert()
