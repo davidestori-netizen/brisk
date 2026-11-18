@@ -158,6 +158,19 @@ class BriskDB
         return FALSE;
     }
 
+    /* the temporary nickname (USER_FLAG_TY_NICKTMP) is not stored in
+       users.type: an account has it while it has a row in users_nickreq,
+       that the queries read as nick_req. Set (or cleared) here in the
+       record read, so that the rest of the code and the players see it */
+    static function nicktmp_fix($user_obj)
+    {
+        if ($user_obj == FALSE)
+            return ($user_obj);
+        $user_obj->type = ((int)$user_obj->type & ~USER_FLAG_TY_NICKTMP)
+            | (isset($user_obj->nick_req) && $user_obj->nick_req !== NULL ? USER_FLAG_TY_NICKTMP : 0);
+        return ($user_obj);
+    }
+
     function getrecord_bylogin($login) {
         GLOBAL $G_dbpfx;
 
@@ -171,9 +184,7 @@ class BriskDB
         if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
-        $user_obj = pg_fetch_object($user_pg, 0);
-
-        return ($user_obj);
+        return (self::nicktmp_fix(pg_fetch_object($user_pg, 0)));
     }
 
     /* the account with a temporary nickname that asked for $nick (easy signup) */
@@ -183,17 +194,15 @@ class BriskDB
         $user_sql = sprintf("SELECT u.*, n.nick AS nick_req FROM %susers AS u
                                  JOIN %susers_nickreq AS n ON n.ucode = u.code
                              WHERE lower(n.nick) = lower('%s')
-                             AND (u.type & CAST (X'%08x' as integer)) = CAST (X'%08x' as integer)
                              AND (u.type & CAST (X'%08x' as integer)) = 0;",
-                            $G_dbpfx, $G_dbpfx, escsql($nick), USER_FLAG_TY_NICKTMP, USER_FLAG_TY_NICKTMP,
-                            USER_FLAG_TY_DISABLE);
+                            $G_dbpfx, $G_dbpfx, escsql($nick), USER_FLAG_TY_DISABLE);
         if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
         }
         if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
-        return (pg_fetch_object($user_pg, 0));
+        return (self::nicktmp_fix(pg_fetch_object($user_pg, 0)));
     }
 
     function user_add($login, $pass, $email, $type, $disa_reas, $guar_code) {
@@ -328,9 +337,7 @@ class BriskDB
         if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
-        $user_obj = pg_fetch_object($user_pg, 0);
-
-        return ($user_obj);
+        return (self::nicktmp_fix(pg_fetch_object($user_pg, 0)));
     }
 
     function user_update_login_time($code, $lintm)
@@ -466,26 +473,23 @@ class BriskDB
         return TRUE;
     }
 
-    /* the requested nickname becomes the login, the temporary flag and
-       the "to be checked" reason go away (fails if the login is taken) */
+    /* the requested nickname becomes the login, its row in users_nickreq
+       (the temporary nickname) and the "to be checked" reason go away
+       (fails if the login is taken) */
     function user_nick_approve($code)
     {
         GLOBAL $G_dbpfx;
 
-        /* one statement: the request of an account with the temporary
-           nickname is taken out of users_nickreq and becomes the login. No
-           request, or no temporary nickname: nothing is deleted nor updated;
-           login taken: the statement fails and the request stays */
-        $user_sql = sprintf("WITH req AS (DELETE FROM %susers_nickreq AS n
-                USING %susers AS u
-                WHERE n.ucode = %d AND u.code = n.ucode
-                    AND (u.type & (CAST (X'%08x' as integer))) = (CAST (X'%08x' as integer))
-                RETURNING n.nick)
-            UPDATE %susers SET (login, type, disa_reas)
-            = ((SELECT lower(nick) FROM req), type & ~(CAST (X'%08x' as integer)), %d)
+        /* one statement: the request is taken out of users_nickreq and
+           becomes the login, and with the row the temporary nickname goes
+           away (USER_FLAG_TY_NICKTMP is not in users.type). No request:
+           nothing is deleted nor updated; login taken: the statement fails
+           and the request stays */
+        $user_sql = sprintf("WITH req AS (DELETE FROM %susers_nickreq WHERE ucode = %d RETURNING nick)
+            UPDATE %susers SET (login, disa_reas)
+            = ((SELECT lower(nick) FROM req), %d)
             WHERE code = %d AND EXISTS (SELECT 1 FROM req);",
-                            $G_dbpfx, $G_dbpfx, $code, USER_FLAG_TY_NICKTMP, USER_FLAG_TY_NICKTMP,
-                            $G_dbpfx, USER_FLAG_TY_NICKTMP, USER_DIS_REA_NONE, $code);
+                            $G_dbpfx, $code, $G_dbpfx, USER_DIS_REA_NONE, $code);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;

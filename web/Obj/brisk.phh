@@ -2177,7 +2177,8 @@ class Brisk
                       ($user->subst != 'standup' && $this->table[$user->table]->auth_type == TABLE_AUTH_TY_PUBL)
                       )
                       ) {
-                          $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL); // Remove auth if name changed
+                          // Remove auth if name changed (and the temporary nickname, out of TY_ALL)
+                          $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL | USER_FLAG_TY_NICKTMP);
                           for ($i = 0 ; $i < TABLES_N ; $i++) {
                               $to_user .= $this->table[$i]->act_content($user);
                           }

@@ -26,7 +26,7 @@
  *  The player chooses the nickname he would like, a password and his
  *  e-mail, and accepts the rules. The account is created disabled, as
  *  apprentice, with a temporary nickname (like "GattoFurbo", shown with a
- *  "*", flag USER_FLAG_TY_NICKTMP): after the click on the link of the
+ *  "*", USER_FLAG_TY_NICKTMP while it has a row in users_nickreq): after the click on the link of the
  *  e-mail (mailmgr.php) it works at once. The requested nickname waits in
  *  users_nickreq for a check in usermgmt.php.
  *  Signups never confirmed are removed after 48 hours.
@@ -176,7 +176,7 @@ function main()
             $ok = FALSE;
             do {
                 if (($usr_obj = $bdb->user_add($nick_tmp, md5($pw), $mail,
-                                               USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR | USER_FLAG_TY_NICKTMP,
+                                               USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
                                                USER_DIS_REA_NU_MAILED, $G_notguar_code)) == FALSE)
                     break;
                 if ($bdb->user_nick_req_set($usr_obj->code, $nome) == FALSE)

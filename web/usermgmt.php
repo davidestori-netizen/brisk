@@ -563,11 +563,7 @@ SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
                 printf("KEY: %s: %s %s<br>\n", $id, eschtml($value), eschtml($usr_obj->login));
                 /* new signup: the account already works with a temporary nickname,
                    the requested one becomes the login and the "*" goes away */
-                if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP) {
-                    if ($usr_obj->nick_req === NULL || $usr_obj->nick_req == "") {
-                        echo "no nickname requested yet<br>";
-                        continue;
-                    }
+                if ($usr_obj->nick_req !== NULL) {
                     $nick_old = $usr_obj->login;
                     if ($bdb->user_nick_approve($usr_obj->code) == FALSE) {
                         echo "fail nick approval (nickname already used ?)<br>";
@@ -670,7 +666,7 @@ SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
                     /* new signup: the account stays with its temporary nickname, only
                        the requested one is refused; the player can ask another one
                        from nickreq.php */
-                    if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP) {
+                    if ($usr_obj->nick_req !== NULL) {
                         /* the request stays: the player keeps entering with the refused
                            nickname until he asks another one from nickreq.php */
                         $nick_page = sprintf("%s://%s/%s/nickreq.php", $G_proto, $G_domain, $G_webbase);
@@ -752,7 +748,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                         $bdb->transaction('ROLLBACK');
                     break;
                 }
-                if (($usr_obj->type & USER_FLAG_TY_NICKTMP) != USER_FLAG_TY_NICKTMP)
+                if ($usr_obj->nick_req === NULL)
                     printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, eschtml($usr_obj->login));
                 else
                     printf("Nickname %s refused, %s keeps playing with the temporary one<br>\n", eschtml($usr_obj->nick_req), eschtml($usr_obj->login));
@@ -786,7 +782,7 @@ SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
 
                 $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
                                       $usr_obj->code, ($nocheck ? "" : "CHECKED"),
-                                      eschtml($usr_obj->login) . (($usr_obj->type & USER_FLAG_TY_NICKTMP) ? "*" : ""),
+                                      eschtml($usr_obj->login) . ($usr_obj->nick_req !== NULL ? "*" : ""),
                                       eschtml((string)$usr_obj->nick_req),
                                       eschtml($usr_obj->email), eschtml($usr_obj->guar_login),
                                       ($usr_obj->type & USER_FLAG_TY_APPR ? "Yes" : "No"),
