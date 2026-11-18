@@ -161,7 +161,10 @@ class BriskDB
     function getrecord_bylogin($login) {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",  $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
+        $user_sql = sprintf("SELECT u.*, n.nick AS nick_req FROM %susers AS u
+                                 LEFT JOIN %susers_nickreq AS n ON n.ucode = u.code
+                             WHERE u.login = lower('%s') AND (u.type & CAST (X'%08x' as integer)) = 0;",
+                            $G_dbpfx, $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
         if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
         }
@@ -177,10 +180,12 @@ class BriskDB
     function getrecord_bynickreq($nick) {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE lower(nick_req) = lower('%s')
-                             AND (type & CAST (X'%08x' as integer)) = CAST (X'%08x' as integer)
-                             AND (type & CAST (X'%08x' as integer)) = 0;",
-                            $G_dbpfx, escsql($nick), USER_FLAG_TY_NICKTMP, USER_FLAG_TY_NICKTMP,
+        $user_sql = sprintf("SELECT u.*, n.nick AS nick_req FROM %susers AS u
+                                 JOIN %susers_nickreq AS n ON n.ucode = u.code
+                             WHERE lower(n.nick) = lower('%s')
+                             AND (u.type & CAST (X'%08x' as integer)) = CAST (X'%08x' as integer)
+                             AND (u.type & CAST (X'%08x' as integer)) = 0;",
+                            $G_dbpfx, $G_dbpfx, escsql($nick), USER_FLAG_TY_NICKTMP, USER_FLAG_TY_NICKTMP,
                             USER_FLAG_TY_DISABLE);
         if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
@@ -314,7 +319,9 @@ class BriskDB
     function getrecord_bycode($code) {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE code = %d;",  $G_dbpfx, $code);
+        $user_sql = sprintf("SELECT u.*, n.nick AS nick_req FROM %susers AS u
+                                 LEFT JOIN %susers_nickreq AS n ON n.ucode = u.code
+                             WHERE u.code = %d;", $G_dbpfx, $G_dbpfx, $code);
         if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
         }
@@ -401,8 +408,10 @@ class BriskDB
                                                                     'í' => 'i', 'ò' => 'o', 'ó' => 'o', 'ù' => 'u', 'ú' => 'u'));
         $nick_sql = sprintf("SELECT code FROM %susers
                                  WHERE translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') = '%s'
-                                    OR translate(lower(coalesce(nick_req, '')), 'àáèéìíòóùú', 'aaeeiioouu') = '%s';",
-                            $G_dbpfx, escsql($plain), escsql($plain));
+                             UNION ALL
+                             SELECT ucode FROM %susers_nickreq
+                                 WHERE translate(lower(nick), 'àáèéìíòóùú', 'aaeeiioouu') = '%s';",
+                            $G_dbpfx, escsql($plain), $G_dbpfx, escsql($plain));
         if (($nick_pg = $this->query($nick_sql)) == FALSE) {
             return FALSE;
         }
@@ -435,13 +444,20 @@ class BriskDB
         return FALSE;
     }
 
-    /* $nick == NULL clears the request (nickname refused) */
+    /* the nickname asked for by the account $code, in users_nickreq: a new
+       request takes the place of the old one; $nick == NULL clears it */
     function user_nick_req_set($code, $nick)
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET nick_req = %s WHERE code = %d;",
-                            $G_dbpfx, ($nick === NULL ? "NULL" : "'".escsql($nick)."'"), $code);
+        if ($nick === NULL) {
+            $user_sql = sprintf("DELETE FROM %susers_nickreq WHERE ucode = %d;", $G_dbpfx, $code);
+            return ($this->query($user_sql) != FALSE);
+        }
+
+        $user_sql = sprintf("INSERT INTO %susers_nickreq (ucode, nick) VALUES (%d, '%s')
+                                 ON CONFLICT (ucode) DO UPDATE SET nick = EXCLUDED.nick, ctime = now();",
+                            $G_dbpfx, $code, escsql($nick));
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
@@ -456,12 +472,20 @@ class BriskDB
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET (login, nick_req, type, disa_reas)
-            = (lower(nick_req), NULL, type & ~(CAST (X'%08x' as integer)), %d)
-            WHERE code = %d AND nick_req IS NOT NULL
-                AND (type & (CAST (X'%08x' as integer))) = (CAST (X'%08x' as integer));",
-                            $G_dbpfx, USER_FLAG_TY_NICKTMP, USER_DIS_REA_NONE,
-                            $code, USER_FLAG_TY_NICKTMP, USER_FLAG_TY_NICKTMP);
+        /* one statement: the request of an account with the temporary
+           nickname is taken out of users_nickreq and becomes the login. No
+           request, or no temporary nickname: nothing is deleted nor updated;
+           login taken: the statement fails and the request stays */
+        $user_sql = sprintf("WITH req AS (DELETE FROM %susers_nickreq AS n
+                USING %susers AS u
+                WHERE n.ucode = %d AND u.code = n.ucode
+                    AND (u.type & (CAST (X'%08x' as integer))) = (CAST (X'%08x' as integer))
+                RETURNING n.nick)
+            UPDATE %susers SET (login, type, disa_reas)
+            = ((SELECT lower(nick) FROM req), type & ~(CAST (X'%08x' as integer)), %d)
+            WHERE code = %d AND EXISTS (SELECT 1 FROM req);",
+                            $G_dbpfx, $G_dbpfx, $code, USER_FLAG_TY_NICKTMP, USER_FLAG_TY_NICKTMP,
+                            $G_dbpfx, USER_FLAG_TY_NICKTMP, USER_DIS_REA_NONE, $code);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;

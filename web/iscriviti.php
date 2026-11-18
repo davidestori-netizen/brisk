@@ -28,7 +28,7 @@
  *  apprentice, with a temporary nickname (like "GattoFurbo", shown with a
  *  "*", flag USER_FLAG_TY_NICKTMP): after the click on the link of the
  *  e-mail (mailmgr.php) it works at once. The requested nickname waits in
- *  users.nick_req for a check in usermgmt.php.
+ *  users_nickreq for a check in usermgmt.php.
  *  Signups never confirmed are removed after 48 hours.
  */
 

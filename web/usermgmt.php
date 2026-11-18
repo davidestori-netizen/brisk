@@ -185,12 +185,13 @@ function main() {
 
                     // retrieve list added users
                     $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nickreq AS nreq ON nreq.ucode = usr.code
      WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d AND usr.code = %d;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_ADDED, $id);
                     if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
@@ -283,12 +284,13 @@ SELECT usr.*, guar.login AS guar_login
 
                     // retrieve list added users
                     $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nickreq AS nreq ON nreq.ucode = usr.code
      WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d AND usr.code = %d;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_ADDED, $id);
                     if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
@@ -342,12 +344,13 @@ SELECT usr.*, guar.login AS guar_login
 
             // retrieve list added users
             $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nickreq AS nreq ON nreq.ucode = usr.code
      WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d ORDER BY usr.lintm;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_ADDED);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
@@ -462,12 +465,13 @@ SELECT mail.*, usr.email AS email, user.login AS login
 
             // retrieve list added users
             $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nickreq AS nreq ON nreq.ucode = usr.code
      WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d ORDER BY usr.lintm;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_MAILED);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
@@ -543,11 +547,12 @@ SELECT usr.*, guar.login AS guar_login
 
                 // retrieve list of active tournaments
                 $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nickreq AS nreq ON nreq.ucode = usr.code
      WHERE usr.disa_reas = %d AND usr.code = %d;",
-                                   $G_dbpfx, $G_dbpfx,
+                                   $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                    USER_DIS_REA_NU_TOBECHK, $id);
                 if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                     log_crit("stat-day: select from tournaments failed");
@@ -640,11 +645,12 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($usr_obj
 
                     // retrieve list added users
                     $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nickreq AS nreq ON nreq.ucode = usr.code
      WHERE usr.disa_reas = %d AND usr.code = %d;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                        USER_DIS_REA_NU_TOBECHK, $id);
 
 
@@ -761,11 +767,12 @@ Saluti e buone partite, mop.', $usr_obj->login);
 
             // retrieve list of active tournaments
             $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, nreq.nick AS nick_req
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nickreq AS nreq ON nreq.ucode = usr.code
      WHERE usr.disa_reas = %d ORDER BY usr.lintm;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_DIS_REA_NU_TOBECHK);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                 log_crit("stat-day: select from tournaments failed");
