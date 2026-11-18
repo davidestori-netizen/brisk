@@ -418,9 +418,16 @@ a.flat:hover {
 }
 
 /* in the company details the links keep the height of the line (a.flat
-   sets 20px, more than the small text of the details) */
+   sets 20px, more than the small text of the details) and the orange of
+   a.flat (#ffae00); under the mouse they turn lighter, halfway between it
+   and #ffd780, instead of becoming bold */
 div.company_line a.flat {
     line-height: inherit;
+}
+
+div.company_line a.flat:hover {
+    color: #ffc240;
+    font-weight: inherit;
 }
 
 /* the header of the room and of the table (header_render() in brisk.phh) */

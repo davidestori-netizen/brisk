@@ -3469,6 +3469,53 @@ function table_act_content($isstanding, $sitted, $table, $cur_table, $allowed)
     return ($ret);
 }
 
+/*
+ *  the roadmap shown by the "roadmap" command: the body of the issue
+ *  ROADMAP_ISSUE on github, as html, kept in LEGAL_PATH/roadmap.html and
+ *  downloaded again when the file is missing or older than ROADMAP_TTL
+ *  seconds. The daemon serves everybody from one process and waits for
+ *  github: the request has a short timeout, and when it fails the old file
+ *  is used, or $G_room_roadmap when there is none. Returned already
+ *  escaped for the double quoted javascript string of show_notify().
+ */
+define('ROADMAP_ISSUE', 'https://api.github.com/repos/nastasi/brisk/issues/18');
+define('ROADMAP_TTL', 600);
+define('ROADMAP_TOUT', 3);
+
+function roadmap_get($lang)
+{
+    GLOBAL $G_room_roadmap;
+
+    $fname = LEGAL_PATH."/roadmap.html";
+    $mtime = @filemtime($fname);
+
+    if ($mtime === FALSE || $mtime + ROADMAP_TTL < time()) {
+        $ctx = stream_context_create(array('http' => array(
+            'timeout' => ROADMAP_TOUT,
+            'header' => "User-Agent: brisk\r\n"
+                      . "Accept: application/vnd.github.html+json\r\n")));
+        $json = @file_get_contents(ROADMAP_ISSUE, FALSE, $ctx);
+        if ($json !== FALSE && ($issue = json_decode($json)) !== NULL
+            && isset($issue->body_html) && $issue->body_html != '') {
+            $tmp = $fname.".tmp";
+            if (@file_put_contents($tmp, $issue->body_html) !== FALSE)
+                @rename($tmp, $fname);
+        }
+        else if ($mtime !== FALSE) {
+            /* github did not answer: the old file again, retried later */
+            @touch($fname);
+            log_main("roadmap: github not reached, the old copy is used");
+        }
+    }
+
+    if (($html = @file_get_contents($fname)) === FALSE || $html == '')
+        return (str_replace("\n", " ", $G_room_roadmap[$lang]));
+
+    /* a json string without its quotes is a valid javascript string body */
+    return (substr(json_encode('<div style="text-align: left;">'.$html.'</div>',
+                               JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 1, -1));
+}
+
 function show_notify($text, $tout, $butt, $w, $h)
 {
     log_main("SHOW_NOTIFY: ".$text);
@@ -3660,15 +3707,19 @@ $mlang_header = array( 'headline' => array('it' => 'briscola chiamata in salsa a
  *  the one-line company details ($G_company_line, HTML allowed) of the
  *  login, the room and the table: the last row of the page, at the bottom
  *  of the window when the page fits in it (div.company_line in brisk.css).
- *  Nothing when the line is empty.
+ *  The table has its own shorter version, $G_company_line_table, when it
+ *  is set and not empty. Nothing when the line is empty.
  */
-function company_line_render()
+function company_line_render($is_table = FALSE)
 {
-    GLOBAL $G_company_line;
+    GLOBAL $G_company_line, $G_company_line_table;
 
-    if (!isset($G_company_line) || $G_company_line == '')
+    $line = (isset($G_company_line) ? $G_company_line : '');
+    if ($is_table && isset($G_company_line_table) && $G_company_line_table != '')
+        $line = $G_company_line_table;
+    if ($line == '')
         return ('');
-    return (sprintf('<div id="company_line" class="company_line">%s</div>', $G_company_line));
+    return (sprintf('<div id="company_line" class="company_line">%s</div>', $line));
 }
 
 /*
