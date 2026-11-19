@@ -143,7 +143,7 @@ function main()
         $nickname = (isset($_POST['nickname']) ? isc_lower(trim((string)$_POST['nickname'])) : "");
         $passwd   = (isset($_POST['passwd'])   ? trim((string)$_POST['passwd'])   : "");
         $mail = (isset($_POST['mail']) ? trim((string)$_POST['mail']) : "");
-        $t    = (isset($_POST['t'])    ? (string)$_POST['t']  : "");
+        $curtime  = (isset($_POST['curtime']) ? (string)$_POST['curtime']  : "");
         $tf   = (isset($_POST['tf'])   ? (string)$_POST['tf'] : "");
         /* the network guard of the old apprentice form, with the address seen by the web server */
         $remote_ip = ip2int(addrtoipv4(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ""));
@@ -153,8 +153,8 @@ function main()
             $error = "Richiesta non valida. Riapri la pagina e riprova.";
         else if (!empty($_POST['site']))                       // trap field for the robots
             $error = "Richiesta non valida.";
-        else if (!preg_match('/^\d+$/', $t) || !hash_equals(hash_hmac('sha256', $t, $key_t), $tf)
-                 || time() - (int)$t < 4 || time() - (int)$t > 7200)
+        else if (!preg_match('/^\d+$/', $curtime) || !hash_equals(hash_hmac('sha256', $curtime, $key_t), $tf)
+                 || time() - (int)$curtime < 4 || time() - (int)$curtime > 7200)
             $error = "La pagina è scaduta. Riprova.";
         else if ($result[0] != 'ok')
             $error = $result[1] . ($result[2] != "" ? " Prova: " . $result[2] : "");
