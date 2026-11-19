@@ -231,12 +231,18 @@ function main()
         }
     }
 
-    /* the temporary nickname shown in the two menus: the one chosen, or a free one at random */
-    $nicktmp_words = $bdb->nick_fun_words();
-    if (!$done && $bdb->nick_fun_check($nicktmp_animal, $nicktmp_adjective) === FALSE) {
-        if (($pair = $bdb->nick_fun_pick()) !== FALSE)
+    /* the two menus of the temporary nickname: for every animal only the
+       adjectives that give a free nickname of 12 letters at most; selected
+       the pair chosen, or a free one at random */
+    $nicktmp_pairs = ($done ? array() : $bdb->nick_fun_free_pairs());
+    if ($nicktmp_pairs === FALSE)
+        $nicktmp_pairs = array();
+    $nicktmp_allowed = (isset($nicktmp_pairs[$nicktmp_animal]) ? $nicktmp_pairs[$nicktmp_animal] : array());
+    if (!$done && !in_array($nicktmp_adjective, $nicktmp_allowed, TRUE)) {
+        if (($pair = $bdb->nick_fun_pick($nicktmp_pairs)) !== FALSE)
             list($nicktmp_animal, $nicktmp_adjective) = $pair;
     }
+    $nicktmp_allowed = (isset($nicktmp_pairs[$nicktmp_animal]) ? $nicktmp_pairs[$nicktmp_animal] : array());
 
     $curtime = (string)time();
     $tf = hash_hmac('sha256', $curtime, $key_t);
@@ -370,20 +376,20 @@ function main()
     <input id="nickname" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nickname provvisorio.</span></div>
 
-    <label for="nicktmp_animal">Il tuo nickname provvisorio</label>
+    <label for="nicktmp_animal">Finché il tuo nickname non viene approvato, verrai visualizzato con:</label>
     <div class="nicktmp_row">
       <select id="nicktmp_animal" name="nicktmp_animal">
-<?php foreach ($nicktmp_words['animals'] as $word) { ?>
+<?php foreach (array_keys($nicktmp_pairs) as $word) { ?>
         <option value="<?php echo isc_h($word); ?>"<?php echo ($word === $nicktmp_animal ? ' selected' : ''); ?>><?php echo isc_h($word); ?></option>
 <?php } ?>
       </select>
       <select id="nicktmp_adjective" name="nicktmp_adjective">
-<?php foreach ($nicktmp_words['adjectives'] as $word) { ?>
+<?php foreach ($nicktmp_allowed as $word) { ?>
         <option value="<?php echo isc_h($word); ?>"<?php echo ($word === $nicktmp_adjective ? ' selected' : ''); ?>><?php echo isc_h($word); ?></option>
 <?php } ?>
       </select>
     </div>
-    <div class="result" id="enicktmp"><span class="piccolo">Finché i moderatori non controllano il tuo nickname, nel gioco ti vedono così. Puoi tenerlo o sceglierne un altro.</span></div>
+    <div class="result" id="enicktmp"><span class="piccolo">Se non ti piace, scegli un altro nome o un altro aggettivo.</span></div>
 
     <label for="passwd">2. La tua password</label>
     <div class="passwd_row"><input id="passwd" name="passwd" type="password" maxlength="30" value="<?php echo isc_h($passwd); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
@@ -452,22 +458,34 @@ function main()
     });
     $('full_rules').onclick = function (e) { e.preventDefault(); var t = $('content'); t.style.display = t.style.display === 'block' ? 'none' : 'block'; };
     $('f').addEventListener('submit', function () { $('create').disabled = true; $('create').textContent = 'Un momento...'; });
+    var nicktmp_pairs = <?php echo json_encode($nicktmp_pairs); ?>;
+
     function nicktmp_show() {
-        var nick = $('nicktmp_animal').value + $('nicktmp_adjective').value;
         var line = document.createElement('span');
 
-        if (nick.length > 12) {
-            line.className = 'no';
-            line.textContent = '\u274c ' + nick + ' è troppo lungo: scegli un\'altra parola';
-        }
-        else {
-            line.className = 'yes';
-            line.textContent = 'Ti vedranno come ' + nick;
-        }
+        line.className = 'yes';
+        line.textContent = 'Ti vedranno come ' + $('nicktmp_animal').value + $('nicktmp_adjective').value;
         $('enicktmp').innerHTML = '';
         $('enicktmp').appendChild(line);
     }
-    $('nicktmp_animal').addEventListener('change', nicktmp_show);
+
+    /* the adjectives of the second menu: only the ones free with the animal chosen */
+    function nicktmp_adjectives() {
+        var menu = $('nicktmp_adjective');
+        var current = menu.value;
+        var allowed = nicktmp_pairs[$('nicktmp_animal').value] || [];
+        var idx;
+
+        menu.innerHTML = '';
+        for (idx = 0 ; idx < allowed.length ; idx++) {
+            menu.appendChild(new Option(allowed[idx], allowed[idx], false, allowed[idx] === current));
+        }
+        if (allowed.indexOf(current) < 0 && allowed.length > 0) {
+            menu.selectedIndex = Math.floor(Math.random() * allowed.length);
+        }
+        nicktmp_show();
+    }
+    $('nicktmp_animal').addEventListener('change', nicktmp_adjectives);
     $('nicktmp_adjective').addEventListener('change', nicktmp_show);
     if ($('nickname').value)
         $('nickname').dispatchEvent(new Event('input'));

@@ -463,21 +463,65 @@ class BriskDB
         return ($nick);
     }
 
-    /* a free temporary nickname chosen at random, to show it already
-       selected in the signup page: array(animal, adjective), or FALSE when
-       none of the pairs tried is free */
-    function nick_fun_pick()
+    /* for every animal, the adjectives that give a temporary nickname that
+       can be used now: at most 12 letters, accepted by login_consistency()
+       and free (one query for all the pairs, the same comparison as
+       nick_is_free()); the animals without such an adjective are left out.
+       FALSE when the query fails */
+    function nick_fun_free_pairs()
     {
+        GLOBAL $G_dbpfx;
+
         $words = $this->nick_fun_words();
-
-        for ($i = 0 ; $i < 60 ; $i++) {
-            $animal = $words['animals'][mt_rand(0, count($words['animals']) - 1)];
-            $adjective = $words['adjectives'][mt_rand(0, count($words['adjectives']) - 1)];
-            if ($this->nick_fun_check($animal, $adjective) !== FALSE)
-                return (array($animal, $adjective));
+        $candidates = array();
+        foreach ($words['animals'] as $animal) {
+            foreach ($words['adjectives'] as $adjective) {
+                $nick = $animal . $adjective;
+                if (strlen($nick) <= 12 && login_consistency($nick) != FALSE)
+                    $candidates[strtolower($nick)] = array($animal, $adjective);
+            }
         }
+        $pairs = array();
+        if (count($candidates) == 0)
+            return ($pairs);
 
-        return FALSE;
+        $quoted = array();
+        foreach (array_keys($candidates) as $nick)
+            $quoted[] = "'" . escsql($nick) . "'";
+        $list_sql = implode(', ', $quoted);
+        $taken_sql = sprintf("SELECT translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') AS nick FROM %susers
+                                  WHERE translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') IN (%s)
+                              UNION
+                              SELECT translate(lower(nick), 'àáèéìíòóùú', 'aaeeiioouu') AS nick FROM %susers_nicktmp
+                                  WHERE translate(lower(nick), 'àáèéìíòóùú', 'aaeeiioouu') IN (%s);",
+                             $G_dbpfx, $list_sql, $G_dbpfx, $list_sql);
+        if (($taken_pg = $this->query($taken_sql)) == FALSE)
+            return FALSE;
+        for ($row = 0 ; $row < pg_num_rows($taken_pg) ; $row++) {
+            $taken = pg_fetch_object($taken_pg, $row);
+            unset($candidates[$taken->nick]);
+        }
+        foreach ($candidates as $pair)
+            $pairs[$pair[0]][] = $pair[1];
+
+        return ($pairs);
+    }
+
+    /* a free temporary nickname chosen at random among $pairs (the result of
+       nick_fun_free_pairs(), read here when not given): array(animal,
+       adjective), or FALSE when there is none */
+    function nick_fun_pick($pairs = NULL)
+    {
+        if ($pairs === NULL)
+            $pairs = $this->nick_fun_free_pairs();
+        if ($pairs === FALSE || count($pairs) == 0)
+            return FALSE;
+
+        $animals = array_keys($pairs);
+        $animal = $animals[mt_rand(0, count($animals) - 1)];
+        $adjective = $pairs[$animal][mt_rand(0, count($pairs[$animal]) - 1)];
+
+        return (array($animal, $adjective));
     }
 
     /* the temporary nickname of the account $code (easy signup), in
