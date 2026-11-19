@@ -6,18 +6,18 @@
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details. You should have received a
- * copy of the GNU General Public License along with this program; if
- * not, write to the Free Software Foundation, Inc, 59 Temple Place -
- * Suite 330, Boston, MA 02111-1307, USA.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -1163,8 +1163,8 @@ function user_decorator(user, is_real)
         }
     }
 
-    /* USER_FLAG_TY_NICKTMP: temporary nickname, the requested one is not checked yet */
-    var nick = user[1] + ((user[0] & 0x100000) ? '<span style="color:#888;font-size:75%;margin-left:2px;vertical-align:super;font-style:normal">&#10033;</span>' : "");
+    /* USER_FLAG_TY_NICKTMP (0x1000000): temporary nickname, the requested one is not checked yet */
+    var nick = user[1] + ((user[0] & 0x1000000) ? '<span style="color:#888;font-size:75%;margin-left:2px;vertical-align:super;font-style:normal">&#10033;</span>' : "");
 
     if (flags != 0) {
         name = "<span class='" + cl + "'><span class='" +

@@ -7,18 +7,18 @@
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details. You should have received a
- * copy of the GNU General Public License along with this program; if
- * not, write to the Free Software Foundation, Inc, 59 Temple Place -
- * Suite 330, Boston, MA 02111-1307, USA.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -255,12 +255,13 @@ function main() {
 
                     // retrieve list added users
                     $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
      WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d AND usr.code = %d;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_ADDED, $id);
                     if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
@@ -354,12 +355,13 @@ SELECT usr.*, guar.login AS guar_login
 
                     // retrieve list added users
                     $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
      WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d AND usr.code = %d;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_ADDED, $id);
                     if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
@@ -414,12 +416,13 @@ SELECT usr.*, guar.login AS guar_login
 
             // retrieve list added users
             $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
      WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d ORDER BY usr.lintm;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_ADDED);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
@@ -535,12 +538,13 @@ SELECT mail.*, usr.email AS email, user.login AS login
 
             // retrieve list added users
             $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
      WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d ORDER BY usr.lintm;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_MAILED);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
@@ -633,11 +637,12 @@ SELECT usr.*, guar.login AS guar_login
 
                 // retrieve list of active tournaments
                 $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
      WHERE usr.disa_reas = %d AND usr.code = %d;",
-                                   $G_dbpfx, $G_dbpfx,
+                                   $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                    USER_DIS_REA_NU_TOBECHK, $id);
                 if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                     log_crit("stat-day: select from tournaments failed");
@@ -646,36 +651,34 @@ SELECT usr.*, guar.login AS guar_login
                 $usr_obj = pg_fetch_object($usr_pg, 0);
 
                 printf("KEY: %s: %s %s<br>\n", $id, eschtml($value), eschtml($usr_obj->login));
-                /* new signup: the account already works with a temporary nickname,
-                   the requested one becomes the login and the "*" goes away */
-                if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP) {
-                    if ($usr_obj->nick_req === NULL || $usr_obj->nick_req == "") {
-                        echo "no nickname requested yet<br>";
-                        continue;
-                    }
-                    $nick_old = $usr_obj->login;
+                /* new signup: the account already works, with the chosen nickname
+                   as login; approved, the temporary nickname and the "*" go away
+                   and the others see the login */
+                if ($usr_obj->nick_tmp !== NULL) {
                     if ($bdb->user_nick_approve($usr_obj->code) == FALSE) {
-                        echo "fail nick approval (nickname already used ?)<br>";
+                        echo "fail nick approval<br>";
                         continue;
                     }
                     $subj = "Brisk: nickname approvato";
                     $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
 
-Il nickname \'%s\' che hai chiesto è stato approvato.
-D\' ora in poi entra con \'%s\' e la tua solita password
+Il nickname \'%s\' che hai scelto è stato approvato:
+da adesso tutti ti vedranno con questo nome
 (il nickname provvisorio \'%s\' non vale più).
+Continui a entrare con \'%s\' e la tua solita password.
 
-Saluti e buone partite, mop.', $usr_obj->nick_req, $usr_obj->nick_req, $nick_old);
+Saluti e buone partite, mop.', $usr_obj->login, $usr_obj->nick_tmp, $usr_obj->login);
                     $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
-Il nickname <b>\'%s\'</b> che hai chiesto è stato approvato.<br>
-D\' ora in poi entra con <b>\'%s\'</b> e la tua solita password
-(il nickname provvisorio \'%s\' non vale più).<br><br>
-Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($usr_obj->nick_req), eschtml($nick_old));
+Il nickname <b>\'%s\'</b> che hai scelto è stato approvato:<br>
+da adesso tutti ti vedono con questo nome
+(il nickname provvisorio \'%s\' non vale più).<br>
+Continui a entrare con <b>\'%s\'</b> e la tua solita password.<br><br>
+Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($usr_obj->nick_tmp), eschtml($usr_obj->login));
                     if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                     }
-                    printf("nickname %s approved, it was %s<br>\n", eschtml($usr_obj->nick_req), eschtml($nick_old));
-                    umgmt_log("accept-nick", $nick_old . " -> " . $usr_obj->nick_req);
+                    printf("nickname %s approved, it was seen as %s<br>\n", eschtml($usr_obj->login), eschtml($usr_obj->nick_tmp));
+                    umgmt_log("accept-nick", $usr_obj->nick_tmp . " -> " . $usr_obj->login);
                     continue;
                 }
                 /* change state first and the password after, in one transaction:
@@ -737,11 +740,12 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($usr_obj
 
                     // retrieve list added users
                     $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
      WHERE usr.disa_reas = %d AND usr.code = %d;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                        USER_DIS_REA_NU_TOBECHK, $id);
 
 
@@ -759,25 +763,19 @@ SELECT usr.*, guar.login AS guar_login
                     $usr_obj = pg_fetch_object($usr_pg, 0);
 
                     /* a moderator refuses the requested nickname, he does not delete */
-                    if (($usr_obj->type & USER_FLAG_TY_NICKTMP) != USER_FLAG_TY_NICKTMP
+                    if ($usr_obj->nick_tmp === NULL
                         && umgmt_admin_only($role, $status) == FALSE) {
                         $res = TRUE;
                         break;
                     }
 
                     /* new signup: the account stays with its temporary nickname, only
-                       the requested one is refused; the player can ask another one
-                       from nickreq.php */
-                    if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP
-                        && ($usr_obj->nick_req === NULL || $usr_obj->nick_req == "")) {
-                        $status .= sprintf("%s has not asked a nickname yet: nothing to refuse<br>",
-                                           eschtml($usr_obj->login));
-                        $res = TRUE;
-                        break;
-                    }
-                    if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP) {
-                        /* the request stays: the player keeps entering with the refused
-                           nickname until he asks another one from nickreq.php */
+                       the chosen one (the login) is refused; the player can ask
+                       another one from nickreq.php */
+                    if ($usr_obj->nick_tmp !== NULL) {
+                        /* the player keeps entering with the refused nickname, that
+                           nobody else can take, until he asks another one from
+                           nickreq.php */
                         $nick_page = sprintf("%s://%s/%s/nickreq.php", $G_proto, $G_domain, $G_webbase);
                         $subj = "Brisk: nickname rifiutato";
                         $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
@@ -786,12 +784,12 @@ Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.
 Scegline un altro qui: <%s>
 Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.
 
-Saluti e buone partite, mop.', $usr_obj->nick_req, $nick_page, $usr_obj->login);
+Saluti e buone partite, mop.', $usr_obj->login, $nick_page, $usr_obj->nick_tmp);
                         $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
 Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.<br>
 Scegline un altro qui:<br>%s<br>
 Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.<br><br>
-Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($nick_page), eschtml($usr_obj->login));
+Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($nick_page), eschtml($usr_obj->nick_tmp));
                         if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                             fprintf(STDERR, "ERROR: mail send FAILED\n");
                             break;
@@ -802,7 +800,7 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($nick_pa
                                             $G_dbpfx, USER_DIS_REA_NU_NICKREF, $usr_obj->code,
                                             USER_DIS_REA_NU_TOBECHK));
                         $status .= sprintf("nickname refused for %s: SUCCESS<br>", eschtml($usr_obj->login));
-                        umgmt_log("refuse-nick", $usr_obj->login . " (" . $usr_obj->nick_req . ")");
+                        umgmt_log("refuse-nick", $usr_obj->login . " (" . $usr_obj->nick_tmp . ")");
                         $res = TRUE;
                         break;
                     }
@@ -864,12 +862,12 @@ Saluti e buone partite, mop.', $usr_obj->login);
                         $bdb->transaction('ROLLBACK');
                     break;
                 }
-                if (($usr_obj->type & USER_FLAG_TY_NICKTMP) != USER_FLAG_TY_NICKTMP) {
+                if ($usr_obj->nick_tmp === NULL) {
                     if ($role == "admin")
                         printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, eschtml($usr_obj->login));
                 }
-                else if ($usr_obj->nick_req !== NULL && $usr_obj->nick_req != "")
-                    printf("Nickname %s refused, %s keeps playing with the temporary one<br>\n", eschtml($usr_obj->nick_req), eschtml($usr_obj->login));
+                else
+                    printf("Nickname %s refused, it keeps playing seen as %s<br>\n", eschtml($usr_obj->login), eschtml($usr_obj->nick_tmp));
             }
         }
         else if ($action == "ban" && $role == "moder" && !isset($_POST['f_single'])
@@ -892,8 +890,10 @@ Saluti e buone partite, mop.', $usr_obj->login);
                 if ($id <= 0)
                     continue;
 
-                $usr_sql = sprintf("SELECT * FROM %susers WHERE disa_reas IN (%d, %d) AND code = %d;",
-                                   $G_dbpfx, USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF, $id);
+                $usr_sql = sprintf("SELECT usr.*, tmp.nick AS nick_tmp FROM %susers AS usr
+                                        LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
+                                        WHERE usr.disa_reas IN (%d, %d) AND usr.code = %d;",
+                                   $G_dbpfx, $G_dbpfx, USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF, $id);
                 if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE
                     || pg_num_rows($usr_pg) != 1) {
                     printf("Inconsistency for code %d, skipped<br>\n", $id);
@@ -908,9 +908,9 @@ Saluti e buone partite, mop.', $usr_obj->login);
                     printf("Block of %s failed<br>\n", eschtml($usr_obj->login));
                     continue;
                 }
-                umgmt_log("ban", $usr_obj->login . " (" . (string)$usr_obj->nick_req . ") " . $usr_obj->email);
+                umgmt_log("ban", $usr_obj->login . " (" . (string)$usr_obj->nick_tmp . ") " . $usr_obj->email);
                 printf("%s refused and blocked: the e-mail cannot be used again<br>\n",
-                       eschtml($usr_obj->login . ($usr_obj->nick_req ? " (" . $usr_obj->nick_req . ")" : "")));
+                       eschtml($usr_obj->login . ($usr_obj->nick_tmp ? " (" . $usr_obj->nick_tmp . ")" : "")));
             }
         }
         $status .= ob_get_clean();
@@ -923,11 +923,12 @@ Saluti e buone partite, mop.', $usr_obj->login);
 
             // retrieve list of active tournaments
             $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login
+SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
+     LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
      WHERE usr.disa_reas IN (%d, %d) ORDER BY usr.lintm;",
-                               $G_dbpfx, $G_dbpfx,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                 log_crit("stat-day: select from tournaments failed");
@@ -960,9 +961,10 @@ SELECT usr.*, guar.login AS guar_login
                                       ($is_ref ? " style=\"color: #888;\"" : ""),
                                       ($is_ref ? "" : sprintf("<input name=\"f_newuser%d\" type=\"checkbox\" %s>",
                                                                $usr_obj->code, (($nocheck || $role != "admin") ? "" : "CHECKED"))),
-                                      eschtml($usr_obj->login) . (($usr_obj->type & USER_FLAG_TY_NICKTMP) ? "*" : ""),
-                                      ($is_ref ? "<s>" . eschtml((string)$usr_obj->nick_req) . "</s> refused, waiting for a new one"
-                                       : eschtml((string)$usr_obj->nick_req)),
+                                      ($usr_obj->nick_tmp !== NULL ? eschtml($usr_obj->nick_tmp) . "*" : eschtml($usr_obj->login)),
+                                      ($usr_obj->nick_tmp === NULL ? ""
+                                       : ($is_ref ? "<s>" . eschtml($usr_obj->login) . "</s> refused, waiting for a new one"
+                                          : eschtml($usr_obj->login))),
                                       eschtml($email), eschtml($usr_obj->guar_login),
                                       ($usr_obj->type & USER_FLAG_TY_APPR ? "Yes" : "No"),
                                       $usr_obj->lintm, $row_btns);

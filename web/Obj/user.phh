@@ -7,18 +7,18 @@
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details. You should have received a
- * copy of the GNU General Public License along with this program; if
- * not, write to the Free Software Foundation, Inc, 59 Temple Place -
- * Suite 330, Boston, MA 02111-1307, USA.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 require_once("{$G_base}Obj/transports.phh");
@@ -59,12 +59,19 @@ define('USER_FLAG_TY_NORM',    0x010000); // done
 define('USER_FLAG_TY_SUPER',   0x020000); // done
 define('USER_FLAG_TY_CERT',    0x040000); // done
 define('USER_FLAG_TY_APPR',    0x080000); // done
-define('USER_FLAG_TY_NICKTMP', 0x100000); // temporary nickname, the requested one waits for a check
+//                             0x100000      free: reserved for the moderators
 //  ... other usefull status ...
 define('USER_FLAG_TY_MODER',   0x100000); // moderator: accepts or refuses the new users in usermgmt.php
 define('USER_FLAG_TY_FIRONLY', 0x200000); // done
 define('USER_FLAG_TY_ADMIN',   0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
+
+/* temporary nickname of the easy signup, the requested one waits for a
+   check: never stored in users.type (out of USER_FLAG_TY_ALL), set when
+   the account is read with its row in users_nickreq
+   (BriskDB::nicktmp_fix()), and sent to the players with the other flags
+   (user_decorator() in commons.js shows it with a "*") */
+define('USER_FLAG_TY_NICKTMP', 0x1000000);
 
 // ... reasons for disabling account ...
 define('USER_DIS_REA_NONE',       0);
@@ -167,6 +174,9 @@ class User {
   public $table_token;// token that identify a game on a table
   public $flags;      // Bitfield with: AUTHENTICATE: 0x02 
   public $rec;        // field with user db record or FALSE
+  public $login;      // login of the authenticated account, "" for a guest: logs, mails
+                      // and bans use it; $name is what the others see, for an easy
+                      // signup the temporary nickname (users_vis.vis_login)
   public $the_end;    // Flag to change the end of the session
 
   public $chat_lst;      // Last chat line
@@ -199,6 +209,7 @@ class User {
     $thiz->idx_orig   = $idx;
     $thiz->code       = -1;
     $thiz->name       = $name;
+    $thiz->login      = "";
     $thiz->sess       = $sess;
     $thiz->ip         = $ip;
     $thiz->lacc       = time();
@@ -256,6 +267,7 @@ class User {
     $this->idx_orig   = $from->idx;
     $this->code       = $from->code;
     $this->name       = $from->name;
+    $this->login      = $from->login;
     $this->sess       = $from->sess;
     $this->ip         = $from->ip;
     $this->lacc       = $from->lacc;
@@ -322,6 +334,7 @@ class User {
     $thiz->idx_orig   = $from->idx;
     $thiz->code       = $from->code;
     $thiz->name       = $from->name;
+    $thiz->login      = $from->login;
     $thiz->sess       = $from->sess;
     $thiz->ip         = $from->ip;
     $thiz->lacc       = $from->lacc;
@@ -382,6 +395,16 @@ class User {
   function is_moder()
   {
       return (($this->flags & USER_FLAG_AUTH) && ($this->flags & USER_FLAG_TY_MODER));
+  }
+
+  /* the name for the logs: the login, and the name the others see when it
+     is a different one (an easy signup with its temporary nickname); the
+     name for a guest */
+  function name_log()
+  {
+      if ((string)$this->login == "" || strcasecmp($this->login, $this->name) == 0)
+          return ($this->name);
+      return (sprintf("%s(%s)", $this->login, $this->name));
   }
 
   function is_cert()
@@ -613,6 +636,7 @@ class User {
     $this->sess = "";
     self::unproxy_step($tmp_sess);
     $this->name = "";  // OK here
+    $this->login = "";
     while (array_pop($this->comm) != NULL);
     $this->step = 0;
     $this->chattime = array_fill(0, CHAT_N, 0);
@@ -640,9 +664,10 @@ class User {
       }
       $myname = xcape($this->name,ENT_COMPAT,"UTF-8");
       /* USER_FLAG_TY_NICKTMP: temporary nickname, shown with a "*" */
-      /* easy signup: the nickname asked for, to greet the player with it */
+      /* easy signup: the nickname chosen by the player, his login, to greet
+         him with it while the others see the temporary one */
       $myname_req = (($this->flags & USER_FLAG_TY_NICKTMP) && isset($this->rec) && is_object($this->rec)
-                     && isset($this->rec->nick_req) ? xcape($this->rec->nick_req, ENT_COMPAT, "UTF-8") : "");
+                     ? xcape($this->rec->login_get(), ENT_COMPAT, "UTF-8") : "");
       return (sprintf('window.myname_req = "%s"; ', $myname_req) .
               sprintf('window.myname = "%s"; window.myname_tmp = %d; $("myname").innerHTML = "<span class=\"%s\">%s%s</span>";',
                       $myname, (($this->flags & USER_FLAG_TY_NICKTMP) ? 1 : 0), $cl, $myname,

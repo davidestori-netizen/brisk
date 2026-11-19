@@ -7,18 +7,18 @@
    *                                  matteo.nastasi@milug.org
    *                          web: http://www.alternativeoutput.it
    *
-   * This program is free software; you can redistribute it and/or modify
-   * it under the terms of the GNU General Public License as published by
-   * the Free Software Foundation; either version 2 of the License, or
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published
+   * by the Free Software Foundation, either version 3 of the License, or
    * (at your option) any later version.
    *
    * This program is distributed in the hope that it will be useful, but
    * WITHOUT ANY WARRANTY; without even the implied warranty of
-   * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-   * General Public License for more details. You should have received a
-   * copy of the GNU General Public License along with this program; if
-   * not, write to the Free Software Foundation, Inc, 59 Temple Place -
-   * Suite 330, Boston, MA 02111-1307, USA.
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+   * Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
    *
    */
 
@@ -36,7 +36,8 @@ class LoginDBItem {
     public $guar_code;
     public $match_cnt;
     public $game_cnt;
-    public $nick_req = NULL;   // easy signup: the nickname asked for, while the temporary one is in use
+    public $nick_tmp = NULL;   // easy signup: the temporary nickname, until the login is approved
+    public $vis_login = NULL;  // the name the others see: nick_tmp if there is one, else login
 
     function __construct($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $tos_vers,
                          $disa_reas, $guar_code, $match_cnt, $game_cnt)
@@ -61,8 +62,10 @@ class LoginDBItem {
                                $rec->email, $rec->type, $rec->last_dona,
                                $rec->supp_comp, $rec->tos_vers, $rec->disa_reas, $rec->guar_code,
                                $rec->match_cnt, $rec->game_cnt);
-        if (isset($rec->nick_req))
-            $ret->nick_req = $rec->nick_req;
+        if (isset($rec->nick_tmp))
+            $ret->nick_tmp = $rec->nick_tmp;
+        if (isset($rec->vis_login))
+            $ret->vis_login = $rec->vis_login;
 
         return ($ret);
     }
@@ -75,6 +78,13 @@ class LoginDBItem {
     function login_get()
     {
         return $this->login;
+    }
+
+    /* the name the others see: the temporary nickname of an easy signup
+       until its login is approved, the login otherwise */
+    function vis_login_get()
+    {
+        return ($this->vis_login !== NULL ? $this->vis_login : $this->login);
     }
 
     function pass_get()

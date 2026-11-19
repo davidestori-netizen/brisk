@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - Obj/iscrizione.phh
+ *  brisk - Obj/signup.phh
  *
  *  Copyright (C) 2026      Davide Stori
  *                          mailto: davidestori@gmail.com
@@ -22,8 +22,8 @@
 
 /*
  *  Common functions of the easy signup ("Crea il tuo account"):
- *  iscriviti.php, nickreq.php, mailmgr.php, password_dimenticata.php,
- *  password_nuova.php.
+ *  signup.php, nickreq.php, mailmgr.php, forgotten_password.php,
+ *  new_password.php.
  */
 
 define('ISC_ACCENTS', 'àáèéìíòóùúÀÁÈÉÌÍÒÓÙÚ');
@@ -79,11 +79,11 @@ function isc_nick_check($bdb, $n)
     if (mb_strlen($n, 'UTF-8') < 2)
         return array('no', "Il nome deve avere almeno 2 caratteri.", "");
     if (mb_strlen($n, 'UTF-8') > 12)
-        return array('no', "Il nome puo' avere al massimo 12 caratteri.", "");
+        return array('no', "Il nome può avere al massimo 12 caratteri.", "");
     if (!preg_match('/^[A-Za-z0-9' . ISC_ACCENTS . ']+$/uD', $n))
         return array('no', "Usa solo lettere (anche accentate, come ò) e numeri, senza spazi o simboli.", "");
     if (isc_nick_forbidden($n))
-        return array('no', "Questo nome non e' permesso. Scegline un altro.", "");
+        return array('no', "Questo nome non è permesso. Scegline un altro.", "");
     if ($bdb->nick_is_free($n) == FALSE) {
         $sug = "";
         for ($i = 1 ; $i < 100 && $sug == "" ; $i++) {
@@ -91,7 +91,7 @@ function isc_nick_check($bdb, $n)
             if (isc_nick_shape($p) && $bdb->nick_is_free($p))
                 $sug = $p;
         }
-        return array('no', "Questo nome e' gia' usato da un altro giocatore.", $sug);
+        return array('no', "Questo nome è già usato da un altro giocatore.", $sug);
     }
     return array('ok', "Nome libero", "");
 }
@@ -123,11 +123,13 @@ function isc_clean_expired($bdb)
 {
     GLOBAL $G_dbpfx;
 
+    /* the signups of this page are the accounts with a requested nickname
+       (users_nicktmp); the row goes away with the account */
     $del_sql = sprintf("DELETE FROM %susers WHERE (type & (CAST (X'%08x' as integer))) = (CAST (X'%08x' as integer))
-                            AND (type & (CAST (X'%08x' as integer))) = (CAST (X'%08x' as integer))
+                            AND EXISTS (SELECT 1 FROM %susers_nicktmp WHERE ucode = code)
                             AND disa_reas = %d AND lintm < now() - interval '48 hours';",
                        $G_dbpfx, USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
-                       USER_FLAG_TY_NICKTMP, USER_FLAG_TY_NICKTMP, USER_DIS_REA_NU_MAILED);
+                       $G_dbpfx, USER_DIS_REA_NU_MAILED);
     $bdb->query($del_sql);
 }
 
@@ -143,25 +145,133 @@ function isc_style()
 {
 ?>
 <style>
-*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
-body{margin:0;background-color:#fafafa;background-image:url('img/brisk-bg.png');background-attachment:fixed;color:black;font-size:18px;line-height:1.45;font-family:Arial,Helvetica,sans-serif}
-.box{max-width:500px;margin:20px auto;background-color:white;background-image:url('img/brisk-bg-light.png');border:1px solid #777;border-radius:8px;padding:18px 18px 16px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
-.logo{text-align:center;margin:0 0 10px}.logo img{max-width:100%}
-h1{font-size:22px;margin:0 0 8px;text-align:center}p{margin:8px 0}
-label{display:block;font-weight:bold;margin:14px 0 5px}
-.riga{display:flex;gap:8px}
-input{width:100%;font:inherit;padding:9px;background-color:#f8f8f8;border:1px solid gray;border-radius:4px}
-input:focus{background-color:white;border-color:#ffae00;outline:none}
-input[readonly]{background-color:#eee}
-button,.btn{display:inline-block;font:inherit;border:1px solid gray;border-radius:4px;background-color:#f6f6f6;color:black;padding:9px 16px;cursor:pointer;text-decoration:none;text-align:center}
-button:hover,.btn:hover{background-color:white}button:active,.btn:active{background-color:#ffff99}
-.blu{width:100%;margin-top:18px;font-weight:bold}
-.occhio{white-space:nowrap}
-.piccolo{font-size:15px;color:#555}
-.err{background:#ffdddd;border:1px solid #d99;border-radius:6px;padding:9px 12px;margin:10px 0}
-.ok{background:#eaf6fc;border:1px solid #9ac4db;border-radius:6px;padding:9px 12px;margin:10px 0}
-.pw{font-size:28px;font-weight:bold;background:#eaf6fc;border:1px solid #9ac4db;border-radius:7px;padding:12px;text-align:center;word-break:break-all;margin:12px 0}
-.dopo{display:block;margin:14px auto 0;color:#555;text-align:center}
+* {
+    box-sizing: border-box;
+}
+html {
+    -webkit-text-size-adjust: 100%;
+}
+body {
+    margin: 0;
+    background-color: #fafafa;
+    background-image: url('img/brisk-bg.png');
+    background-attachment: fixed;
+    color: black;
+    font-size: 18px;
+    line-height: 1.45;
+    font-family: Arial,Helvetica,sans-serif;
+}
+.box {
+    max-width: 500px;
+    margin: 20px auto;
+    background-color: white;
+    background-image: url('img/brisk-bg-light.png');
+    border: 1px solid #777;
+    border-radius: 8px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
+.logo {
+    text-align: center;
+    margin: 0 0 10px;
+}
+.logo img {
+    max-width: 100%;
+}
+h1 {
+    font-size: 22px;
+    margin: 0 0 8px;
+    text-align: center;
+}
+p {
+    margin: 8px 0;
+}
+label {
+    display: block;
+    font-weight: bold;
+    margin: 14px 0 5px;
+}
+.riga {
+    display: flex;
+    gap: 8px;
+}
+input {
+    width: 100%;
+    font: inherit;
+    padding: 9px;
+    background-color: #f8f8f8;
+    border: 1px solid gray;
+    border-radius: 4px;
+}
+input:focus {
+    background-color: white;
+    border-color: #ffae00;
+    outline: none;
+}
+input[readonly] {
+    background-color: #eee;
+}
+button,.btn {
+    display: inline-block;
+    font: inherit;
+    border: 1px solid gray;
+    border-radius: 4px;
+    background-color: #f6f6f6;
+    color: black;
+    padding: 9px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}
+button:hover,.btn:hover {
+    background-color: white;
+}
+button:active,.btn:active {
+    background-color: #ffff99;
+}
+.blu {
+    width: 100%;
+    margin-top: 18px;
+    font-weight: bold;
+}
+.occhio {
+    white-space: nowrap;
+}
+.piccolo {
+    font-size: 15px;
+    color: #555;
+}
+.err {
+    background: #ffdddd;
+    border: 1px solid #d99;
+    border-radius: 6px;
+    padding: 9px 12px;
+    margin: 10px 0;
+}
+.ok {
+    background: #eaf6fc;
+    border: 1px solid #9ac4db;
+    border-radius: 6px;
+    padding: 9px 12px;
+    margin: 10px 0;
+}
+.passwd {
+    font-size: 28px;
+    font-weight: bold;
+    background: #eaf6fc;
+    border: 1px solid #9ac4db;
+    border-radius: 7px;
+    padding: 12px;
+    text-align: center;
+    word-break: break-all;
+    margin: 12px 0;
+}
+.dopo {
+    display: block;
+    margin: 14px auto 0;
+    color: #555;
+    text-align: center;
+}
 </style>
 <?php
 }
@@ -173,11 +283,23 @@ function isc_page_activated($nick)
     header('Cache-Control: no-store, max-age=0');
 ?><!doctype html>
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Attiva il tuo account</title><?php isc_style(); ?><style>body{font-size:20px}h1{font-size:25px}</style></head><body><div class="box">
+<title>Attiva il tuo account</title>
+<?php isc_style(); ?>
+<style>
+body {
+    font-size: 20px;
+}
+h1 {
+    font-size: 25px;
+}
+</style>
+</head>
+<body>
+<div class="box">
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
   <h1>Account attivato! &#127881;</h1>
   <div class="ok" style="text-align:center;font-size:21px">Benvenuto <b><?php echo isc_h($nick); ?></b>, ora puoi giocare.</div>
-  <p>Tocca il bottone qui sotto ed entra con il tuo nome e la tua password (li trovi anche nell'email).</p>
+  <p>Tocca il bottone qui sotto ed entra con il tuo nome e la tua password (se hai scelto di riceverla, la password è anche nell'email).</p>
   <p>Quando il browser chiede <b>«Vuoi salvare la password?»</b> tocca <b>Salva</b>: la prossima volta entri da solo.</p>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($nick); ?>">Entra a giocare</a>
 </div></body></html>
@@ -190,13 +312,25 @@ function isc_page_link_not_valid()
     header('Cache-Control: no-store, max-age=0');
 ?><!doctype html>
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Attiva il tuo account</title><?php isc_style(); ?><style>body{font-size:20px}h1{font-size:25px}</style></head><body><div class="box">
+<title>Attiva il tuo account</title>
+<?php isc_style(); ?>
+<style>
+body {
+    font-size: 20px;
+}
+h1 {
+    font-size: 25px;
+}
+</style>
+</head>
+<body>
+<div class="box">
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
   <h1>Link già usato o non valido</h1>
   <p>Forse avevi già attivato il tuo account: in quel caso entra pure con il tuo nome e la tua password.</p>
   <p>Il link vale 48 ore: se è passato, rifai l'iscrizione.</p>
   <a class="btn blu" href="index.php">Vai a giocare</a>
-  <a class="btn blu" href="iscriviti.php">Crea il tuo account</a>
+  <a class="btn blu" href="signup.php">Crea il tuo account</a>
 </div></body></html>
 <?php
 }

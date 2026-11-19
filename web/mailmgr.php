@@ -7,18 +7,18 @@
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details. You should have received a
- * copy of the GNU General Public License along with this program; if
- * not, write to the Free Software Foundation, Inc, 59 Temple Place -
- * Suite 330, Boston, MA 02111-1307, USA.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -44,7 +44,7 @@ require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
 require_once($G_base."Obj/singlemsg.phh");
-require_once($G_base."Obj/iscrizione.phh");
+require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
@@ -75,7 +75,7 @@ function main() {
 
             /* new signup (temporary nickname): the account works at once with the
                password chosen by the player; NU_TOBECHK stays as reason until the
-               requested nickname is checked in usermgmt.php */
+               login, the nickname chosen by the player, is checked in usermgmt.php */
             $is_nicktmp = (($usr_rec = $bdb->getrecord_bycode($mai->ucode)) != FALSE
                            && ($usr_rec->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP);
 
@@ -93,7 +93,8 @@ function main() {
             $bdb->transaction('COMMIT');
 
             if ($is_nicktmp) {
-                isc_page_activated(($usr_rec->nick_req != "" ? $usr_rec->nick_req : $usr_rec->login));
+                /* the login is the nickname chosen by the player */
+                isc_page_activated($usr_rec->login);
             }
             else {
                 singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Se il tuo nickname passerà il vaglio dei moderatori<br>riceverai una email con la password per accedere al sito.<br>Benvenuto!");

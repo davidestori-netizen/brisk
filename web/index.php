@@ -7,18 +7,18 @@
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details. You should have received a
- * copy of the GNU General Public License along with this program; if
- * not, write to the Free Software Foundation, Inc, 59 Temple Place -
- * Suite 330, Boston, MA 02111-1307, USA.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -366,7 +366,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
     GLOBAL $G_sidebanner, $G_sidebanner_idx;
-    GLOBAL $G_with_poll, $G_company_line;
+    GLOBAL $G_with_poll, $G_company_line, $G_brisk_version;
     GLOBAL $G_lang, $G_lng, $mlang_room;
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER, $_COOKIE;
     GLOBAL $G_base;
@@ -686,6 +686,9 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     $brisk_header_form = '<div class="container">'."\n".header_render('', $_cookie_law_3party);
 
     /* MLANG: ALL THE VERTICAL MENU */
+    /* "sources" points to the tag of the running version on github,
+       v$G_brisk_version (brisk.phh): the AGPL asks to offer the players the
+       source of what runs, so each installed version is tagged and pushed */
     $brisk_vertical_menu = '
 <!--  =========== vertical menu ===========  -->
 <div class="topmenu">
@@ -718,9 +721,9 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_comp'][$G_lang].'">'.$mlang_room['itm_comp'][$G_lang].'</a><br>
 
-<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#sources"
+<a target="_blank" href="https://github.com/nastasi/brisk/tree/v'.$G_brisk_version.'"
    onmouseover="menu_hide(0,1);"
-   title="'.$mlang_room['tit_src'][$G_lang].'">'.$mlang_room['itm_src'][$G_lang].'</a><br>
+   title="'.$mlang_room['tit_src'][$G_lang].' (v'.$G_brisk_version.')">'.$mlang_room['itm_src'][$G_lang].'</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#mailing"
    onmouseover="menu_hide(0,1);"
@@ -1142,8 +1145,8 @@ window.onload = function() {
     <tr><td colspan="2"><input id="sub" value="<?php echo $mlang_room['btn_enter'][$G_lang];?>" type="submit" class="button"></td></tr>
     </table>
     </form>
-    <div id="pw_dimenticata" style="max-width:600px;margin:10px auto;text-align:center;font-size:20px"><a href="password_dimenticata.php" onclick="var n = document.getElementById('nameid'), v = (n ? n.value.replace(/^\s+|\s+$/g, '') : ''); if (v != '') this.href = 'password_dimenticata.php?n=' + encodeURIComponent(v);" style="display:inline-block;margin:8px 6px;padding:6px 14px;border:1px solid #99aabb;border-radius:6px;background:#f4f4f4;color:#193747;font-size:17px;text-decoration:none">Password dimenticata?</a></div><br>
-    <div style="text-align:center;margin:-16px auto 10px"><button style="font-size:20px;padding:8px 18px;font-weight:bold;cursor:pointer;background:#e6f4ea;border:2px solid #7cb987;border-radius:6px;color:#1b4d2b" onclick="window.location.href = 'iscriviti.php'; return false;">Crea il tuo account</button></div>
+    <div id="forgotten_passwd" style="max-width:600px;margin:10px auto;text-align:center;font-size:20px"><a href="forgotten_password.php" onclick="var n = document.getElementById('nameid'), v = (n ? n.value.replace(/^\s+|\s+$/g, '') : ''); if (v != '') this.href = 'forgotten_password.php?n=' + encodeURIComponent(v);" style="display:inline-block;margin:8px 6px;padding:6px 14px;border:1px solid #99aabb;border-radius:6px;background:#f4f4f4;color:#193747;font-size:17px;text-decoration:none">Password dimenticata?</a></div><br>
+    <div style="text-align:center;margin:-16px auto 10px"><button style="font-size:20px;padding:8px 18px;font-weight:bold;cursor:pointer;background:#e6f4ea;border:2px solid #7cb987;border-radius:6px;color:#1b4d2b" onclick="window.location.href = 'signup.php'; return false;">Crea il tuo account</button></div>
     <?php echo $mlang_room['passwarn'][$G_lang];?><br><br>
 
          <br><br>
