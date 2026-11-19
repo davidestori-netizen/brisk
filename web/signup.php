@@ -133,6 +133,8 @@ function main()
     $key_t = hash('sha256', 'iscr-tempo|' . $G_alarm_passwd);
     $nickname = "";
     $nick_tmp = "";
+    $nicktmp_animal = "";
+    $nicktmp_adjective = "";
     $passwd = "";
     $mail = "";
     $error = "";
@@ -143,6 +145,8 @@ function main()
         $nickname = (isset($_POST['nickname']) ? isc_lower(trim((string)$_POST['nickname'])) : "");
         $passwd   = (isset($_POST['passwd'])   ? trim((string)$_POST['passwd'])   : "");
         $mail = (isset($_POST['mail']) ? trim((string)$_POST['mail']) : "");
+        $nicktmp_animal = (isset($_POST['nicktmp_animal']) ? (string)$_POST['nicktmp_animal'] : "");
+        $nicktmp_adjective = (isset($_POST['nicktmp_adjective']) ? (string)$_POST['nicktmp_adjective'] : "");
         $curtime  = (isset($_POST['curtime']) ? (string)$_POST['curtime']  : "");
         $tf   = (isset($_POST['tf'])   ? (string)$_POST['tf'] : "");
         /* the network guard of the old apprentice form, with the address seen by the web server */
@@ -175,8 +179,9 @@ function main()
         else if ($bdb->selfreg_check($remote_ip) == FALSE)
             $error = sprintf("Da questa connessione è già stato creato un account da poco. Se siete in due "
                               . "(per esempio marito e moglie), scrivi a %s e ti aiutiamo.", $G_admin_mail);
-        else if (($nick_tmp = $bdb->nick_fun_gen()) == FALSE)
-            $error = "Non è stato possibile creare l'account. Riprova tra poco.";
+        else if (($nick_tmp = $bdb->nick_fun_check($nicktmp_animal, $nicktmp_adjective)) === FALSE)
+            $error = "Il nickname provvisorio scelto è troppo lungo o è già usato da qualcun altro: "
+                     . "te ne abbiamo proposto un altro, puoi tenerlo o cambiarlo.";
         else {
             $bdb->transaction('BEGIN');
             $ok = FALSE;
@@ -217,6 +222,13 @@ function main()
                 $error = "Non è stato possibile creare l'account. Riprova tra poco.";
             }
         }
+    }
+
+    /* the temporary nickname shown in the two menus: the one chosen, or a free one at random */
+    $nicktmp_words = $bdb->nick_fun_words();
+    if (!$done && $bdb->nick_fun_check($nicktmp_animal, $nicktmp_adjective) === FALSE) {
+        if (($pair = $bdb->nick_fun_pick()) !== FALSE)
+            list($nicktmp_animal, $nicktmp_adjective) = $pair;
     }
 
     $curtime = (string)time();
@@ -270,6 +282,15 @@ function main()
         white-space: nowrap;
         font-size: 16px;
         padding: 8px 10px;
+    }
+    .nicktmp_row{
+        display: flex;
+        gap: 8px;
+    }
+    .nicktmp_row select{
+        flex: 1;
+        font-size: 20px;
+        padding: 9px;
     }
     .rules{
         background: #eaf6fc;
@@ -342,6 +363,21 @@ function main()
     <input id="nickname" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nickname provvisorio.</span></div>
 
+    <label for="nicktmp_animal">Il tuo nickname provvisorio</label>
+    <div class="nicktmp_row">
+      <select id="nicktmp_animal" name="nicktmp_animal">
+<?php foreach ($nicktmp_words['animals'] as $word) { ?>
+        <option value="<?php echo isc_h($word); ?>"<?php echo ($word === $nicktmp_animal ? ' selected' : ''); ?>><?php echo isc_h($word); ?></option>
+<?php } ?>
+      </select>
+      <select id="nicktmp_adjective" name="nicktmp_adjective">
+<?php foreach ($nicktmp_words['adjectives'] as $word) { ?>
+        <option value="<?php echo isc_h($word); ?>"<?php echo ($word === $nicktmp_adjective ? ' selected' : ''); ?>><?php echo isc_h($word); ?></option>
+<?php } ?>
+      </select>
+    </div>
+    <div class="result" id="enicktmp"><span class="piccolo">Finché i moderatori non controllano il tuo nickname, nel gioco ti vedono così. Puoi tenerlo o sceglierne un altro.</span></div>
+
     <label for="passwd">2. La tua password</label>
     <div class="passwd_row"><input id="passwd" name="passwd" type="text" maxlength="30" value="<?php echo isc_h($passwd); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
       <button type="button" id="occhio">Nascondi</button></div>
@@ -383,6 +419,23 @@ function main()
     $('occhio').onclick = function () { var c = $('passwd'); if (c.type === 'text') { c.type = 'password'; this.textContent = 'Mostra'; } else { c.type = 'text'; this.textContent = 'Nascondi'; } };
     $('full_rules').onclick = function (e) { e.preventDefault(); var t = $('content'); t.style.display = t.style.display === 'block' ? 'none' : 'block'; };
     $('f').addEventListener('submit', function () { $('create').disabled = true; $('create').textContent = 'Un momento...'; });
+    function nicktmp_show() {
+        var nick = $('nicktmp_animal').value + $('nicktmp_adjective').value;
+        var line = document.createElement('span');
+
+        if (nick.length > 12) {
+            line.className = 'no';
+            line.textContent = '\u274c ' + nick + ' è troppo lungo: scegli un\'altra parola';
+        }
+        else {
+            line.className = 'yes';
+            line.textContent = 'Ti vedranno come ' + nick;
+        }
+        $('enicktmp').innerHTML = '';
+        $('enicktmp').appendChild(line);
+    }
+    $('nicktmp_animal').addEventListener('change', nicktmp_show);
+    $('nicktmp_adjective').addEventListener('change', nicktmp_show);
     if ($('nickname').value)
         $('nickname').dispatchEvent(new Event('input'));
   })();

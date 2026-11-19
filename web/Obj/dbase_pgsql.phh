@@ -429,26 +429,52 @@ class BriskDB
         return (pg_num_rows($nick_pg) == 0);
     }
 
-    /* a nice temporary nickname, like "GattoFurbo": letters only, 12 at most, free */
-    function nick_fun_gen()
+    /* the words of the temporary nickname of an easy signup: an animal
+       and an adjective, like "GattoFurbo" */
+    function nick_fun_words()
     {
-        $animals = array('Gatto', 'Cane', 'Orso', 'Lupo', 'Gufo', 'Riccio', 'Merlo', 'Tasso',
-                         'Falco', 'Topo', 'Cigno', 'Grillo', 'Ghiro', 'Leone', 'Polpo', 'Panda',
-                         'Koala', 'Fagiano', 'Delfino', 'Passero', 'Castoro', 'Pavone');
-        $adjs = array('Furbo', 'Allegro', 'Elegante', 'Pigro', 'Saggio', 'Curioso', 'Gentile',
-                      'Ribelle', 'Timido', 'Goloso', 'Distratto', 'Romantico', 'Simpatico',
-                      'Sereno', 'Felice', 'Audace', 'Fiero', 'Buffo', 'Tenero', 'Sognatore');
+        $animals = array(
+            'Gatto', 'Cane', 'Orso', 'Lupo', 'Gufo', 'Riccio', 'Merlo', 'Tasso', 'Falco',
+            'Topo', 'Cigno', 'Grillo', 'Ghiro', 'Leone', 'Polpo', 'Panda', 'Koala', 'Fagiano',
+            'Delfino', 'Passero', 'Castoro', 'Pavone');
+        $adjectives = array(
+            'Furbo', 'Allegro', 'Elegante', 'Pigro', 'Saggio', 'Curioso', 'Gentile', 'Ribelle',
+            'Timido', 'Goloso', 'Distratto', 'Romantico', 'Simpatico', 'Sereno', 'Felice',
+            'Audace', 'Fiero', 'Buffo', 'Tenero', 'Sognatore');
+
+        return (array('animals' => $animals, 'adjectives' => $adjectives));
+    }
+
+    /* the temporary nickname made of $animal and $adjective when both are
+       words of nick_fun_words(), it has 12 letters at most and it is free;
+       FALSE otherwise */
+    function nick_fun_check($animal, $adjective)
+    {
+        $words = $this->nick_fun_words();
+
+        if (!in_array($animal, $words['animals'], TRUE) || !in_array($adjective, $words['adjectives'], TRUE))
+            return FALSE;
+        $nick = $animal . $adjective;
+        if (strlen($nick) > 12 || login_consistency($nick) == FALSE)
+            return FALSE;
+        if ($this->nick_is_free($nick) == FALSE)
+            return FALSE;
+
+        return ($nick);
+    }
+
+    /* a free temporary nickname chosen at random, to show it already
+       selected in the signup page: array(animal, adjective), or FALSE when
+       none of the pairs tried is free */
+    function nick_fun_pick()
+    {
+        $words = $this->nick_fun_words();
 
         for ($i = 0 ; $i < 60 ; $i++) {
-            $nick = $animals[mt_rand(0, count($animals) - 1)] . $adjs[mt_rand(0, count($adjs) - 1)];
-            if ($i >= 30) {
-                /* all the tried pairs are taken: add two digits */
-                $nick = substr($nick, 0, 10) . mt_rand(10, 99);
-            }
-            if (strlen($nick) > 12 || login_consistency($nick) == FALSE)
-                continue;
-            if ($this->nick_is_free($nick))
-                return ($nick);
+            $animal = $words['animals'][mt_rand(0, count($words['animals']) - 1)];
+            $adjective = $words['adjectives'][mt_rand(0, count($words['adjectives']) - 1)];
+            if ($this->nick_fun_check($animal, $adjective) !== FALSE)
+                return (array($animal, $adjective));
         }
 
         return FALSE;
