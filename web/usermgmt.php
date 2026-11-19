@@ -99,8 +99,10 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'Refuse and block'),
                       'mg_ban_ask'     => array( 'it' => 'Rifiutare e bloccare %s?',
                                                  'en' => 'Refuse and block %s?'),
-                      'mg_refused'     => array( 'it' => 'nome rifiutato, in attesa di uno nuovo',
-                                                 'en' => 'refused, waiting for a new one'),
+                      'mg_refused'     => array( 'it' => 'nome rifiutato',
+                                                 'en' => 'refused'),
+                      'mg_date_fmt'    => array( 'it' => 'd/m/Y H:i',
+                                                 'en' => 'Y-m-d H:i'),
                       'mg_checked'     => array( 'it' => 'Giocatori selezionati:',
                                                  'en' => 'Checked players:'),
                       'mg_none'        => array( 'it' => 'Nessun giocatore selezionato.',
@@ -269,6 +271,12 @@ $s_style = "
      table.the_tab td {
             border: 1px solid black;
             padding: 8px;
+            }
+
+     table.the_tab th {
+            border: 1px solid black;
+            padding: 4px 8px;
+            background: #eee;
             }
 
      table.the_tab td.email {
@@ -1061,7 +1069,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                                       ($usr_obj->nick_tmp !== NULL ? eschtml($usr_obj->nick_tmp) . "*" : ""),
                                       eschtml($email), eschtml($usr_obj->guar_login),
                                       eschtml(umgmt_txt($usr_obj->type & USER_FLAG_TY_APPR ? 'mg_yes' : 'mg_no')),
-                                      $usr_obj->lintm, $row_btns);
+                                      date(umgmt_txt('mg_date_fmt'), strtotime($usr_obj->lintm)), $row_btns);
             }
             ?>
 <html>
