@@ -419,20 +419,86 @@ function main()
   <a class="dopo" href="index.php">Torna all'ingresso</a>
   <script>
   (function () {
-    function $(i) { return document.getElementById(i); }
-    function chiedi(u, cb) { var x = new XMLHttpRequest(); x.open('GET', u, true); x.onload = function () { try { cb(JSON.parse(x.responseText)); } catch (e) { } }; x.send(null); }
-    function mostra(el, r, campo) {
-      el.innerHTML = '';
-      var s = document.createElement('span'); s.className = r.stato === 'ok' ? 'yes' : 'no'; s.textContent = (r.stato === 'ok' ? '\u2705 ' : '\u274c ') + r.msg; el.appendChild(s);
-      if (r.sug) { var a = document.createElement('span'); a.className = 'sug'; a.textContent = r.sug; a.onclick = function () { campo.value = r.sug; campo.dispatchEvent(new Event('input')); }; el.appendChild(a); }
+    var nickname_timer = null;
+    var mail_timer = null;
+
+    function $(id) {
+        return document.getElementById(id);
     }
-    var tn = null, tm = null;
-    $('nickname').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tn); if (!v) return;
-      tn = setTimeout(function () { chiedi('signup.php?nickname=' + encodeURIComponent(v), function (r) { mostra($('enickname'), r, $('nickname')); }); }, 400); });
-    $('mail').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tm); if (v.indexOf('@') < 1 || v.indexOf('.') < 0) return;
-      tm = setTimeout(function () { chiedi('signup.php?mail=' + encodeURIComponent(v), function (r) { mostra($('email'), r, $('mail')); }); }, 700); });
-    $('passwd').addEventListener('input', function () { var l = this.value.trim().length;
-      $('epasswd').innerHTML = l === 0 ? '' : (l < 6 ? '<span class="no">\u274c Ancora ' + (6 - l) + ' caratteri</span>' : '<span class="yes">\u2705 Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>'); });
+
+    /* asks the page for a check (json answer) and gives the answer to callback */
+    function ask(url, callback) {
+        var request = new XMLHttpRequest();
+
+        request.open('GET', url, true);
+        request.onload = function () {
+            try {
+                callback(JSON.parse(request.responseText));
+            }
+            catch (error) {
+            }
+        };
+        request.send(null);
+    }
+
+    /* the answer of a check under its field, with the suggestion to click */
+    function show_result(box, result, field) {
+        var line = document.createElement('span');
+        var suggestion;
+
+        box.innerHTML = '';
+        line.className = (result.stato === 'ok' ? 'yes' : 'no');
+        line.textContent = (result.stato === 'ok' ? '✅ ' : '❌ ') + result.msg;
+        box.appendChild(line);
+        if (result.sug) {
+            suggestion = document.createElement('span');
+            suggestion.className = 'sug';
+            suggestion.textContent = result.sug;
+            suggestion.onclick = function () {
+                field.value = result.sug;
+                field.dispatchEvent(new Event('input'));
+            };
+            box.appendChild(suggestion);
+        }
+    }
+
+    $('nickname').addEventListener('input', function () {
+        var value = this.value.trim();
+
+        clearTimeout(nickname_timer);
+        if (!value)
+            return;
+        nickname_timer = setTimeout(function () {
+            ask('signup.php?nickname=' + encodeURIComponent(value), function (result) {
+                show_result($('enickname'), result, $('nickname'));
+            });
+        }, 400);
+    });
+
+    $('mail').addEventListener('input', function () {
+        var value = this.value.trim();
+
+        clearTimeout(mail_timer);
+        if (value.indexOf('@') < 1 || value.indexOf('.') < 0)
+            return;
+        mail_timer = setTimeout(function () {
+            ask('signup.php?mail=' + encodeURIComponent(value), function (result) {
+                show_result($('email'), result, $('mail'));
+            });
+        }, 700);
+    });
+
+    $('passwd').addEventListener('input', function () {
+        var length = this.value.trim().length;
+
+        if (length === 0)
+            $('epasswd').innerHTML = '';
+        else if (length < 6)
+            $('epasswd').innerHTML = '<span class="no">❌ Ancora ' + (6 - length) + ' caratteri</span>';
+        else
+            $('epasswd').innerHTML = '<span class="yes">✅ Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>';
+    });
+
     $('occhio').onclick = function () {
         var show = ($('passwd').type === 'password');
 
@@ -440,6 +506,7 @@ function main()
         $('passwd2').type = (show ? 'text' : 'password');
         this.textContent = (show ? 'Nascondi' : 'Mostra');
     };
+
     $('passwd2').addEventListener('input', function () {
         var line = document.createElement('span');
 
@@ -448,16 +515,27 @@ function main()
             return;
         if (this.value === $('passwd').value) {
             line.className = 'yes';
-            line.textContent = '\u2705 Le due password sono uguali';
+            line.textContent = '✅ Le due password sono uguali';
         }
         else {
             line.className = 'no';
-            line.textContent = '\u274c Le due password non sono uguali';
+            line.textContent = '❌ Le due password non sono uguali';
         }
         $('epasswd2').appendChild(line);
     });
-    $('full_rules').onclick = function (e) { e.preventDefault(); var t = $('content'); t.style.display = t.style.display === 'block' ? 'none' : 'block'; };
-    $('f').addEventListener('submit', function () { $('create').disabled = true; $('create').textContent = 'Un momento...'; });
+
+    $('full_rules').onclick = function (event) {
+        var content = $('content');
+
+        event.preventDefault();
+        content.style.display = (content.style.display === 'block' ? 'none' : 'block');
+    };
+
+    $('f').addEventListener('submit', function () {
+        $('create').disabled = true;
+        $('create').textContent = 'Un momento...';
+    });
+
     var nicktmp_pairs = <?php echo json_encode($nicktmp_pairs); ?>;
 
     function nicktmp_show() {
