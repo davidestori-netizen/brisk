@@ -957,6 +957,12 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                                     . "<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
                                     $usr_obj->code, $usr_obj->code, ($role == "admin" ? "Delete" : "Refuse nickname"),
                                     $usr_obj->code, eschtml(addslashes($usr_obj->login)));
+                /* a moderator does not delete: on an account without a temporary
+                   nickname there is no nickname to refuse, so no button for it */
+                if ($role != "admin" && $usr_obj->nick_tmp === NULL)
+                    $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">Accept</button> "
+                                        . "<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
+                                        $usr_obj->code, $usr_obj->code, eschtml(addslashes($usr_obj->login)));
                 /* refused nickname: nothing to accept until the player asks another one */
                 if ($is_ref)
                     $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
