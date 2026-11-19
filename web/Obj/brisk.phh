@@ -1758,12 +1758,13 @@ class Brisk
               $mesg = sprintf($mlang_brisk['inf_self'][$G_lang]);
               break;
           }
-          if (($user_item = $bdb->getitem_bylogin($target, $user_code)) == FALSE) {
+          /* the target is the name the player sees (vis_login) */
+          if (($user_item = $bdb->getitem_byvislogin($target, $user_code)) == FALSE) {
               $ret = 4;
               break;
           }
           if (($guar_item = $bdb->getitem_bycode($user_item->guar_code_get())) != FALSE) {
-              $guar_login = $guar_item->login_get();
+              $guar_login = $guar_item->vis_login_get();   // shown to the player
           }
           else {
               $guar_login = "";
@@ -2179,6 +2180,7 @@ class Brisk
                       ) {
                           // Remove auth if name changed (and the temporary nickname, out of TY_ALL)
                           $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL | USER_FLAG_TY_NICKTMP);
+                          $user->login = "";
                           for ($i = 0 ; $i < TABLES_N ; $i++) {
                               $to_user .= $this->table[$i]->act_content($user);
                           }
@@ -2509,10 +2511,12 @@ class Brisk
 
               if ($authenticate != FALSE) {
                   $user_type = $authenticate->type_get();
-                  /* easy signup: entered with the requested nickname, plays with
-                     the temporary one, that is the login of the account */
-                  if (strcasecmp($authenticate->login_get(), $name_new) != 0) {
-                      $name_new = $authenticate->login_get();
+                  /* easy signup: entered with his login, the nickname he chose,
+                     the player is seen with the temporary one until the login is
+                     approved (users_vis.vis_login): from here on that is his name
+                     in the room, the login goes in ->login */
+                  if (strcasecmp($authenticate->vis_login_get(), $name_new) != 0) {
+                      $name_new = $authenticate->vis_login_get();
                   }
               }
               else {
@@ -2615,6 +2619,8 @@ class Brisk
               $this->user[$idx]->sess = $sess;
           }
           $this->user[$idx]->name = $name_new; // OK - add new user
+          /* the login of the account; name_new is the name the others see */
+          $this->user[$idx]->login = ($authenticate != FALSE ? $authenticate->login_get() : "");
           $this->user[$idx]->stat_set("room");
           $this->user[$idx]->step_set(0);
           while (array_pop($this->user[$idx]->comm) != NULL);
@@ -3440,7 +3446,7 @@ function log_legal($curtime, $addr, $user, $where, $mesg)
         /* Unix time | session | nickname | IP | where was | mesg */
         fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, ($user ? $user->sess : "NOSESS"),
         ($user ? ($user->is_auth() ? 'A' : 'N') : "U"),
-        ($user ? $user->name : "NO-USER"), $addr, $where , $mesg));
+        ($user ? $user->name_log() : "NO-USER"), $addr, $where , $mesg));
         fclose($fp);
     }
 }

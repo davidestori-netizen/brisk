@@ -172,6 +172,9 @@ class User {
   public $table_token;// token that identify a game on a table
   public $flags;      // Bitfield with: AUTHENTICATE: 0x02 
   public $rec;        // field with user db record or FALSE
+  public $login;      // login of the authenticated account, "" for a guest: logs, mails
+                      // and bans use it; $name is what the others see, for an easy
+                      // signup the temporary nickname (users_vis.vis_login)
   public $the_end;    // Flag to change the end of the session
 
   public $chat_lst;      // Last chat line
@@ -204,6 +207,7 @@ class User {
     $thiz->idx_orig   = $idx;
     $thiz->code       = -1;
     $thiz->name       = $name;
+    $thiz->login      = "";
     $thiz->sess       = $sess;
     $thiz->ip         = $ip;
     $thiz->lacc       = time();
@@ -261,6 +265,7 @@ class User {
     $this->idx_orig   = $from->idx;
     $this->code       = $from->code;
     $this->name       = $from->name;
+    $this->login      = $from->login;
     $this->sess       = $from->sess;
     $this->ip         = $from->ip;
     $this->lacc       = $from->lacc;
@@ -327,6 +332,7 @@ class User {
     $thiz->idx_orig   = $from->idx;
     $thiz->code       = $from->code;
     $thiz->name       = $from->name;
+    $thiz->login      = $from->login;
     $thiz->sess       = $from->sess;
     $thiz->ip         = $from->ip;
     $thiz->lacc       = $from->lacc;
@@ -382,6 +388,16 @@ class User {
   function is_auth()
   {
       return ($this->flags & USER_FLAG_AUTH);
+  }
+
+  /* the name for the logs: the login, and the name the others see when it
+     is a different one (an easy signup with its temporary nickname); the
+     name for a guest */
+  function name_log()
+  {
+      if ((string)$this->login == "" || strcasecmp($this->login, $this->name) == 0)
+          return ($this->name);
+      return (sprintf("%s(%s)", $this->login, $this->name));
   }
 
   function is_cert()
@@ -613,6 +629,7 @@ class User {
     $this->sess = "";
     self::unproxy_step($tmp_sess);
     $this->name = "";  // OK here
+    $this->login = "";
     while (array_pop($this->comm) != NULL);
     $this->step = 0;
     $this->chattime = array_fill(0, CHAT_N, 0);
@@ -640,9 +657,10 @@ class User {
       }
       $myname = xcape($this->name,ENT_COMPAT,"UTF-8");
       /* USER_FLAG_TY_NICKTMP: temporary nickname, shown with a "*" */
-      /* easy signup: the nickname asked for, to greet the player with it */
+      /* easy signup: the nickname chosen by the player, his login, to greet
+         him with it while the others see the temporary one */
       $myname_req = (($this->flags & USER_FLAG_TY_NICKTMP) && isset($this->rec) && is_object($this->rec)
-                     && isset($this->rec->nick_req) ? xcape($this->rec->nick_req, ENT_COMPAT, "UTF-8") : "");
+                     ? xcape($this->rec->login_get(), ENT_COMPAT, "UTF-8") : "");
       return (sprintf('window.myname_req = "%s"; ', $myname_req) .
               sprintf('window.myname = "%s"; window.myname_tmp = %d; $("myname").innerHTML = "<span class=\"%s\">%s%s</span>";',
                       $myname, (($this->flags & USER_FLAG_TY_NICKTMP) ? 1 : 0), $cl, $myname,

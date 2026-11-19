@@ -124,9 +124,9 @@ function isc_clean_expired($bdb)
     GLOBAL $G_dbpfx;
 
     /* the signups of this page are the accounts with a requested nickname
-       (users_nickreq); the row goes away with the account */
+       (users_nicktmp); the row goes away with the account */
     $del_sql = sprintf("DELETE FROM %susers WHERE (type & (CAST (X'%08x' as integer))) = (CAST (X'%08x' as integer))
-                            AND EXISTS (SELECT 1 FROM %susers_nickreq WHERE ucode = code)
+                            AND EXISTS (SELECT 1 FROM %susers_nicktmp WHERE ucode = code)
                             AND disa_reas = %d AND lintm < now() - interval '48 hours';",
                        $G_dbpfx, USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                        $G_dbpfx, USER_DIS_REA_NU_MAILED);

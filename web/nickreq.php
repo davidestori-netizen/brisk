@@ -22,8 +22,9 @@
 
 /*
  *  A player that still plays with a temporary nickname (USER_FLAG_TY_NICKTMP)
- *  asks for another nickname, i.e. after the first one has been refused.
- *  The request is checked by hand in usermgmt.php, like the first one.
+ *  asks for another nickname, i.e. after the first one has been refused:
+ *  it becomes his login, and is checked by hand in usermgmt.php like the
+ *  first one; the others keep seeing the temporary nickname until then.
  */
 
 foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
@@ -84,8 +85,7 @@ function main()
             break;
         }
 
-        if ($login == "" || (($usr = $bdb->getrecord_bylogin($login)) == FALSE
-                             && ($usr = $bdb->getrecord_bynickreq($login)) == FALSE)
+        if ($login == "" || ($usr = $bdb->getrecord_bylogin($login)) == FALSE
             || strcmp($usr->pass, md5($pass)) != 0
             || ($usr->type & USER_FLAG_TY_NICKTMP) != USER_FLAG_TY_NICKTMP) {
             $msg = "Nome o password sbagliati.";
@@ -99,7 +99,7 @@ function main()
             break;
         }
 
-        if ($bdb->user_nick_req_set($usr->code, $nick) == FALSE) {
+        if ($bdb->user_login_change($usr->code, $nick) == FALSE) {
             $msg = "E' occorso un errore, riprova più tardi.";
             break;
         }

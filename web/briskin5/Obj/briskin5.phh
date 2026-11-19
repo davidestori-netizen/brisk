@@ -1273,7 +1273,7 @@ class Bin5 {
                         $remcalc = $this->table[0]->exitlock_calc($this->user, $user_cur->table_pos);
                         if ($remcalc < 3) {
                             require_once("{$G_base}Obj/hardban.phh");
-                            Hardbans::add(($user_cur->is_auth() ? $user_cur->name : FALSE),
+                            Hardbans::add(($user_cur->is_auth() ? $user_cur->login : FALSE),
                                           $user_cur->ip, $user_cur->sess, $user_cur->laccwr + BAN_TIME);
                         }
                         //      $user->bantime = $user->laccwr + BAN_TIME;

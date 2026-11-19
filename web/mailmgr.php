@@ -75,7 +75,7 @@ function main() {
 
             /* new signup (temporary nickname): the account works at once with the
                password chosen by the player; NU_TOBECHK stays as reason until the
-               requested nickname is checked in usermgmt.php */
+               login, the nickname chosen by the player, is checked in usermgmt.php */
             $is_nicktmp = (($usr_rec = $bdb->getrecord_bycode($mai->ucode)) != FALSE
                            && ($usr_rec->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP);
 
@@ -93,7 +93,8 @@ function main() {
             $bdb->transaction('COMMIT');
 
             if ($is_nicktmp) {
-                isc_page_activated(($usr_rec->nick_req != "" ? $usr_rec->nick_req : $usr_rec->login));
+                /* the login is the nickname chosen by the player */
+                isc_page_activated($usr_rec->login);
             }
             else {
                 singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Se il tuo nickname passerà il vaglio dei moderatori<br>riceverai una email con la password per accedere al sito.<br>Benvenuto!");

@@ -457,7 +457,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
                     if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
                         /* Unix time | session | nickname | IP | where was | mesg */
-                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(trim(urldecode($cli_name))), xcapelt(trim(urldecode($cli_email)))));
+                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->login), xcapelt(trim(urldecode($cli_name))), xcapelt(trim(urldecode($cli_email)))));
                         fclose($fp);
                     }
                     Warrant::unlock_data($wa_lock);
@@ -520,9 +520,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                                             $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
                     $subj = $mlang_indwr['nu_msubj'][$G_lang];
                     $body_txt = sprintf($mlang_indwr['nu_mtext'][$G_lang],
-                                        $user->name, $cli_name, $confirm_page);
+                                        $user->login, $cli_name, $confirm_page);
                     $body_htm = sprintf($mlang_indwr['nu_mhtml'][$G_lang],
-                                        $user->name, $cli_name, $confirm_page);
+                                        $user->login, $cli_name, $confirm_page);
 
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
@@ -576,7 +576,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (($bdb = BriskDB::create()) != FALSE) {
                     $bdb->users_load();
 
-                    if (($ema = $bdb->getmail($user->name)) != FALSE) {
+                    /* by login: the name in the room can be a temporary nickname */
+                    if (($ema = $bdb->getmail($user->login)) != FALSE) {
                         //  mail("nastasi",
                         /* php8: mbstring.func_overload was removed, so mail() is no
                            longer remapped onto mb_send_mail(): the subject and
@@ -585,7 +586,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                            RFC 5322). */
                         if (brisk_mail($G_admin_mail, 'Brisk Team',
                                        urldecode($cli_subj), urldecode($cli_mesg),
-                                       urldecode($cli_mesg), ["Utente Brisk {$user->name}", $ema]) == FALSE) {
+                                       urldecode($cli_mesg), ["Utente Brisk {$user->login}", $ema]) == FALSE) {
                                        # urldecode($cli_mesg), NULL) == FALSE) {
                             // mail error
                             fprintf(STDERR, "ERROR: mail send FAILED\n");
@@ -600,7 +601,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                     if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
                         /* Unix time | session | nickname | IP | where was | mesg */
-                        fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name,
+                        fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name_log(),
                                             xcapelt(urldecode($cli_subj)), xcapelt(urldecode($cli_mesg))));
                         fclose($fp);
                     }
@@ -903,7 +904,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 // if ($user->bantime > $user->laccwr) {
                 require_once("Obj/hardban.phh");
 
-                if (($bantime = Hardbans::check(($user->is_auth() ? $user->name : FALSE),
+                /* the ban follows the login: it stays if meanwhile a temporary
+                   nickname of an easy signup gets approved */
+                if (($bantime = Hardbans::check(($user->is_auth() ? $user->login : FALSE),
                                                 $user->ip, $user->sess)) != -1) {
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                     /* MLANG: "<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", "resta in piedi.", "<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ".secstoword($bantime - $user->laccwr)." prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere." */

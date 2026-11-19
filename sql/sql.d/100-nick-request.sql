@@ -1,27 +1,36 @@
 --
---  Nickname requested at signup: the player plays at once with a
---  temporary nickname and the requested one waits here for a check in
---  usermgmt.php. An account has the temporary nickname while it has a row
---  here: USER_FLAG_TY_NICKTMP (0x1000000) is not stored in users.type, the
---  code sets it when it reads the row (BriskDB::nicktmp_fix()). A table
---  of its own, one row per account with a request, instead of a column of
---  users: the queries that need it read users LEFT JOIN users_nickreq.
---  The row goes away with its account (ON DELETE CASCADE) and when the
---  nickname is approved.
+--  Easy signup: the account is made at once with the nickname the player
+--  chose as its login (users.login, its identity), and plays under a
+--  temporary nickname until a moderator approves the chosen one in
+--  usermgmt.php. The temporary nickname lives here, one row per account
+--  that still has it; users is not changed. Approving the nickname deletes
+--  the row; the row goes away with its account too (ON DELETE CASCADE).
 --
---  A database that ran the first version of this file has the column
---  users.nick_req, and the temporary nickname stored as 0x100000 in
---  users.type, the bit now kept for the moderators: move the values here,
---  drop the column and clear the bit by hand, before any moderator is set,
---  with
---    INSERT INTO #PFX#users_nickreq (ucode, nick)
---        SELECT code, nick_req FROM #PFX#users WHERE nick_req IS NOT NULL;
---    ALTER TABLE #PFX#users DROP COLUMN nick_req;
+--  USER_FLAG_TY_NICKTMP (0x1000000) is not stored in users.type: the code
+--  sets it when it reads an account that has a row here
+--  (BriskDB::nicktmp_fix()).
+--
+--  The name the other players see is users_vis.vis_login: the temporary
+--  nickname while there is one, the login otherwise. Everything public
+--  (room, tables, rankings) uses it; logs, mails and bans use the login.
+--  PostgreSQL expands "u.*" when the view is made: a column added later to
+--  users shows in the view only after running this file again.
+--
+--  A database that ran an older version of this file has to drop what it
+--  made by hand, before running this one:
+--    ALTER TABLE #PFX#users DROP COLUMN IF EXISTS nick_req;
+--    DROP TABLE IF EXISTS #PFX#users_nickreq;
 --    UPDATE #PFX#users SET type = type & ~(CAST (X'00100000' as integer));
+--  (its pending signups have the temporary nickname as login: they have
+--  to be fixed by hand or signed up again)
 --
-CREATE TABLE IF NOT EXISTS #PFX#users_nickreq (
+CREATE TABLE IF NOT EXISTS #PFX#users_nicktmp (
        ucode      integer PRIMARY KEY REFERENCES #PFX#users (code) ON DELETE CASCADE,
        nick       text NOT NULL,
        ctime      timestamp DEFAULT now() NOT NULL
        );
-CREATE INDEX IF NOT EXISTS #PFX#users_nickreq_nick ON #PFX#users_nickreq (lower(nick));
+CREATE UNIQUE INDEX IF NOT EXISTS #PFX#users_nicktmp_nick ON #PFX#users_nicktmp (lower(nick));
+
+CREATE OR REPLACE VIEW #PFX#users_vis AS
+    SELECT u.*, t.nick AS nick_tmp, coalesce(t.nick, u.login) AS vis_login
+        FROM #PFX#users AS u LEFT JOIN #PFX#users_nicktmp AS t ON t.ucode = u.code;

@@ -25,10 +25,11 @@
  *  it replaces the apprentice form of the login page.
  *  The player chooses the nickname he would like, a password and his
  *  e-mail, and accepts the rules. The account is created disabled, as
- *  apprentice, with a temporary nickname (like "GattoFurbo", shown with a
- *  "*", USER_FLAG_TY_NICKTMP while it has a row in users_nickreq): after the click on the link of the
- *  e-mail (mailmgr.php) it works at once. The requested nickname waits in
- *  users_nickreq for a check in usermgmt.php.
+ *  apprentice, with the chosen nickname as login and a temporary nickname
+ *  (like "GattoFurbo", in users_nicktmp) that the others see, with a "*"
+ *  (USER_FLAG_TY_NICKTMP), until the login is approved in usermgmt.php.
+ *  After the click on the link of the e-mail (mailmgr.php) it works at
+ *  once, and the player enters with the chosen nickname.
  *  Signups never confirmed are removed after 48 hours.
  */
 
@@ -175,11 +176,11 @@ function main()
             $bdb->transaction('BEGIN');
             $ok = FALSE;
             do {
-                if (($usr_obj = $bdb->user_add($nick_tmp, md5($pw), $mail,
+                if (($usr_obj = $bdb->user_add($nome, md5($pw), $mail,
                                                USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
                                                USER_DIS_REA_NU_MAILED, $G_notguar_code)) == FALSE)
                     break;
-                if ($bdb->user_nick_req_set($usr_obj->code, $nome) == FALSE)
+                if ($bdb->user_nicktmp_set($usr_obj->code, $nick_tmp) == FALSE)
                     break;
                 // the rules are accepted in this page
                 if ($bdb->user_tos_update($usr_obj->code, $G_tos_vers) == FALSE)
@@ -197,7 +198,7 @@ function main()
                 if ($bdb->selfreg_set($remote_ip) == FALSE)
                     break;
                 $mw = isc_mail_welcome($nick_tmp, $nome, $pw, $link);
-                if (brisk_mail($mail, "Utente Brisk {$nick_tmp}", $mw[0], $mw[1], $mw[2]) == FALSE)
+                if (brisk_mail($mail, "Utente Brisk {$nome}", $mw[0], $mw[1], $mw[2]) == FALSE)
                     break;
                 $ok = TRUE;
             } while (FALSE);
