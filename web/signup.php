@@ -67,7 +67,7 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
     $passwd_h = ($passwd === NULL ? "quella che hai scelto" : isc_h($passwd));
     $subj = "Benvenuto su Brisk, " . $nickname . "! Attiva il tuo account";
     $text = "Ciao " . $nickname . ", benvenuto su Brisk!\n\n"
-        . "Entri subito con il tuo nickname, " . $nickname . ". Finché gli amministratori non lo approvano, nel gioco ti vedono con il nickname provvisorio "
+        . "Entri subito con il tuo nickname, " . $nickname . ". Finché i moderatori non lo approvano, nel gioco ti vedono con il nickname provvisorio "
         . $nick_tmp . ".\n"
         . "Quando \"" . $nickname . "\" sarà approvato ti arriverà un'altra email, e da quel momento tutti ti vedranno con il tuo nickname.\n\n"
         . "Per ATTIVARE l'account apri questo link (vale 48 ore):\n" . $link
@@ -83,7 +83,7 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
     $html = '<table cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;font-family:Arial,Helvetica,sans-serif;color:#222;border-collapse:collapse">'
         . '<tr><td style="padding:10px 0 12px;border-bottom:3px solid #193747"><img src="' . isc_h($logo) . '" alt="brisk" height="48" style="display:block;border:0"></td></tr>'
         . '<tr><td style="padding:18px 0 6px;font-size:22px;font-weight:bold">Ciao ' . isc_h($nickname) . ', benvenuto su Brisk!</td></tr>'
-        . '<tr><td ' . $td . '>Entri subito con il tuo nickname, <b>' . isc_h($nickname) . '</b>. Finché gli amministratori non lo approvano, nel gioco ti vedono con il nickname provvisorio <b>' . isc_h($nick_tmp) . '</b>.</td></tr>'
+        . '<tr><td ' . $td . '>Entri subito con il tuo nickname, <b>' . isc_h($nickname) . '</b>. Finché i moderatori non lo approvano, nel gioco ti vedono con il nickname provvisorio <b>' . isc_h($nick_tmp) . '</b>.</td></tr>'
         . '<tr><td ' . $td . '>Quando &quot;<b>' . isc_h($nickname) . '</b>&quot; sarà approvato ti arriverà un\'altra email, e da quel momento tutti ti vedranno con il tuo nickname.</td></tr>'
         . '<tr><td style="padding:16px 0 8px;font-size:16px">Per <b>attivare</b> l\'account tocca il pulsante (vale 48 ore):</td></tr>'
         . '<tr><td style="padding:4px 0 8px"><a href="' . isc_h($link) . '" style="display:inline-block;background:#193747;color:#fff;padding:14px 26px;border-radius:6px;text-decoration:none;font-size:20px;font-weight:bold">Attiva il mio account</a></td></tr>'
@@ -398,7 +398,7 @@ function main()
     <label for="passwd2">Riscrivi la password</label>
     <input id="passwd2" name="passwd2" type="password" maxlength="30" value="<?php echo isc_h($passwd2); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="epasswd2"></div>
-    <label class="cbox"><input type="checkbox" name="mail_passwd" value="1"<?php echo (!empty($_POST['mail_passwd']) ? ' checked' : ''); ?>> La vuoi anche per email? Te la scriviamo nell'email di benvenuto</label>
+    <label class="cbox" style="margin-top: 0"><input type="checkbox" name="mail_passwd" value="1"<?php echo (!empty($_POST['mail_passwd']) ? ' checked' : ''); ?>> Ricevi la password anche via email</label>
 
     <label for="mail">3. La tua email</label>
     <input id="mail" name="mail" type="email" maxlength="120" value="<?php echo isc_h($mail); ?>" placeholder="esempio: mario.rossi@gmail.com" autocapitalize="none" autocorrect="off" spellcheck="false" required>
