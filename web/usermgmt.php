@@ -128,12 +128,12 @@ function check_auth()
     GLOBAL $G_alarm_passwd, $G_umgmt_who, $sess, $_SERVER;
 
     if (array_key_exists("HTTP_X_REAL_IP", $_SERVER)) {
-        $ip = $_SERVER["HTTP_X_REAL_IP"];
+        $remote_ip = $_SERVER["HTTP_X_REAL_IP"];
     }
     else {
-        $ip = $_SERVER["REMOTE_ADDR"];
+        $remote_ip = $_SERVER["REMOTE_ADDR"];
     }
-    $private = md5($G_alarm_passwd.$ip.$sess);
+    $private = md5($G_alarm_passwd.$remote_ip.$sess);
     $res = auth_ask(array("cmd" => "userauth", "sess" => $sess, "private" => $private,
                           "the_end" => "true"));
     if ($res != FALSE && $res['val'] == 200) {
@@ -154,11 +154,11 @@ function umgmt_log($action, $login)
 {
     GLOBAL $G_umgmt_who, $_SERVER;
 
-    $ip = (array_key_exists("HTTP_X_REAL_IP", $_SERVER) ? $_SERVER["HTTP_X_REAL_IP"]
-           : $_SERVER["REMOTE_ADDR"]);
-    if (($fp = @fopen(LEGAL_PATH."/usermgmt.log", 'a')) != FALSE) {
-        fwrite($fp, sprintf("%ld|%s|%s|%s|%s|\n", time(), $G_umgmt_who, $ip, $action, $login));
-        fclose($fp);
+    $remote_ip = (array_key_exists("HTTP_X_REAL_IP", $_SERVER) ? $_SERVER["HTTP_X_REAL_IP"]
+                  : $_SERVER["REMOTE_ADDR"]);
+    if (($log_file = @fopen(LEGAL_PATH."/usermgmt.log", 'a')) != FALSE) {
+        fwrite($log_file, sprintf("%ld|%s|%s|%s|%s|\n", time(), $G_umgmt_who, $remote_ip, $action, $login));
+        fclose($log_file);
     }
 }
 
@@ -173,9 +173,9 @@ function umgmt_moder_passwd_ok()
         return (FALSE);
     $sql = sprintf("SELECT pass FROM %susers WHERE login = lower('%s');",
                    $G_dbpfx, escsql($G_umgmt_who));
-    if (($pg = pg_query($bdb->dbconn->db(), $sql)) == FALSE || pg_num_rows($pg) != 1)
+    if (($pass_pg = pg_query($bdb->dbconn->db(), $sql)) == FALSE || pg_num_rows($pass_pg) != 1)
         return (FALSE);
-    $rec = pg_fetch_object($pg, 0);
+    $rec = pg_fetch_object($pass_pg, 0);
     return (hash_equals((string)$rec->pass, md5($_POST['f_banpass'])));
 }
 
@@ -198,6 +198,13 @@ $s_style = "
      table.the_tab td {
             border: 1px solid black;
             padding: 8px;
+            }
+
+     div.result {
+            border: 1px solid #888;
+            background: #ffffe0;
+            padding: 8px;
+            margin: 8px 0;
             }
 </style>";
 
@@ -589,14 +596,14 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
     }
     else { // if ($_GET['do'] ...
         /* the buttons at the right of a row: the same action, on that player only */
-        if (isset($_POST['f_row']) && preg_match('/^(accept|delete|ban)_([0-9]+)$/', $_POST['f_row'], $m)) {
+        if (isset($_POST['f_row']) && preg_match('/^(accept|delete|ban)_([0-9]+)$/', $_POST['f_row'], $row_match)) {
             foreach (array_keys($_POST) as $key) {
                 if (substr($key, 0, 9) == "f_newuser")
                     unset($_POST[$key]);
             }
             unset($_POST['f_accept'], $_POST['f_delete'], $_POST['f_ban']);
-            $_POST['f_newuser'.$m[2]] = "on";
-            $_POST['f_'.$m[1]] = "1";
+            $_POST['f_newuser'.$row_match[2]] = "on";
+            $_POST['f_'.$row_match[1]] = "1";
             $_POST['f_single'] = "1";
         }
         if (isset($_POST['f_accept'])) {
@@ -886,17 +893,17 @@ Saluti e buone partite, mop.', $usr_obj->login);
                 if (substr($key, 0, 9) != "f_newuser")
                     continue;
 
-                $id = (int)substr($key, 9);
-                if ($id <= 0)
+                $user_code = (int)substr($key, 9);
+                if ($user_code <= 0)
                     continue;
 
                 $usr_sql = sprintf("SELECT usr.*, tmp.nick AS nick_tmp FROM %susers AS usr
                                         LEFT JOIN %susers_nicktmp AS tmp ON tmp.ucode = usr.code
                                         WHERE usr.disa_reas IN (%d, %d) AND usr.code = %d;",
-                                   $G_dbpfx, $G_dbpfx, USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF, $id);
+                                   $G_dbpfx, $G_dbpfx, USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF, $user_code);
                 if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE
                     || pg_num_rows($usr_pg) != 1) {
-                    printf("Inconsistency for code %d, skipped<br>\n", $id);
+                    printf("Inconsistency for code %d, skipped<br>\n", $user_code);
                     continue;
                 }
                 $usr_obj = pg_fetch_object($usr_pg, 0);
@@ -943,7 +950,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                    the odd ones, without the address of the player */
                 $email = $usr_obj->email;
                 if ($role != "admin")
-                    $email = (($at = strrpos($email, "@")) === FALSE ? "..." : "..." . substr($email, $at));
+                    $email = (($at_pos = strrpos($email, "@")) === FALSE ? "..." : "..." . substr($email, $at_pos));
                 $is_ref = ($usr_obj->disa_reas == USER_DIS_REA_NU_NICKREF);
                 $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">Accept</button> "
                                     . "<button type=\"submit\" name=\"f_row\" value=\"delete_%d\">%s</button> "
@@ -979,7 +986,9 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      <body>
      <h2> E-mail verified user management.</h2>
      <?php echo $who_line; ?>
-     <?php if ($status != "") { echo "<div style=\"border: 1px solid #888; background: #ffffe0; padding: 8px; margin: 8px 0;\"><b>Result:</b><br>$status</div>"; } ?>
+     <?php if ($status != "") { ?>
+     <div class="result"><b>Result:</b><br><?php echo $status; ?></div>
+     <?php } ?>
      <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
      <table class="the_tab">
      <?php
@@ -992,9 +1001,13 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                       return document.querySelectorAll('input[type=checkbox][name^=f_newuser]:checked').length;
                   }
                   function umgmt_bulk(what) {
-                      var n = umgmt_n_checked();
-                      if (n == 0) { alert("No player checked."); return false; }
-                      return confirm(what + " " + n + " player" + (n == 1 ? "" : "s") + "?");
+                      var checked = umgmt_n_checked();
+
+                      if (checked == 0) {
+                          alert("No player checked.");
+                          return false;
+                      }
+                      return confirm(what + " " + checked + " player" + (checked == 1 ? "" : "s") + "?");
                   }
                   </script>
                   Checked players:
