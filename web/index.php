@@ -36,7 +36,7 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'The nickname have to contain at least one letter or one number.'),
                      'userpasserr'  => array('it' => 'Utente e/o password errati.',
                                              'en' => 'Wrong user and/or password.'),
-                     'userpassmailed' => array('it' => 'Il tuo account non &egrave; ancora attivo: apri l\'e-mail che ti abbiamo mandato e tocca &laquo;Attiva il mio account&raquo; (guarda anche in Spam, Posta indesiderata o Quarantena).',
+                     'userpassmailed' => array('it' => 'Il tuo account non &egrave; ancora attivo: apri l\'e-mail che ti abbiamo mandato e clicca &laquo;Attiva il mio account&raquo; (guarda anche in Spam, Posta indesiderata o Quarantena).',
                                              'en' => 'Your account is not active yet: open the e-mail we sent you and click &laquo;Attiva il mio account&raquo; (look also in the spam folder).'),
                      'userpassban'  => array('it' => 'Il tuo indirizzo IP è stato bannato perché precedentemente utilizzato da qualche molestatore.',
                                              'en' => 'Your IP address is banned because trolling activity was detected from it.'),

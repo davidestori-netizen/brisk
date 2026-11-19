@@ -85,7 +85,7 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
         . '<tr><td style="padding:18px 0 6px;font-size:22px;font-weight:bold">Ciao ' . isc_h($nickname) . ', benvenuto su Brisk!</td></tr>'
         . '<tr><td ' . $td . '>Entri subito con il tuo nickname, <b>' . isc_h($nickname) . '</b>. Finché i moderatori non lo approvano, nel gioco ti vedono con il nickname provvisorio <b>' . isc_h($nick_tmp) . '</b>.</td></tr>'
         . '<tr><td ' . $td . '>Quando &quot;<b>' . isc_h($nickname) . '</b>&quot; sarà approvato ti arriverà un\'altra email, e da quel momento tutti ti vedranno con il tuo nickname.</td></tr>'
-        . '<tr><td style="padding:16px 0 8px;font-size:16px">Per <b>attivare</b> l\'account tocca il pulsante (vale 48 ore):</td></tr>'
+        . '<tr><td style="padding:16px 0 8px;font-size:16px">Per <b>attivare</b> l\'account clicca il pulsante (vale 48 ore):</td></tr>'
         . '<tr><td style="padding:4px 0 8px"><a href="' . isc_h($link) . '" style="display:inline-block;background:#193747;color:#fff;padding:14px 26px;border-radius:6px;text-decoration:none;font-size:20px;font-weight:bold">Attiva il mio account</a></td></tr>'
         . '<tr><td style="padding:0 0 14px;font-size:12px;color:#777">Se il pulsante non funziona, apri questo indirizzo: ' . isc_h($link) . '</td></tr>'
         . '<tr><td ' . $td . '>Poi entra con:</td></tr>'
@@ -358,8 +358,8 @@ function main()
 <?php if ($done) { ?>
   <h1>Quasi fatto, <?php echo isc_h($nickname); ?>!</h1>
   <div class="ok" style="text-align:center;font-size:21px">Ti abbiamo mandato un'<b>email</b> a<br><b><?php echo isc_h($mail); ?></b></div>
-  <p style="font-size:21px"><b>Aprila e tocca il bottone «Attiva il mio account».</b></p>
-  <p><b>Finché non lo tocchi non puoi entrare.</b></p>
+  <p style="font-size:21px"><b>Aprila e clicca il bottone «Attiva il mio account».</b></p>
+  <p><b>Finché non lo clicchi non puoi entrare.</b></p>
   <p>Poi entri subito a giocare con il tuo nickname <b><?php echo isc_h($nickname); ?></b> e la tua password<?php echo (empty($_POST['mail_passwd']) ? '' : " (te li abbiamo scritti anche nell'email)"); ?>.
      Finché i moderatori non approvano il tuo nickname, nel gioco ti vedi e ti vedono con il nickname provvisorio <b><?php echo isc_h($nick_tmp); ?></b>: quando è approvato ti arriva un'altra email.</p>
   <p class="piccolo">Non trovi l'email? Guarda anche nelle cartelle <b>Spam</b>, <b>Posta indesiderata</b> o <b>Quarantena</b>. Il link vale 48 ore.</p>

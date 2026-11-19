@@ -299,8 +299,8 @@ h1 {
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
   <h1>Account attivato! &#127881;</h1>
   <div class="ok" style="text-align:center;font-size:21px">Benvenuto <b><?php echo isc_h($nick); ?></b>, ora puoi giocare.</div>
-  <p>Tocca il bottone qui sotto ed entra con il tuo nome e la tua password (se hai scelto di riceverla, la password è anche nell'email).</p>
-  <p>Quando il browser chiede <b>«Vuoi salvare la password?»</b> tocca <b>Salva</b>: la prossima volta entri da solo.</p>
+  <p>Clicca il bottone qui sotto ed entra con il tuo nome e la tua password (se hai scelto di riceverla, la password è anche nell'email).</p>
+  <p>Quando il browser chiede <b>«Vuoi salvare la password?»</b> clicca <b>Salva</b>: la prossima volta entri da solo.</p>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($nick); ?>">Entra a giocare</a>
 </div></body></html>
 <?php

@@ -157,7 +157,7 @@ function main()
   <button type="button" class="occhio" style="width:100%" onclick="copy_passwd()">Copia la password</button>
   <p class="piccolo" id="copied"></p>
   <p>Ora entra con il tuo nome e questa password.</p>
-  <div style="margin:14px 0;padding:12px 14px;background:#fff6c8;border:1px solid #e0c34a;border-radius:8px;font-size:20px;line-height:1.5"><b>Importante:</b> il browser ora ti chiede <b>&laquo;Vuoi salvare la password?&raquo;</b> (in alto o in basso nello schermo). Tocca <b>Salva</b>: le prossime volte entri da solo.</div>
+  <div style="margin:14px 0;padding:12px 14px;background:#fff6c8;border:1px solid #e0c34a;border-radius:8px;font-size:20px;line-height:1.5"><b>Importante:</b> il browser ora ti chiede <b>&laquo;Vuoi salvare la password?&raquo;</b> (in alto o in basso nello schermo). Clicca <b>Salva</b>: le prossime volte entri da solo.</div>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($login); ?>">Entra</a>
   <script>
   function copy_passwd(){
