@@ -943,7 +943,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
             }
 
             $usr_n = pg_num_rows($usr_pg);
-            $tab_lines = "<tr><th></th><th>User</th><th>Requested nick</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th><th></th></tr>";
+            $tab_lines = "<tr><th></th><th>Account</th><th>Temporary nickname</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th><th></th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
                 /* a moderator sees only the domain of the e-mail: enough to spot
@@ -974,10 +974,9 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                                       ($is_ref ? " style=\"color: #888;\"" : ""),
                                       ($is_ref ? "" : sprintf("<input name=\"f_newuser%d\" type=\"checkbox\" %s>",
                                                                $usr_obj->code, (($nocheck || $role != "admin") ? "" : "CHECKED"))),
-                                      ($usr_obj->nick_tmp !== NULL ? eschtml($usr_obj->nick_tmp) . "*" : eschtml($usr_obj->login)),
-                                      ($usr_obj->nick_tmp === NULL ? ""
-                                       : ($is_ref ? "<s>" . eschtml($usr_obj->login) . "</s> refused, waiting for a new one"
-                                          : eschtml($usr_obj->login))),
+                                      ($is_ref ? "<s>" . eschtml($usr_obj->login) . "</s> refused, waiting for a new one"
+                                       : eschtml($usr_obj->login)),
+                                      ($usr_obj->nick_tmp !== NULL ? eschtml($usr_obj->nick_tmp) . "*" : ""),
                                       eschtml($email), eschtml($usr_obj->guar_login),
                                       ($usr_obj->type & USER_FLAG_TY_APPR ? "Yes" : "No"),
                                       $usr_obj->lintm, $row_btns);
