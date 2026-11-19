@@ -61,7 +61,70 @@ Benvenuto e buone partite, mop.',
                       'nu_phtml' => array( 'it' => 'Ciao, sono l\' amministratore del sito di Brisk.<br><br>
 La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine.<br><br>Per accedere al  sito d\'ora in poi potrai usare l\' utente \'%s\' e la password \'%s\'.<br><br>
 Benvenuto e buone partite, mop.<br>',
-                                           'en' => 'EN phtml [%s] [%s]')
+                                           'en' => 'EN phtml [%s] [%s]'),
+                      /* the page of the moderators: they are players, not programmers */
+                      'mg_title'       => array( 'it' => 'Brisk: gestione nuovi iscritti',
+                                                 'en' => 'Brisk: email verified user management'),
+                      'mg_head'        => array( 'it' => 'Gestione nuovi iscritti',
+                                                 'en' => 'E-mail verified user management'),
+                      'mg_logged'      => array( 'it' => 'Entrato come <b>%s</b>%s',
+                                                 'en' => 'Logged as <b>%s</b>%s'),
+                      'mg_moder'       => array( 'it' => ' (moderatore)',
+                                                 'en' => ' (moderator)'),
+                      'mg_result'      => array( 'it' => 'Esito:',
+                                                 'en' => 'Result:'),
+                      'mg_th_account'  => array( 'it' => 'Account',
+                                                 'en' => 'Account'),
+                      'mg_th_nicktmp'  => array( 'it' => 'Nome provvisorio',
+                                                 'en' => 'Temporary nickname'),
+                      'mg_th_email'    => array( 'it' => 'Email',
+                                                 'en' => 'EMail'),
+                      'mg_th_guar'     => array( 'it' => 'Garante',
+                                                 'en' => 'Guar'),
+                      'mg_th_appr'     => array( 'it' => 'Apprendista',
+                                                 'en' => 'Apprendice'),
+                      'mg_th_date'     => array( 'it' => 'Data',
+                                                 'en' => 'Date'),
+                      'mg_yes'         => array( 'it' => 'Sì',
+                                                 'en' => 'Yes'),
+                      'mg_no'          => array( 'it' => 'No',
+                                                 'en' => 'No'),
+                      'mg_accept'      => array( 'it' => 'Accetta',
+                                                 'en' => 'Accept'),
+                      'mg_delete'      => array( 'it' => 'Cancella',
+                                                 'en' => 'Delete'),
+                      'mg_refuse'      => array( 'it' => 'Rifiuta il nome',
+                                                 'en' => 'Refuse nickname'),
+                      'mg_ban'         => array( 'it' => 'Rifiuta e blocca',
+                                                 'en' => 'Refuse and block'),
+                      'mg_ban_ask'     => array( 'it' => 'Rifiutare e bloccare %s?',
+                                                 'en' => 'Refuse and block %s?'),
+                      'mg_refused'     => array( 'it' => 'nome rifiutato, in attesa di uno nuovo',
+                                                 'en' => 'refused, waiting for a new one'),
+                      'mg_checked'     => array( 'it' => 'Giocatori selezionati:',
+                                                 'en' => 'Checked players:'),
+                      'mg_none'        => array( 'it' => 'Nessun giocatore selezionato.',
+                                                 'en' => 'No player checked.'),
+                      'mg_bulk_accept' => array( 'it' => 'Giocatori selezionati: %n. Accettarli?',
+                                                 'en' => 'Checked players: %n. Accept them?'),
+                      'mg_bulk_delete' => array( 'it' => 'Giocatori selezionati: %n. Cancellarli?',
+                                                 'en' => 'Checked players: %n. Delete them?'),
+                      'mg_bulk_refuse' => array( 'it' => 'Giocatori selezionati: %n. Rifiutare il loro nome?',
+                                                 'en' => 'Checked players: %n. Refuse their nicknames?'),
+                      'mg_bulk_ban'    => array( 'it' => 'Giocatori selezionati: %n. Rifiutarli e bloccarli (account disattivato, email non più usabile)?',
+                                                 'en' => 'Checked players: %n. Refuse and block them (account disabled, e-mail not usable again)?'),
+                      'mg_banpass'     => array( 'it' => 'Per bloccare più giocatori insieme: la tua password',
+                                                 'en' => 'To block more than one player at once: your password'),
+                      'mg_banpass_need' => array( 'it' => 'Per bloccare più giocatori insieme scrivi la tua password.',
+                                                  'en' => 'To block more than one player at once, write your password.'),
+                      'mg_admin_only'  => array( 'it' => 'Solo l\'amministratore può cancellare (per un nome offensivo usa "Rifiuta e blocca").',
+                                                 'en' => 'Only the administrator can delete (for an offensive nickname use "Refuse and block").'),
+                      'mg_approved'    => array( 'it' => 'Nome %s approvato (prima si vedeva come %s)',
+                                                 'en' => 'nickname %s approved, it was seen as %s'),
+                      'mg_refused_ok'  => array( 'it' => 'Nome %s rifiutato: continua a giocare come %s',
+                                                 'en' => 'Nickname %s refused, it keeps playing seen as %s'),
+                      'mg_banned'      => array( 'it' => 'Rifiutato e bloccato: %s (la sua email non si può più usare)',
+                                                 'en' => '%s refused and blocked: the e-mail cannot be used again')
                       );
 
 
@@ -179,12 +242,20 @@ function umgmt_moder_passwd_ok()
     return (hash_equals((string)$rec->pass, md5($_POST['f_banpass'])));
 }
 
+/* a text of the page in the language of the site ($mlang_umgmt) */
+function umgmt_txt($key)
+{
+    GLOBAL $mlang_umgmt, $G_lang;
+
+    return ($mlang_umgmt[$key][$G_lang]);
+}
+
 /* the moderators do not delete: deleting frees the e-mail */
 function umgmt_admin_only($role, &$status)
 {
     if ($role == "admin")
         return (TRUE);
-    $status .= "Only the administrator can delete (for an offensive nickname use \"Refuse and block\").<br>";
+    $status .= eschtml(umgmt_txt('mg_admin_only')) . "<br>";
     return (FALSE);
 }
 
@@ -198,6 +269,11 @@ $s_style = "
      table.the_tab td {
             border: 1px solid black;
             padding: 8px;
+            }
+
+     table.the_tab td.email {
+            white-space: nowrap;
+            min-width: 14em;
             }
 
      div.result {
@@ -220,8 +296,8 @@ function main() {
         echo "Authentication failed";
         exit;
     }
-    $who_line = sprintf("<p>Logged as <b>%s</b>%s</p>", eschtml($G_umgmt_who),
-                        ($role == "moder" ? " (moderator)" : ""));
+    $who_line = sprintf("<p>" . umgmt_txt('mg_logged') . "</p>", eschtml($G_umgmt_who),
+                        ($role == "moder" ? umgmt_txt('mg_moder') : ""));
 
     $nocheck = FALSE;
     if (isset($_GET['f_nocheck'])) {
@@ -684,7 +760,7 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($usr_obj->n
                     if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                     }
-                    printf("nickname %s approved, it was seen as %s<br>\n", eschtml($usr_obj->login), eschtml($usr_obj->nick_tmp));
+                    printf("%s<br>\n", eschtml(sprintf(umgmt_txt('mg_approved'), $usr_obj->login, $usr_obj->nick_tmp)));
                     umgmt_log("accept-nick", $usr_obj->nick_tmp . " -> " . $usr_obj->login);
                     continue;
                 }
@@ -806,7 +882,6 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($nick_page)
                         $bdb->query(sprintf("UPDATE %susers SET disa_reas = %d WHERE code = %d AND disa_reas = %d;",
                                             $G_dbpfx, USER_DIS_REA_NU_NICKREF, $usr_obj->code,
                                             USER_DIS_REA_NU_TOBECHK));
-                        $status .= sprintf("nickname refused for %s: SUCCESS<br>", eschtml($usr_obj->login));
                         umgmt_log("refuse-nick", $usr_obj->login . " (" . $usr_obj->nick_tmp . ")");
                         $res = TRUE;
                         break;
@@ -874,12 +949,12 @@ Saluti e buone partite, mop.', $usr_obj->login);
                         printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, eschtml($usr_obj->login));
                 }
                 else
-                    printf("Nickname %s refused, it keeps playing seen as %s<br>\n", eschtml($usr_obj->login), eschtml($usr_obj->nick_tmp));
+                    printf("%s<br>\n", eschtml(sprintf(umgmt_txt('mg_refused_ok'), $usr_obj->login, $usr_obj->nick_tmp)));
             }
         }
         else if ($action == "ban" && $role == "moder" && !isset($_POST['f_single'])
                  && umgmt_moder_passwd_ok() == FALSE) {
-            echo "To block more than one player at once, write your password.<br>";
+            echo eschtml(umgmt_txt('mg_banpass_need')) . "<br>";
         }
         else if ($action == "ban") {
             /* refuse and block (offensive nickname): the account is not deleted
@@ -916,8 +991,8 @@ Saluti e buone partite, mop.', $usr_obj->login);
                     continue;
                 }
                 umgmt_log("ban", $usr_obj->login . " (" . (string)$usr_obj->nick_tmp . ") " . $usr_obj->email);
-                printf("%s refused and blocked: the e-mail cannot be used again<br>\n",
-                       eschtml($usr_obj->login . ($usr_obj->nick_tmp ? " (" . $usr_obj->nick_tmp . ")" : "")));
+                printf("%s<br>\n", eschtml(sprintf(umgmt_txt('mg_banned'),
+                                                   $usr_obj->login . ($usr_obj->nick_tmp ? " (" . $usr_obj->nick_tmp . ")" : ""))));
             }
         }
         $status .= ob_get_clean();
@@ -943,7 +1018,9 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
             }
 
             $usr_n = pg_num_rows($usr_pg);
-            $tab_lines = "<tr><th></th><th>Account</th><th>Temporary nickname</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th><th></th></tr>";
+            $tab_lines = sprintf("<tr><th></th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th></th></tr>",
+                                 umgmt_txt('mg_th_account'), umgmt_txt('mg_th_nicktmp'), umgmt_txt('mg_th_email'),
+                                 umgmt_txt('mg_th_guar'), umgmt_txt('mg_th_appr'), umgmt_txt('mg_th_date'));
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
                 /* a moderator sees only the domain of the e-mail: enough to spot
@@ -952,47 +1029,52 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                 if ($role != "admin")
                     $email = (($at_pos = strrpos($email, "@")) === FALSE ? "..." : "..." . substr($email, $at_pos));
                 $is_ref = ($usr_obj->disa_reas == USER_DIS_REA_NU_NICKREF);
-                $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">Accept</button> "
-                                    . "<button type=\"submit\" name=\"f_row\" value=\"delete_%d\">%s</button> "
-                                    . "<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
-                                    $usr_obj->code, $usr_obj->code, ($role == "admin" ? "Delete" : "Refuse nickname"),
-                                    $usr_obj->code, eschtml(addslashes($usr_obj->login)));
-                /* a moderator does not delete: on an account without a temporary
-                   nickname there is no nickname to refuse, so no button for it */
-                if ($role != "admin" && $usr_obj->nick_tmp === NULL)
-                    $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">Accept</button> "
-                                        . "<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
-                                        $usr_obj->code, $usr_obj->code, eschtml(addslashes($usr_obj->login)));
-                /* refused nickname: nothing to accept until the player asks another one */
-                if ($is_ref)
-                    $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
-                                        $usr_obj->code, eschtml(addslashes($usr_obj->login)));
+                $btn_accept = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">%s</button>",
+                                      $usr_obj->code, eschtml(umgmt_txt('mg_accept')));
+                $btn_delete = sprintf("<button type=\"submit\" name=\"f_row\" value=\"delete_%d\">%s</button>",
+                                      $usr_obj->code, eschtml(umgmt_txt($role == "admin" ? 'mg_delete' : 'mg_refuse')));
+                $btn_ban = sprintf("<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm(%s);\">%s</button>",
+                                   $usr_obj->code,
+                                   htmlspecialchars(json_encode(sprintf(umgmt_txt('mg_ban_ask'), $usr_obj->login)), ENT_QUOTES),
+                                   eschtml(umgmt_txt('mg_ban')));
+                if ($is_ref) {
+                    /* refused nickname: nothing to accept until the player asks another one */
+                    $row_btns = $btn_ban;
+                }
+                else if ($role != "admin" && $usr_obj->nick_tmp === NULL) {
+                    /* a moderator does not delete: on an account without a temporary
+                       nickname there is no nickname to refuse, so no button for it */
+                    $row_btns = $btn_accept . " " . $btn_ban;
+                }
+                else {
+                    $row_btns = $btn_accept . " " . $btn_delete . " " . $btn_ban;
+                }
 
                 /* the moderators start with nothing checked: a wrong click on the
                    buttons at the bottom must not touch every player */
-                $tab_lines .= sprintf("<tr%s><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                $tab_lines .= sprintf("<tr%s><td>%s</td><td>%s</td><td>%s</td><td class=\"email\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
                                       ($is_ref ? " style=\"color: #888;\"" : ""),
                                       ($is_ref ? "" : sprintf("<input name=\"f_newuser%d\" type=\"checkbox\" %s>",
                                                                $usr_obj->code, (($nocheck || $role != "admin") ? "" : "CHECKED"))),
-                                      ($is_ref ? "<s>" . eschtml($usr_obj->login) . "</s> refused, waiting for a new one"
+                                      ($is_ref ? "<s>" . eschtml($usr_obj->login) . "</s><br><small>" . eschtml(umgmt_txt('mg_refused')) . "</small>"
                                        : eschtml($usr_obj->login)),
                                       ($usr_obj->nick_tmp !== NULL ? eschtml($usr_obj->nick_tmp) . "*" : ""),
                                       eschtml($email), eschtml($usr_obj->guar_login),
-                                      ($usr_obj->type & USER_FLAG_TY_APPR ? "Yes" : "No"),
+                                      eschtml(umgmt_txt($usr_obj->type & USER_FLAG_TY_APPR ? 'mg_yes' : 'mg_no')),
                                       $usr_obj->lintm, $row_btns);
             }
             ?>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Brisk: email verified user management.</title>
+<title><?php echo eschtml(umgmt_txt('mg_title')); ?></title>
      <?php echo "$s_style"; ?>
 </head>
      <body>
-     <h2> E-mail verified user management.</h2>
+     <h2><?php echo eschtml(umgmt_txt('mg_head')); ?></h2>
      <?php echo $who_line; ?>
      <?php if ($status != "") { ?>
-     <div class="result"><b>Result:</b><br><?php echo $status; ?></div>
+     <div class="result"><b><?php echo eschtml(umgmt_txt('mg_result')); ?></b><br><?php echo $status; ?></div>
      <?php } ?>
      <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
      <table class="the_tab">
@@ -1005,22 +1087,25 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                   function umgmt_n_checked() {
                       return document.querySelectorAll('input[type=checkbox][name^=f_newuser]:checked').length;
                   }
-                  function umgmt_bulk(what) {
+                  function umgmt_bulk(question) {
                       var checked = umgmt_n_checked();
 
                       if (checked == 0) {
-                          alert("No player checked.");
+                          alert(<?php echo json_encode(umgmt_txt('mg_none')); ?>);
                           return false;
                       }
-                      return confirm(what + " " + checked + " player" + (checked == 1 ? "" : "s") + "?");
+                      return confirm(question.replace('%n', checked));
                   }
                   </script>
-                  Checked players:
-                  <input type="submit" name="f_accept" value="Accept" onclick="return umgmt_bulk('Accept');">
-                  <input type="submit" name="f_delete" value="<?php echo ($role == "admin" ? "Delete" : "Refuse nickname"); ?>" onclick="return umgmt_bulk('<?php echo ($role == "admin" ? "Delete" : "Refuse the nickname of"); ?>');">
-                  <input type="submit" name="f_ban" value="Refuse and block" onclick="return umgmt_bulk('Refuse and block (account disabled, e-mail not usable again)');">
+                  <?php echo eschtml(umgmt_txt('mg_checked')); ?>
+                  <input type="submit" name="f_accept" value="<?php echo eschtml(umgmt_txt('mg_accept')); ?>"
+                         onclick="return umgmt_bulk(<?php echo htmlspecialchars(json_encode(umgmt_txt('mg_bulk_accept')), ENT_QUOTES); ?>);">
+                  <input type="submit" name="f_delete" value="<?php echo eschtml(umgmt_txt($role == "admin" ? 'mg_delete' : 'mg_refuse')); ?>"
+                         onclick="return umgmt_bulk(<?php echo htmlspecialchars(json_encode(umgmt_txt($role == "admin" ? 'mg_bulk_delete' : 'mg_bulk_refuse')), ENT_QUOTES); ?>);">
+                  <input type="submit" name="f_ban" value="<?php echo eschtml(umgmt_txt('mg_ban')); ?>"
+                         onclick="return umgmt_bulk(<?php echo htmlspecialchars(json_encode(umgmt_txt('mg_bulk_ban')), ENT_QUOTES); ?>);">
                   <?php if ($role == "moder") { ?>
-                  <br>To block more than one player at once: your password <input type="password" name="f_banpass" autocomplete="current-password">
+                  <br><?php echo eschtml(umgmt_txt('mg_banpass')); ?> <input type="password" name="f_banpass" autocomplete="current-password">
                   <?php } ?>
                   </form>
                   </body>
