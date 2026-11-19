@@ -79,11 +79,11 @@ function isc_nick_check($bdb, $n)
     if (mb_strlen($n, 'UTF-8') < 2)
         return array('no', "Il nome deve avere almeno 2 caratteri.", "");
     if (mb_strlen($n, 'UTF-8') > 12)
-        return array('no', "Il nome puo' avere al massimo 12 caratteri.", "");
+        return array('no', "Il nome può avere al massimo 12 caratteri.", "");
     if (!preg_match('/^[A-Za-z0-9' . ISC_ACCENTS . ']+$/uD', $n))
         return array('no', "Usa solo lettere (anche accentate, come ò) e numeri, senza spazi o simboli.", "");
     if (isc_nick_forbidden($n))
-        return array('no', "Questo nome non e' permesso. Scegline un altro.", "");
+        return array('no', "Questo nome non è permesso. Scegline un altro.", "");
     if ($bdb->nick_is_free($n) == FALSE) {
         $sug = "";
         for ($i = 1 ; $i < 100 && $sug == "" ; $i++) {
@@ -91,7 +91,7 @@ function isc_nick_check($bdb, $n)
             if (isc_nick_shape($p) && $bdb->nick_is_free($p))
                 $sug = $p;
         }
-        return array('no', "Questo nome e' gia' usato da un altro giocatore.", $sug);
+        return array('no', "Questo nome è già usato da un altro giocatore.", $sug);
     }
     return array('ok', "Nome libero", "");
 }

@@ -57,21 +57,21 @@ header('Referrer-Policy: no-referrer');
 
 /* e-mail with the link to activate the account, the temporary nickname and the password:
    array(subject, text, html). It is stored also in the mails table (usermgmt.php can send it
-   again) but with $pass === NULL: the password is never saved in clear in the database */
-function isc_mail_welcome($nick_tmp, $nick, $pass, $link)
+   again) but with $passwd === NULL: the password is never saved in clear in the database */
+function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
 {
     GLOBAL $G_proto, $G_domain, $G_webbase;
 
-    $pass_t = ($pass === NULL ? "quella che hai scelto" : $pass);
-    $pass_h = ($pass === NULL ? "quella che hai scelto" : isc_h($pass));
-    $subj = "Benvenuto su Brisk, " . $nick . "! Attiva il tuo account";
-    $text = "Ciao " . $nick . ", benvenuto su Brisk!\n\n"
-        . "Entri subito con il tuo nome, " . $nick . ". Finche' gli amministratori non lo approvano, nel gioco ti vedono con il nome provvisorio "
+    $passwd_t = ($passwd === NULL ? "quella che hai scelto" : $passwd);
+    $passwd_h = ($passwd === NULL ? "quella che hai scelto" : isc_h($passwd));
+    $subj = "Benvenuto su Brisk, " . $nickname . "! Attiva il tuo account";
+    $text = "Ciao " . $nickname . ", benvenuto su Brisk!\n\n"
+        . "Entri subito con il tuo nickname, " . $nickname . ". Finché gli amministratori non lo approvano, nel gioco ti vedono con il nickname provvisorio "
         . $nick_tmp . ".\n"
-        . "Quando \"" . $nick . "\" sara' approvato ti arrivera' un'altra email, e da quel momento tutti ti vedranno con il tuo nome.\n\n"
+        . "Quando \"" . $nickname . "\" sarà approvato ti arriverà un'altra email, e da quel momento tutti ti vedranno con il tuo nickname.\n\n"
         . "Per ATTIVARE l'account apri questo link (vale 48 ore):\n" . $link
-        . "\nFinche' non lo apri non puoi entrare."
-        . "\n\nPoi entra con:\nNome utente: " . $nick . "\nPassword: " . $pass_t
+        . "\nFinché non lo apri non puoi entrare."
+        . "\n\nPoi entra con:\nNickname: " . $nickname . "\nPassword: " . $passwd_t
         . "\n\nConserva questa email: ti ricorda la tua password.\nSe non sei stato tu a iscriverti, ignora questa email.\n\nCi vediamo ai tavoli!\n";
     /* table layout, no <br> and no <div>: isc_mail_lines() and the white-space
        of the frame around the body would turn them into empty lines. The logo is
@@ -80,16 +80,16 @@ function isc_mail_welcome($nick_tmp, $nick, $pass, $link)
     $td = 'style="padding:6px 0;font-size:16px;line-height:1.45"';
     $html = '<table cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;font-family:Arial,Helvetica,sans-serif;color:#222;border-collapse:collapse">'
         . '<tr><td style="padding:10px 0 12px;border-bottom:3px solid #193747"><img src="' . isc_h($logo) . '" alt="brisk" height="48" style="display:block;border:0"></td></tr>'
-        . '<tr><td style="padding:18px 0 6px;font-size:22px;font-weight:bold">Ciao ' . isc_h($nick) . ', benvenuto su Brisk!</td></tr>'
-        . '<tr><td ' . $td . '>Entri subito con il tuo nome, <b>' . isc_h($nick) . '</b>. Finché gli amministratori non lo approvano, nel gioco ti vedono con il nome provvisorio <b>' . isc_h($nick_tmp) . '</b>.</td></tr>'
-        . '<tr><td ' . $td . '>Quando &quot;<b>' . isc_h($nick) . '</b>&quot; sarà approvato ti arriverà un\'altra email, e da quel momento tutti ti vedranno con il tuo nome.</td></tr>'
+        . '<tr><td style="padding:18px 0 6px;font-size:22px;font-weight:bold">Ciao ' . isc_h($nickname) . ', benvenuto su Brisk!</td></tr>'
+        . '<tr><td ' . $td . '>Entri subito con il tuo nickname, <b>' . isc_h($nickname) . '</b>. Finché gli amministratori non lo approvano, nel gioco ti vedono con il nickname provvisorio <b>' . isc_h($nick_tmp) . '</b>.</td></tr>'
+        . '<tr><td ' . $td . '>Quando &quot;<b>' . isc_h($nickname) . '</b>&quot; sarà approvato ti arriverà un\'altra email, e da quel momento tutti ti vedranno con il tuo nickname.</td></tr>'
         . '<tr><td style="padding:16px 0 8px;font-size:16px">Per <b>attivare</b> l\'account tocca il pulsante (vale 48 ore):</td></tr>'
         . '<tr><td style="padding:4px 0 8px"><a href="' . isc_h($link) . '" style="display:inline-block;background:#193747;color:#fff;padding:14px 26px;border-radius:6px;text-decoration:none;font-size:20px;font-weight:bold">Attiva il mio account</a></td></tr>'
         . '<tr><td style="padding:0 0 14px;font-size:12px;color:#777">Se il pulsante non funziona, apri questo indirizzo: ' . isc_h($link) . '</td></tr>'
         . '<tr><td ' . $td . '>Poi entra con:</td></tr>'
         . '<tr><td><table cellpadding="0" cellspacing="0" style="background:#fff6c8;border:1px solid #e0c34a;border-radius:6px;font-size:18px">'
-        . '<tr><td style="padding:10px 16px 4px">Nome utente: <b>' . isc_h($nick) . '</b></td></tr>'
-        . '<tr><td style="padding:4px 16px 10px">Password: <b>' . $pass_h . '</b></td></tr></table></td></tr>'
+        . '<tr><td style="padding:10px 16px 4px">Nickname: <b>' . isc_h($nickname) . '</b></td></tr>'
+        . '<tr><td style="padding:4px 16px 10px">Password: <b>' . $passwd_h . '</b></td></tr></table></td></tr>'
         . '<tr><td style="padding:14px 0;font-size:14px;color:#555">Finché non attivi l\'account non puoi entrare. Conserva questa email: ti ricorda la tua password.</td></tr>'
         . '<tr><td style="padding:12px 0 0;border-top:1px solid #ddd;font-size:12px;color:#888">Se non sei stato tu a iscriverti, ignora questa email. Ci vediamo ai tavoli! &#127183;</td></tr>'
         . '</table>';
@@ -107,9 +107,9 @@ function main()
     isc_clean_expired($bdb);
 
     /* checks while typing (json answers) */
-    if (isset($_GET['nome'])) {
+    if (isset($_GET['nickname'])) {
         header('Content-Type: application/json; charset=UTF-8');
-        $e = isc_nick_check($bdb, (string)$_GET['nome']);
+        $e = isc_nick_check($bdb, (string)$_GET['nickname']);
         echo json_encode(array('stato' => $e[0], 'msg' => $e[1], 'sug' => $e[2]));
         return;
     }
@@ -122,7 +122,7 @@ function main()
         else if (!isc_mail_ok($m))
             $r = array('stato' => 'no', 'msg' => "Questa email non sembra giusta. Controlla come l'hai scritta.", 'sug' => "");
         else if ($bdb->mail_is_used($m))
-            $r = array('stato' => 'no', 'msg' => "Questa email e' gia' usata da un altro account. Se e' il tuo, usa \"Password dimenticata?\".", 'sug' => "");
+            $r = array('stato' => 'no', 'msg' => "Questa email è già usata da un altro account. Se è il tuo, usa \"Password dimenticata?\".", 'sug' => "");
         else
             $r = array('stato' => 'ok', 'msg' => "Email giusta", 'sug' => "");
         echo json_encode($r);
@@ -131,52 +131,57 @@ function main()
 
     header('Content-Type: text/html; charset=UTF-8');
     $key_t = hash('sha256', 'iscr-tempo|' . $G_alarm_passwd);
-    $nome = ""; $passwd = ""; $mail = ""; $errore = ""; $fatto = FALSE; $nick_tmp = "";
+    $nickname = "";
+    $nick_tmp = "";
+    $passwd = "";
+    $mail = "";
+    $error = "";
+    $done = FALSE;
 
     if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST') {
         $origine = (isset($_SERVER['HTTP_ORIGIN']) ? parse_url($_SERVER['HTTP_ORIGIN'], PHP_URL_HOST) : "");
-        $nome = (isset($_POST['nome']) ? isc_lower(trim((string)$_POST['nome'])) : "");
+        $nickname = (isset($_POST['nickname']) ? isc_lower(trim((string)$_POST['nickname'])) : "");
         $passwd   = (isset($_POST['passwd'])   ? trim((string)$_POST['passwd'])   : "");
         $mail = (isset($_POST['mail']) ? trim((string)$_POST['mail']) : "");
         $t    = (isset($_POST['t'])    ? (string)$_POST['t']  : "");
         $tf   = (isset($_POST['tf'])   ? (string)$_POST['tf'] : "");
         /* the network guard of the old apprentice form, with the address seen by the web server */
         $remote_ip = ip2int(addrtoipv4(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ""));
-        $esito = isc_nick_check($bdb, $nome);
+        $result = isc_nick_check($bdb, $nickname);
 
         if ($origine != "" && $origine !== NULL && strcasecmp($origine, (string)$_SERVER['HTTP_HOST']) != 0)
-            $errore = "Richiesta non valida. Riapri la pagina e riprova.";
-        else if (!empty($_POST['sito']))                       // trap field for the robots
-            $errore = "Richiesta non valida.";
+            $error = "Richiesta non valida. Riapri la pagina e riprova.";
+        else if (!empty($_POST['site']))                       // trap field for the robots
+            $error = "Richiesta non valida.";
         else if (!preg_match('/^\d+$/', $t) || !hash_equals(hash_hmac('sha256', $t, $key_t), $tf)
                  || time() - (int)$t < 4 || time() - (int)$t > 7200)
-            $errore = "La pagina e' scaduta. Riprova.";
-        else if ($esito[0] != 'ok')
-            $errore = $esito[1] . ($esito[2] != "" ? " Prova: " . $esito[2] : "");
+            $error = "La pagina è scaduta. Riprova.";
+        else if ($result[0] != 'ok')
+            $error = $result[1] . ($result[2] != "" ? " Prova: " . $result[2] : "");
         else if (strlen($passwd) < 6)
-            $errore = "La password deve avere almeno 6 caratteri.";
+            $error = "La password deve avere almeno 6 caratteri.";
         else if (strlen($passwd) > 30 || preg_match('/\s/', $passwd))
-            $errore = "La password puo' avere al massimo 30 caratteri, senza spazi.";
-        else if (strcasecmp($passwd, $nome) == 0)
-            $errore = "La password non puo' essere uguale al nome.";
+            $error = "La password può avere al massimo 30 caratteri, senza spazi.";
+        else if (strcasecmp($passwd, $nickname) == 0)
+            $error = "La password non può essere uguale al nickname.";
         else if (isc_mail_suggest($mail) != "")
-            $errore = "Controlla l'email: forse intendevi " . isc_mail_suggest($mail) . " ?";
+            $error = "Controlla l'email: forse intendevi " . isc_mail_suggest($mail) . " ?";
         else if (!isc_mail_ok($mail))
-            $errore = "Questa email non sembra giusta. Controlla come l'hai scritta.";
+            $error = "Questa email non sembra giusta. Controlla come l'hai scritta.";
         else if ($bdb->mail_is_used($mail))
-            $errore = "Questa email e' gia' usata da un altro account. Se e' il tuo, usa \"Password dimenticata?\".";
-        else if (empty($_POST['regole']))
-            $errore = "Per creare l'account devi accettare il regolamento.";
+            $error = "Questa email è già usata da un altro account. Se è il tuo, usa \"Password dimenticata?\".";
+        else if (empty($_POST['rules']))
+            $error = "Per creare l'account devi accettare il regolamento.";
         else if ($bdb->selfreg_check($remote_ip) == FALSE)
-            $errore = sprintf("Da questa connessione e' gia' stato creato un account da poco. Se siete in due "
+            $error = sprintf("Da questa connessione è già stato creato un account da poco. Se siete in due "
                               . "(per esempio marito e moglie), scrivi a %s e ti aiutiamo.", $G_admin_mail);
         else if (($nick_tmp = $bdb->nick_fun_gen()) == FALSE)
-            $errore = "Non e' stato possibile creare l'account. Riprova tra poco.";
+            $error = "Non è stato possibile creare l'account. Riprova tra poco.";
         else {
             $bdb->transaction('BEGIN');
             $ok = FALSE;
             do {
-                if (($usr_obj = $bdb->user_add($nome, md5($passwd), $mail,
+                if (($usr_obj = $bdb->user_add($nickname, md5($passwd), $mail,
                                                USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
                                                USER_DIS_REA_NU_MAILED, $G_notguar_code)) == FALSE)
                     break;
@@ -190,93 +195,173 @@ function main()
                 $hash = md5(time() . $G_alarm_passwd . $nick_tmp . $mail);
                 $link = sprintf("%s://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
                                 $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
-                $ms = isc_mail_welcome($nick_tmp, $nome, NULL, $link);
+                $ms = isc_mail_welcome($nick_tmp, $nickname, NULL, $link);
                 $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK, time(),
                                             $ms[0], $ms[1], $ms[2], $hash);
                 if ($mail_item->store($bdb) == FALSE)
                     break;
                 if ($bdb->selfreg_set($remote_ip) == FALSE)
                     break;
-                $mw = isc_mail_welcome($nick_tmp, $nome, $passwd, $link);
-                if (brisk_mail($mail, "Utente Brisk {$nome}", $mw[0], $mw[1], $mw[2]) == FALSE)
+                $mw = isc_mail_welcome($nick_tmp, $nickname, $passwd, $link);
+                if (brisk_mail($mail, "Utente Brisk {$nickname}", $mw[0], $mw[1], $mw[2]) == FALSE)
                     break;
                 $ok = TRUE;
             } while (FALSE);
 
             if ($ok) {
                 $bdb->transaction('COMMIT');
-                $fatto = TRUE;
+                $done = TRUE;
             }
             else {
                 $bdb->transaction('ROLLBACK');
-                $errore = "Non e' stato possibile creare l'account. Riprova tra poco.";
+                $error = "Non è stato possibile creare l'account. Riprova tra poco.";
             }
         }
     }
 
-    $t = (string)time();
-    $tf = hash_hmac('sha256', $t, $key_t);
-    $regole = (string)@file_get_contents(__DIR__ . "/Obj/doc/terms-of-service_V" . $G_tos_vers . "_it.txt");
-    if (!mb_check_encoding($regole, 'UTF-8'))
-        $regole = mb_convert_encoding($regole, 'UTF-8', 'ISO-8859-1');
+    $curtime = (string)time();
+    $tf = hash_hmac('sha256', $curtime, $key_t);
+    $rules = (string)@file_get_contents(__DIR__ . "/Obj/doc/terms-of-service_V" . $G_tos_vers . "_it.txt");
+    if (!mb_check_encoding($rules, 'UTF-8'))
+        $rules = mb_convert_encoding($rules, 'UTF-8', 'ISO-8859-1');
 ?><!doctype html>
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Crea il tuo account</title>
 <?php isc_style(); ?>
 <style>
-body{font-size:20px}h1{font-size:25px}
-input{font-size:21px;padding:11px}
-.esito{font-size:17px;margin:6px 0 0;min-height:24px}.si{color:#2e7d32;font-weight:bold}.no{color:#b3261e}
-.sug{display:inline-block;margin-left:6px;color:#0a58ca;text-decoration:underline;cursor:pointer;font-weight:bold}
-.passwd_row{display:flex;gap:8px}.passwd_row input{flex:1}.passwd_row button{white-space:nowrap;font-size:16px;padding:8px 10px}
-.regole{background:#eaf6fc;border:1px solid #9ac4db;border-radius:6px;padding:10px 12px;margin:14px 0;font-size:18px}
-.spunta{display:flex;align-items:flex-start;gap:10px;font-weight:bold;margin-top:10px}.spunta input{width:28px;height:28px;flex:none;margin:0}
-.testo{display:none;white-space:pre-wrap;font-family:Arial,sans-serif;font-size:15px;max-height:260px;overflow:auto;background:#fff;border:1px solid #ccc;padding:8px;margin-top:8px}
-.trappola{position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden}
-.spirito{background:#fff6c8;border:1px solid #e0c34a;border-radius:6px;padding:9px 11px;margin:0 0 12px;font-size:18px}
+     body {
+        font-size: 20px;
+    }
+    h1 {
+        font-size: 25px;
+    }
+    input {
+        font-size: 21px;
+        padding: 11px;
+    }
+    .result {
+        font-size: 17px;
+        margin: 6px 0 0;
+        min-height: 24px;
+    }
+    .yes{
+        color: #2e7d32;
+        font-weight: bold;
+    }
+    .no{
+        color: #b3261e;
+    }
+    .sug{
+        display: inline-block;
+        margin-left: 6px;
+        color: #0a58ca;
+        text-decoration: underline;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .passwd_row{
+        display: flex;
+        gap: 8px
+    }
+    .passwd_row input{
+        flex: 1;
+    }
+    .passwd_row button{
+        white-space: nowrap;
+        font-size: 16px;
+        padding: 8px 10px;
+    }
+    .rules{
+        background: #eaf6fc;
+        border: 1px solid #9ac4db;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin: 14px 0;
+        font-size: 18px;
+    }
+    .cbox{
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    .cbox input{
+        width: 28px;
+        height: 28px;
+        flex: none;
+        margin:0;
+    }
+    .content{
+        display: none;
+        white-space: pre-wrap;
+        font-family: Arial,sans-serif;
+        font-size: 15px;
+        max-height: 260px;
+        overflow: auto;
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 8px;
+        margin-top:8px;
+    }
+    .trap{
+        position: absolute;
+        left: -5000px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+    .guidelines{
+        background: #fff6c8;
+        border: 1px solid #e0c34a;
+        border-radius: 6px;
+        padding: 9px 11px;
+        margin: 0 0 12px;
+        font-size:18px;
+    }
 </style></head><body><div class="box">
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
-<?php if ($fatto) { ?>
-  <h1>Quasi fatto, <?php echo isc_h($nome); ?>!</h1>
+<?php if ($done) { ?>
+  <h1>Quasi fatto, <?php echo isc_h($nickname); ?>!</h1>
   <div class="ok" style="text-align:center;font-size:21px">Ti abbiamo mandato un'<b>email</b> a<br><b><?php echo isc_h($mail); ?></b></div>
   <p style="font-size:21px"><b>Aprila e tocca il bottone «Attiva il mio account».</b></p>
   <p><b>Finché non lo tocchi non puoi entrare.</b></p>
-  <p>Poi entri subito a giocare con il tuo nome <b><?php echo isc_h($nome); ?></b> e la tua password (te li abbiamo scritti anche nell'email).
-     Finché i moderatori non approvano il tuo nome, nel gioco ti vedi e ti vedono con il nome provvisorio <b><?php echo isc_h($nick_tmp); ?></b>: quando è approvato ti arriva un'altra email.</p>
+  <p>Poi entri subito a giocare con il tuo nickname <b><?php echo isc_h($nickname); ?></b> e la tua password (te li abbiamo scritti anche nell'email).
+     Finché i moderatori non approvano il tuo nickname, nel gioco ti vedi e ti vedono con il nickname provvisorio <b><?php echo isc_h($nick_tmp); ?></b>: quando è approvato ti arriva un'altra email.</p>
   <p class="piccolo">Non trovi l'email? Guarda anche nelle cartelle <b>Spam</b>, <b>Posta indesiderata</b> o <b>Quarantena</b>. Il link vale 48 ore.</p>
   <a class="btn blu" href="index.php">Torna all'ingresso</a>
 <?php } else { ?>
   <h1>Crea il tuo account</h1>
   <p style="text-align:center">Ci vuole un minuto, e giochi subito.</p>
-  <?php if ($errore != "") { ?><div class="err"><?php echo isc_h($errore); ?></div><?php } ?>
+  <?php if ($error != "") { ?><div class="err"><?php echo isc_h($error); ?></div><?php } ?>
   <form method="post" action="signup.php" autocomplete="off" id="f" accept-charset="utf-8">
-    <input type="hidden" name="t" value="<?php echo isc_h($t); ?>"><input type="hidden" name="tf" value="<?php echo isc_h($tf); ?>">
-    <div class="trappola" aria-hidden="true"><label>Sito <input name="sito" tabindex="-1" autocomplete="off"></label></div>
+    <input type="hidden" name="curtime" value="<?php echo isc_h($curtime); ?>"><input type="hidden" name="tf" value="<?php echo isc_h($tf); ?>">
+    <div class="trap" aria-hidden="true"><label>Sito <input name="site" tabindex="-1" autocomplete="off"></label></div>
 
-    <label for="nome">1. Il tuo nome nel gioco</label>
-    <input id="nome" name="nome" maxlength="12" value="<?php echo isc_h($nome); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-    <div class="esito" id="enome"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nome provvisorio.</span></div>
+    <label for="name">1. Il tuo nickname nel gioco</label>
+    <input id="name" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nickname provvisorio.</span></div>
 
     <label for="passwd">2. La tua password</label>
     <div class="passwd_row"><input id="passwd" name="passwd" type="text" maxlength="30" value="<?php echo isc_h($passwd); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
       <button type="button" id="occhio">Nascondi</button></div>
-    <div class="esito" id="epasswd"><span class="piccolo">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
+    <div class="result" id="epasswd"><span class="piccolo">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
 
     <label for="mail">3. La tua email</label>
     <input id="mail" name="mail" type="email" maxlength="120" value="<?php echo isc_h($mail); ?>" placeholder="esempio: mario.rossi@gmail.com" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-    <div class="esito" id="email"><span class="piccolo">Deve essere la tua: ti mandiamo il link per <b>attivare l'account</b>, con nome e password.</span></div>
+    <div class="result" id="email"><span class="piccolo">Deve essere la tua: ti mandiamo il link per <b>attivare l'account</b>, con nickname e password.</span></div>
 
-    <div class="regole">
-      <div class="spirito"><b>Prima di tutto: lo spirito di Brisk</b><br>
+    <div class="rules">
+      <div class="guidelines"><b>Prima di tutto: lo spirito di Brisk</b><br>
         Non tutti giocano per lo stesso motivo: c'è chi cerca la partita impegnata e chi vuole solo passare un'ora in compagnia,
         chi è esperto e chi sta imparando. <b>Sono tutti benvenuti allo stesso modo.</b><br>
         <b>Sii tollerante con chi sbaglia o è meno bravo:</b> nessuno va rimproverato, deriso o umiliato per come gioca.
         Se un compagno o un tavolo non ti piace, <b>sei libero di cambiare tavolo</b>, senza insultare nessuno. È un gioco, e deve restare un piacere per tutti.</div>
-      <a href="#" id="tutto" class="piccolo">Leggi il regolamento completo</a>
-      <div class="testo" id="testo"><?php echo isc_h($regole); ?></div>
-      <label class="spunta"><input type="checkbox" name="regole" value="1"<?php echo (!empty($_POST['regole']) ? ' checked' : ''); ?> required> Ho letto e accetto il regolamento</label>
+      <a href="#" id="full_rules" class="piccolo">Leggi il regolamento completo</a>
+      <div class="content" id="content"><?php echo isc_h($rules); ?></div>
+      <label class="cbox"><input type="checkbox" name="rules" value="1"<?php echo (!empty($_POST['rules']) ? ' checked' : ''); ?> required> Ho letto e accetto il regolamento</label>
     </div>
-    <button type="submit" class="blu" id="crea">Crea il mio account</button>
+    <button type="submit" class="blu" id="create">Crea il mio account</button>
   </form>
   <a class="dopo" href="index.php">Torna all'ingresso</a>
   <script>
@@ -285,20 +370,21 @@ input{font-size:21px;padding:11px}
     function chiedi(u, cb) { var x = new XMLHttpRequest(); x.open('GET', u, true); x.onload = function () { try { cb(JSON.parse(x.responseText)); } catch (e) { } }; x.send(null); }
     function mostra(el, r, campo) {
       el.innerHTML = '';
-      var s = document.createElement('span'); s.className = r.stato === 'ok' ? 'si' : 'no'; s.textContent = (r.stato === 'ok' ? '\u2705 ' : '\u274c ') + r.msg; el.appendChild(s);
+      var s = document.createElement('span'); s.className = r.stato === 'ok' ? 'yes' : 'no'; s.textContent = (r.stato === 'ok' ? '\u2705 ' : '\u274c ') + r.msg; el.appendChild(s);
       if (r.sug) { var a = document.createElement('span'); a.className = 'sug'; a.textContent = r.sug; a.onclick = function () { campo.value = r.sug; campo.dispatchEvent(new Event('input')); }; el.appendChild(a); }
     }
     var tn = null, tm = null;
-    $('nome').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tn); if (!v) return;
-      tn = setTimeout(function () { chiedi('signup.php?nome=' + encodeURIComponent(v), function (r) { mostra($('enome'), r, $('nome')); }); }, 400); });
+    $('nickname').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tn); if (!v) return;
+      tn = setTimeout(function () { chiedi('signup.php?nickname=' + encodeURIComponent(v), function (r) { mostra($('ename'), r, $('nickname')); }); }, 400); });
     $('mail').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tm); if (v.indexOf('@') < 1 || v.indexOf('.') < 0) return;
       tm = setTimeout(function () { chiedi('signup.php?mail=' + encodeURIComponent(v), function (r) { mostra($('email'), r, $('mail')); }); }, 700); });
     $('passwd').addEventListener('input', function () { var l = this.value.trim().length;
-      $('epasswd').innerHTML = l === 0 ? '' : (l < 6 ? '<span class="no">\u274c Ancora ' + (6 - l) + ' caratteri</span>' : '<span class="si">\u2705 Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>'); });
+      $('epasswd').innerHTML = l === 0 ? '' : (l < 6 ? '<span class="no">\u274c Ancora ' + (6 - l) + ' caratteri</span>' : '<span class="yes">\u2705 Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>'); });
     $('occhio').onclick = function () { var c = $('passwd'); if (c.type === 'text') { c.type = 'password'; this.textContent = 'Mostra'; } else { c.type = 'text'; this.textContent = 'Nascondi'; } };
-    $('tutto').onclick = function (e) { e.preventDefault(); var t = $('testo'); t.style.display = t.style.display === 'block' ? 'none' : 'block'; };
-    $('f').addEventListener('submit', function () { $('crea').disabled = true; $('crea').textContent = 'Un momento...'; });
-    if ($('nome').value) $('nome').dispatchEvent(new Event('input'));
+    $('full_rules').onclick = function (e) { e.preventDefault(); var t = $('content'); t.style.display = t.style.display === 'block' ? 'none' : 'block'; };
+    $('f').addEventListener('submit', function () { $('create').disabled = true; $('create').textContent = 'Un momento...'; });
+    if ($('nickname').value)
+        $('nickname').dispatchEvent(new Event('input'));
   })();
   </script>
 <?php } ?>
