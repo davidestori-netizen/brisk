@@ -411,7 +411,7 @@ function passwd_gen($seed = NULL)
 {
     GLOBAL $G_PG_vow, $G_PG_vow_n, $G_PG_cons, $G_PG_cons_n;
 
-    $pw = "";
+    $passwd = "";
 
     if ($seed != NULL)
         mt_srand($seed);
@@ -424,23 +424,23 @@ function passwd_gen($seed = NULL)
             for ($n = 0 ; $n < mt_rand(1,2) ; $n++) {
                 if ($n == 0) {
                     $old = mt_rand(0, $G_PG_vow_n-1);
-                    $pw .= $G_PG_vow[$old];
+                    $passwd .= $G_PG_vow[$old];
                 }
                 else {
                     $new = mt_rand(0, $G_PG_vow_n-1);
                     if ($new == $old)
                         $new = ($new + mt_rand(0, $G_PG_vow_n-2)) % $G_PG_vow_n;
-                    $pw .= $G_PG_vow[$new];
+                    $passwd .= $G_PG_vow[$new];
                 }
             }
         }
         else {
             // consonants
-            $pw .= $G_PG_cons[mt_rand(0, $G_PG_cons_n-1)];
+            $passwd .= $G_PG_cons[mt_rand(0, $G_PG_cons_n-1)];
         }
     }
 
-    return $pw;
+    return $passwd;
 }
 
 function cmd_return($val, $desc)
