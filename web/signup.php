@@ -55,7 +55,8 @@ header('Cache-Control: no-store, max-age=0');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
 
-/* e-mail with the link to activate the account, the temporary nickname and the password:
+/* e-mail with the link to activate the account, the temporary nickname and, only when the
+   player asks for it with the box of the page, the password:
    array(subject, text, html). It is stored also in the mails table (usermgmt.php can send it
    again) but with $passwd === NULL: the password is never saved in clear in the database */
 function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
@@ -72,7 +73,8 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
         . "Per ATTIVARE l'account apri questo link (vale 48 ore):\n" . $link
         . "\nFinché non lo apri non puoi entrare."
         . "\n\nPoi entra con:\nNickname: " . $nickname . "\nPassword: " . $passwd_t
-        . "\n\nConserva questa email: ti ricorda la tua password.\nSe non sei stato tu a iscriverti, ignora questa email.\n\nCi vediamo ai tavoli!\n";
+        . ($passwd === NULL ? "\n\n" : "\n\nConserva questa email: ti ricorda la tua password.\n")
+        . "Se non sei stato tu a iscriverti, ignora questa email.\n\nCi vediamo ai tavoli!\n";
     /* table layout, no <br> and no <div>: isc_mail_lines() and the white-space
        of the frame around the body would turn them into empty lines. The logo is
        the one at the top of the home page, linked with the address of the site. */
@@ -90,7 +92,8 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
         . '<tr><td><table cellpadding="0" cellspacing="0" style="background:#fff6c8;border:1px solid #e0c34a;border-radius:6px;font-size:18px">'
         . '<tr><td style="padding:10px 16px 4px">Nickname: <b>' . isc_h($nickname) . '</b></td></tr>'
         . '<tr><td style="padding:4px 16px 10px">Password: <b>' . $passwd_h . '</b></td></tr></table></td></tr>'
-        . '<tr><td style="padding:14px 0;font-size:14px;color:#555">Finché non attivi l\'account non puoi entrare. Conserva questa email: ti ricorda la tua password.</td></tr>'
+        . '<tr><td style="padding:14px 0;font-size:14px;color:#555">Finché non attivi l\'account non puoi entrare.'
+        . ($passwd === NULL ? '' : ' Conserva questa email: ti ricorda la tua password.') . '</td></tr>'
         . '<tr><td style="padding:12px 0 0;border-top:1px solid #ddd;font-size:12px;color:#888">Se non sei stato tu a iscriverti, ignora questa email. Ci vediamo ai tavoli! &#127183;</td></tr>'
         . '</table>';
     return (array($subj, $text, isc_mail_lines($html)));
@@ -136,6 +139,7 @@ function main()
     $nicktmp_animal = "";
     $nicktmp_adjective = "";
     $passwd = "";
+    $passwd2 = "";
     $mail = "";
     $error = "";
     $done = FALSE;
@@ -144,6 +148,7 @@ function main()
         $origine = (isset($_SERVER['HTTP_ORIGIN']) ? parse_url($_SERVER['HTTP_ORIGIN'], PHP_URL_HOST) : "");
         $nickname = (isset($_POST['nickname']) ? isc_lower(trim((string)$_POST['nickname'])) : "");
         $passwd   = (isset($_POST['passwd'])   ? trim((string)$_POST['passwd'])   : "");
+        $passwd2  = (isset($_POST['passwd2'])  ? trim((string)$_POST['passwd2'])  : "");
         $mail = (isset($_POST['mail']) ? trim((string)$_POST['mail']) : "");
         $nicktmp_animal = (isset($_POST['nicktmp_animal']) ? (string)$_POST['nicktmp_animal'] : "");
         $nicktmp_adjective = (isset($_POST['nicktmp_adjective']) ? (string)$_POST['nicktmp_adjective'] : "");
@@ -168,6 +173,8 @@ function main()
             $error = "La password può avere al massimo 30 caratteri, senza spazi.";
         else if (strcasecmp($passwd, $nickname) == 0)
             $error = "La password non può essere uguale al nickname.";
+        else if ($passwd2 !== $passwd)
+            $error = "Le due password non sono uguali: riscrivile.";
         else if (isc_mail_suggest($mail) != "")
             $error = "Controlla l'email: forse intendevi " . isc_mail_suggest($mail) . " ?";
         else if (!isc_mail_ok($mail))
@@ -207,7 +214,7 @@ function main()
                     break;
                 if ($bdb->selfreg_set($remote_ip) == FALSE)
                     break;
-                $mw = isc_mail_welcome($nick_tmp, $nickname, $passwd, $link);
+                $mw = isc_mail_welcome($nick_tmp, $nickname, (empty($_POST['mail_passwd']) ? NULL : $passwd), $link);
                 if (brisk_mail($mail, "Utente Brisk {$nickname}", $mw[0], $mw[1], $mw[2]) == FALSE)
                     break;
                 $ok = TRUE;
@@ -347,7 +354,7 @@ function main()
   <div class="ok" style="text-align:center;font-size:21px">Ti abbiamo mandato un'<b>email</b> a<br><b><?php echo isc_h($mail); ?></b></div>
   <p style="font-size:21px"><b>Aprila e tocca il bottone «Attiva il mio account».</b></p>
   <p><b>Finché non lo tocchi non puoi entrare.</b></p>
-  <p>Poi entri subito a giocare con il tuo nickname <b><?php echo isc_h($nickname); ?></b> e la tua password (te li abbiamo scritti anche nell'email).
+  <p>Poi entri subito a giocare con il tuo nickname <b><?php echo isc_h($nickname); ?></b> e la tua password<?php echo (empty($_POST['mail_passwd']) ? '' : " (te li abbiamo scritti anche nell'email)"); ?>.
      Finché i moderatori non approvano il tuo nickname, nel gioco ti vedi e ti vedono con il nickname provvisorio <b><?php echo isc_h($nick_tmp); ?></b>: quando è approvato ti arriva un'altra email.</p>
   <p class="piccolo">Non trovi l'email? Guarda anche nelle cartelle <b>Spam</b>, <b>Posta indesiderata</b> o <b>Quarantena</b>. Il link vale 48 ore.</p>
   <a class="btn blu" href="index.php">Torna all'ingresso</a>
@@ -379,13 +386,17 @@ function main()
     <div class="result" id="enicktmp"><span class="piccolo">Finché i moderatori non controllano il tuo nickname, nel gioco ti vedono così. Puoi tenerlo o sceglierne un altro.</span></div>
 
     <label for="passwd">2. La tua password</label>
-    <div class="passwd_row"><input id="passwd" name="passwd" type="text" maxlength="30" value="<?php echo isc_h($passwd); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-      <button type="button" id="occhio">Nascondi</button></div>
+    <div class="passwd_row"><input id="passwd" name="passwd" type="password" maxlength="30" value="<?php echo isc_h($passwd); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+      <button type="button" id="occhio">Mostra</button></div>
     <div class="result" id="epasswd"><span class="piccolo">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
+    <label for="passwd2">Riscrivi la password</label>
+    <input id="passwd2" name="passwd2" type="password" maxlength="30" value="<?php echo isc_h($passwd2); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <div class="result" id="epasswd2"></div>
+    <label class="cbox"><input type="checkbox" name="mail_passwd" value="1"<?php echo (!empty($_POST['mail_passwd']) ? ' checked' : ''); ?>> La vuoi anche per email? Te la scriviamo nell'email di benvenuto</label>
 
     <label for="mail">3. La tua email</label>
     <input id="mail" name="mail" type="email" maxlength="120" value="<?php echo isc_h($mail); ?>" placeholder="esempio: mario.rossi@gmail.com" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-    <div class="result" id="email"><span class="piccolo">Deve essere la tua: ti mandiamo il link per <b>attivare l'account</b>, con nickname e password.</span></div>
+    <div class="result" id="email"><span class="piccolo">Deve essere la tua: ti mandiamo il link per <b>attivare l'account</b>.</span></div>
 
     <div class="rules">
       <div class="guidelines"><b>Prima di tutto: lo spirito di Brisk</b><br>
@@ -416,7 +427,29 @@ function main()
       tm = setTimeout(function () { chiedi('signup.php?mail=' + encodeURIComponent(v), function (r) { mostra($('email'), r, $('mail')); }); }, 700); });
     $('passwd').addEventListener('input', function () { var l = this.value.trim().length;
       $('epasswd').innerHTML = l === 0 ? '' : (l < 6 ? '<span class="no">\u274c Ancora ' + (6 - l) + ' caratteri</span>' : '<span class="yes">\u2705 Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>'); });
-    $('occhio').onclick = function () { var c = $('passwd'); if (c.type === 'text') { c.type = 'password'; this.textContent = 'Mostra'; } else { c.type = 'text'; this.textContent = 'Nascondi'; } };
+    $('occhio').onclick = function () {
+        var show = ($('passwd').type === 'password');
+
+        $('passwd').type = (show ? 'text' : 'password');
+        $('passwd2').type = (show ? 'text' : 'password');
+        this.textContent = (show ? 'Nascondi' : 'Mostra');
+    };
+    $('passwd2').addEventListener('input', function () {
+        var line = document.createElement('span');
+
+        $('epasswd2').innerHTML = '';
+        if (this.value === '')
+            return;
+        if (this.value === $('passwd').value) {
+            line.className = 'yes';
+            line.textContent = '\u2705 Le due password sono uguali';
+        }
+        else {
+            line.className = 'no';
+            line.textContent = '\u274c Le due password non sono uguali';
+        }
+        $('epasswd2').appendChild(line);
+    });
     $('full_rules').onclick = function (e) { e.preventDefault(); var t = $('content'); t.style.display = t.style.display === 'block' ? 'none' : 'block'; };
     $('f').addEventListener('submit', function () { $('create').disabled = true; $('create').textContent = 'Un momento...'; });
     function nicktmp_show() {
