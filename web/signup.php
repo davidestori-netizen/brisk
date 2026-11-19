@@ -154,7 +154,7 @@ function main()
         else if (!empty($_POST['site']))                       // trap field for the robots
             $error = "Richiesta non valida.";
         else if (!preg_match('/^\d+$/', $curtime) || !hash_equals(hash_hmac('sha256', $curtime, $key_t), $tf)
-                 || time() - (int)$curtime < 4 || time() - (int)$curtime > 7200)
+                 || time() - (int)$curtime < 4)
             $error = "La pagina è scaduta. Riprova.";
         else if ($result[0] != 'ok')
             $error = $result[1] . ($result[2] != "" ? " Prova: " . $result[2] : "");
