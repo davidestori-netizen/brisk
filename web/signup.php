@@ -338,8 +338,8 @@ function main()
     <input type="hidden" name="curtime" value="<?php echo isc_h($curtime); ?>"><input type="hidden" name="tf" value="<?php echo isc_h($tf); ?>">
     <div class="trap" aria-hidden="true"><label>Sito <input name="site" tabindex="-1" autocomplete="off"></label></div>
 
-    <label for="name">1. Il tuo nickname nel gioco</label>
-    <input id="name" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <label for="nickname">1. Il tuo nickname nel gioco</label>
+    <input id="nickname" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nickname provvisorio.</span></div>
 
     <label for="passwd">2. La tua password</label>
@@ -375,7 +375,7 @@ function main()
     }
     var tn = null, tm = null;
     $('nickname').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tn); if (!v) return;
-      tn = setTimeout(function () { chiedi('signup.php?nickname=' + encodeURIComponent(v), function (r) { mostra($('ename'), r, $('nickname')); }); }, 400); });
+      tn = setTimeout(function () { chiedi('signup.php?nickname=' + encodeURIComponent(v), function (r) { mostra($('enickname'), r, $('nickname')); }); }, 400); });
     $('mail').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tm); if (v.indexOf('@') < 1 || v.indexOf('.') < 0) return;
       tm = setTimeout(function () { chiedi('signup.php?mail=' + encodeURIComponent(v), function (r) { mostra($('email'), r, $('mail')); }); }, 700); });
     $('passwd').addEventListener('input', function () { var l = this.value.trim().length;
