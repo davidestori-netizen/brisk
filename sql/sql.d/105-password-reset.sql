@@ -1,5 +1,5 @@
 --
---  "Password dimenticata?" (password_dimenticata.php, password_nuova.php):
+--  "Forgotten password?" (forgotten_password.php, new_password.php):
 --  links sent by e-mail (only the sha256 of the code) and copy of the old passwords
 --
 CREATE TABLE IF NOT EXISTS #PFX#pw_reset (

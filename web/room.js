@@ -880,7 +880,7 @@ sideslide.prototype = {
 
 }
 
-/* easy signup (iscriviti.php): the nickname given in the link (index.php?n=nick) is
+/* easy signup (signup.php): the nickname given in the link (index.php?n=nick) is
    written in the login form, and at the first entry with a temporary nickname a
    welcome window explains the "*" (once per browser). The leading ';' closes the
    statement above, that has no semicolon of its own */

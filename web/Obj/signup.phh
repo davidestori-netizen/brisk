@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - Obj/iscrizione.phh
+ *  brisk - Obj/signup.phh
  *
  *  Copyright (C) 2026      Davide Stori
  *                          mailto: davidestori@gmail.com
@@ -22,8 +22,8 @@
 
 /*
  *  Common functions of the easy signup ("Crea il tuo account"):
- *  iscriviti.php, nickreq.php, mailmgr.php, password_dimenticata.php,
- *  password_nuova.php.
+ *  signup.php, nickreq.php, mailmgr.php, forgotten_password.php,
+ *  new_password.php.
  */
 
 define('ISC_ACCENTS', 'àáèéìíòóùúÀÁÈÉÌÍÒÓÙÚ');
@@ -198,7 +198,7 @@ function isc_page_link_not_valid()
   <p>Forse avevi già attivato il tuo account: in quel caso entra pure con il tuo nome e la tua password.</p>
   <p>Il link vale 48 ore: se è passato, rifai l'iscrizione.</p>
   <a class="btn blu" href="index.php">Vai a giocare</a>
-  <a class="btn blu" href="iscriviti.php">Crea il tuo account</a>
+  <a class="btn blu" href="signup.php">Crea il tuo account</a>
 </div></body></html>
 <?php
 }

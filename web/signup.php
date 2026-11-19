@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - iscriviti.php
+ *  brisk - signup.php
  *
  *  Copyright (C) 2026      Davide Stori
  *                          mailto: davidestori@gmail.com
@@ -47,7 +47,7 @@ require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/mail.phh");
 require_once($G_base."Obj/dbase_base.phh");
 require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
-require_once($G_base."Obj/iscrizione.phh");
+require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
@@ -249,7 +249,7 @@ input{font-size:21px;padding:11px}
   <h1>Crea il tuo account</h1>
   <p style="text-align:center">Ci vuole un minuto, e giochi subito.</p>
   <?php if ($errore != "") { ?><div class="err"><?php echo isc_h($errore); ?></div><?php } ?>
-  <form method="post" action="iscriviti.php" autocomplete="off" id="f" accept-charset="utf-8">
+  <form method="post" action="signup.php" autocomplete="off" id="f" accept-charset="utf-8">
     <input type="hidden" name="t" value="<?php echo isc_h($t); ?>"><input type="hidden" name="tf" value="<?php echo isc_h($tf); ?>">
     <div class="trappola" aria-hidden="true"><label>Sito <input name="sito" tabindex="-1" autocomplete="off"></label></div>
 
@@ -290,9 +290,9 @@ input{font-size:21px;padding:11px}
     }
     var tn = null, tm = null;
     $('nome').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tn); if (!v) return;
-      tn = setTimeout(function () { chiedi('iscriviti.php?nome=' + encodeURIComponent(v), function (r) { mostra($('enome'), r, $('nome')); }); }, 400); });
+      tn = setTimeout(function () { chiedi('signup.php?nome=' + encodeURIComponent(v), function (r) { mostra($('enome'), r, $('nome')); }); }, 400); });
     $('mail').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tm); if (v.indexOf('@') < 1 || v.indexOf('.') < 0) return;
-      tm = setTimeout(function () { chiedi('iscriviti.php?mail=' + encodeURIComponent(v), function (r) { mostra($('email'), r, $('mail')); }); }, 700); });
+      tm = setTimeout(function () { chiedi('signup.php?mail=' + encodeURIComponent(v), function (r) { mostra($('email'), r, $('mail')); }); }, 700); });
     $('pw').addEventListener('input', function () { var l = this.value.trim().length;
       $('epw').innerHTML = l === 0 ? '' : (l < 6 ? '<span class="no">\u274c Ancora ' + (6 - l) + ' caratteri</span>' : '<span class="si">\u2705 Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>'); });
     $('occhio').onclick = function () { var c = $('pw'); if (c.type === 'text') { c.type = 'password'; this.textContent = 'Mostra'; } else { c.type = 'text'; this.textContent = 'Nascondi'; } };

@@ -1145,7 +1145,7 @@ window.onload = function() {
     <tr><td colspan="2"><input id="sub" value="<?php echo $mlang_room['btn_enter'][$G_lang];?>" type="submit" class="button"></td></tr>
     </table>
     </form>
-    <div id="pw_dimenticata" style="max-width:600px;margin:10px auto;text-align:center;font-size:20px"><a href="password_dimenticata.php" onclick="var n = document.getElementById('nameid'), v = (n ? n.value.replace(/^\s+|\s+$/g, '') : ''); if (v != '') this.href = 'password_dimenticata.php?n=' + encodeURIComponent(v);" style="display:inline-block;margin:8px 6px;padding:6px 14px;border:1px solid #99aabb;border-radius:6px;background:#f4f4f4;color:#193747;font-size:17px;text-decoration:none">Password dimenticata?</a></div><br>
+    <div id="pw_dimenticata" style="max-width:600px;margin:10px auto;text-align:center;font-size:20px"><a href="forgotten_password.php" onclick="var n = document.getElementById('nameid'), v = (n ? n.value.replace(/^\s+|\s+$/g, '') : ''); if (v != '') this.href = 'forgotten_password.php?n=' + encodeURIComponent(v);" style="display:inline-block;margin:8px 6px;padding:6px 14px;border:1px solid #99aabb;border-radius:6px;background:#f4f4f4;color:#193747;font-size:17px;text-decoration:none">Password dimenticata?</a></div><br>
     <div style="text-align:center;margin:-16px auto 10px"><button style="font-size:20px;padding:8px 18px;font-weight:bold;cursor:pointer;background:#e6f4ea;border:2px solid #7cb987;border-radius:6px;color:#1b4d2b" onclick="window.location.href = 'iscriviti.php'; return false;">Crea il tuo account</button></div>
     <?php echo $mlang_room['passwarn'][$G_lang];?><br><br>
 

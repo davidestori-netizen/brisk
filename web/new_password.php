@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - password_nuova.php
+ *  brisk - new_password.php
  *
  *  Copyright (C) 2026      Davide Stori
  *                          mailto: davidestori@gmail.com
@@ -21,7 +21,7 @@
  */
 
 /*
- *  New password from the link of password_dimenticata.php (60 minutes, once only).
+ *  New password from the link of forgotten_password.php (60 minutes, once only).
  *  The old password goes in users_pw_backup; an e-mail tells the player the change.
  */
 
@@ -39,7 +39,7 @@ require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/mail.phh");
 require_once($G_base."Obj/dbase_base.phh");
 require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
-require_once($G_base."Obj/iscrizione.phh");
+require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
@@ -163,12 +163,12 @@ function main()
 <?php } else if ($login === FALSE) { ?>
   <h1>Link scaduto o gia' usato</h1>
   <p>Questo link non vale piu': dura 60 minuti e si puo' usare una volta sola.</p>
-  <a class="btn blu" href="password_dimenticata.php">Chiedi un nuovo link</a>
+  <a class="btn blu" href="forgotten_password.php">Chiedi un nuovo link</a>
 <?php } else { ?>
   <h1>Scegli la nuova password</h1>
   <p>Scegli una password che ricordi facilmente.</p>
   <?php if ($errore != "") { ?><div class="err"><?php echo isc_h($errore); ?></div><?php } ?>
-  <form method="post" action="password_nuova.php" autocomplete="on">
+  <form method="post" action="new_password.php" autocomplete="on">
     <input type="hidden" name="t" value="<?php echo isc_h($t); ?>">
     <label for="u">Il tuo nome</label>
     <input id="u" name="username" autocomplete="username" value="<?php echo isc_h($login); ?>" readonly>

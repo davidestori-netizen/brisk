@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - password_dimenticata.php
+ *  brisk - forgotten_password.php
  *
  *  Copyright (C) 2026      Davide Stori
  *                          mailto: davidestori@gmail.com
@@ -22,7 +22,7 @@
 
 /*
  *  "Password dimenticata?": the player writes his nickname or his e-mail and
- *  receives a link (password_nuova.php) valid 60 minutes, once only.
+ *  receives a link (new_password.php) valid 60 minutes, once only.
  *  In the database only the sha256 of the link code (pw_reset table).
  */
 
@@ -40,7 +40,7 @@ require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/mail.phh");
 require_once($G_base."Obj/dbase_base.phh");
 require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
-require_once($G_base."Obj/iscrizione.phh");
+require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
@@ -108,7 +108,7 @@ function main()
                     $ins_sql = sprintf("INSERT INTO %spw_reset (impronta, login, ip) VALUES ('%s', '%s', '%s');",
                                        $G_dbpfx, hash('sha256', $codice), escsql($u->login), escsql($ip));
                     $ok = $bdb->query($ins_sql);
-                    $link = sprintf("%s://%s/%s/password_nuova.php?t=%s", $G_proto, $G_domain, $G_webbase, $codice);
+                    $link = sprintf("%s://%s/%s/new_password.php?t=%s", $G_proto, $G_domain, $G_webbase, $codice);
                     $testo = "Ciao " . $u->login . ",\n\nhai chiesto di scegliere una nuova password per Brisk.\n"
                         . "Apri questo link (vale 60 minuti, una volta sola):\n\n" . $link
                         . "\n\nSe non sei stato tu, ignora questa email: la tua password resta quella di prima.\n\n"
@@ -143,7 +143,7 @@ function main()
     <span style="font-size:16px">Se e' li', premi <b>"Non e' posta indesiderata"</b>: le prossime arriveranno nella posta normale.</span>
   </div>
   <p class="piccolo">Il link vale 60 minuti.</p>
-  <form method="post" action="password_dimenticata.php">
+  <form method="post" action="forgotten_password.php">
     <input type="hidden" name="chi" value="<?php echo isc_h($chi); ?>">
     <button type="submit" class="blu">Mandamela di nuovo</button>
   </form>
@@ -158,7 +158,7 @@ function main()
   <h1>Password dimenticata?</h1>
   <p>Scrivi il tuo <b>nome nel gioco</b> oppure la tua <b>email</b>: ti mandiamo un link per sceglierne una nuova.</p>
   <?php if ($errore != "") { ?><div class="err"><?php echo isc_h($errore); ?></div><?php } ?>
-  <form method="post" action="password_dimenticata.php">
+  <form method="post" action="forgotten_password.php">
     <label for="chi">Nome nel gioco o email</label>
     <input id="chi" name="chi" autocomplete="username" maxlength="120" value="<?php echo isc_h($chi); ?>" required>
     <button type="submit" class="blu">Mandami il link</button>

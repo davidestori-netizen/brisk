@@ -39,7 +39,7 @@ require_once($G_base."Obj/brisk.phh");
 require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
-require_once($G_base."Obj/iscrizione.phh");
+require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
@@ -92,7 +92,7 @@ function main()
             break;
         }
 
-        /* the same rules of the signup page (iscriviti.php) */
+        /* the same rules of the signup page (signup.php) */
         $esito = isc_nick_check($bdb, $nick);
         if ($esito[0] != 'ok') {
             $msg = eschtml($esito[1] . ($esito[2] != "" ? " Prova: " . $esito[2] : ""));
