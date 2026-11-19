@@ -23,7 +23,7 @@
 /*
  *  "Password dimenticata?": the player writes his nickname or his e-mail and
  *  receives a link (new_password.php) valid 60 minutes, once only.
- *  In the database only the sha256 of the link code (pw_reset table).
+ *  In the database only the sha256 of the link code (passwd_reset table).
  */
 
 foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
@@ -44,15 +44,15 @@ require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
-define('PWD_MAX_NICK', 3);    // requests for the same account in one hour
-define('PWD_MAX_IP',  10);    // requests from the same address in one hour
+define('PASSWD_MAX_NICK', 3);    // requests for the same account in one hour
+define('PASSWD_MAX_IP',  10);    // requests from the same address in one hour
 
 header('Content-Type: text/html; charset=UTF-8');
 header('Cache-Control: no-store, max-age=0');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
 
-function pwd_mask($e)
+function passwd_mask($e)
 {
     $p = explode('@', $e, 2);
     if (count($p) < 2)
@@ -60,11 +60,11 @@ function pwd_mask($e)
     return substr($p[0], 0, 1) . str_repeat('*', max(2, strlen($p[0]) - 1)) . '@' . $p[1];
 }
 
-function pwd_count($bdb, $where)
+function passwd_count($bdb, $where)
 {
     GLOBAL $G_dbpfx;
 
-    $c_sql = sprintf("SELECT count(*) AS n FROM %spw_reset WHERE %s AND creato > now() - interval '1 hour';", $G_dbpfx, $where);
+    $c_sql = sprintf("SELECT count(*) AS n FROM %spasswd_reset WHERE %s AND creato > now() - interval '1 hour';", $G_dbpfx, $where);
     if (($c_pg = $bdb->query($c_sql)) == FALSE || pg_num_rows($c_pg) != 1)
         return 1000;
     return ((int)pg_fetch_object($c_pg, 0)->n);
@@ -97,15 +97,15 @@ function main()
                 $errore = "Non troviamo nessun giocatore con questo nome o questa email. Controlla come l'hai scritto.";
             else if (!isc_mail_ok($u->email))
                 $esito = 'senza_mail';
-            else if (pwd_count($bdb, sprintf("ip = '%s'", escsql($ip))) >= PWD_MAX_IP)
+            else if (passwd_count($bdb, sprintf("ip = '%s'", escsql($ip))) >= PASSWD_MAX_IP)
                 $errore = "Troppe richieste. Riprova tra un'ora.";
             else {
-                if (pwd_count($bdb, sprintf("login = '%s'", escsql($u->login))) >= PWD_MAX_NICK) {
+                if (passwd_count($bdb, sprintf("login = '%s'", escsql($u->login))) >= PASSWD_MAX_NICK) {
                     $esito = 'gia';
                 }
                 else {
                     $codice = bin2hex(random_bytes(24));
-                    $ins_sql = sprintf("INSERT INTO %spw_reset (impronta, login, ip) VALUES ('%s', '%s', '%s');",
+                    $ins_sql = sprintf("INSERT INTO %spasswd_reset (impronta, login, ip) VALUES ('%s', '%s', '%s');",
                                        $G_dbpfx, hash('sha256', $codice), escsql($u->login), escsql($ip));
                     $ok = $bdb->query($ins_sql);
                     $link = sprintf("%s://%s/%s/new_password.php?t=%s", $G_proto, $G_domain, $G_webbase, $codice);
@@ -126,7 +126,7 @@ function main()
                         $errore = "Non siamo riusciti a mandare l'email. Riprova tra poco o scrivi all'amministratore.";
                 }
                 if ($esito != "")
-                    $mascherata = pwd_mask($u->email);
+                    $mascherata = passwd_mask($u->email);
             }
         }
     }

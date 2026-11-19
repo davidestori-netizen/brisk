@@ -131,12 +131,12 @@ function main()
 
     header('Content-Type: text/html; charset=UTF-8');
     $key_t = hash('sha256', 'iscr-tempo|' . $G_alarm_passwd);
-    $nome = ""; $pw = ""; $mail = ""; $errore = ""; $fatto = FALSE; $nick_tmp = "";
+    $nome = ""; $passwd = ""; $mail = ""; $errore = ""; $fatto = FALSE; $nick_tmp = "";
 
     if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST') {
         $origine = (isset($_SERVER['HTTP_ORIGIN']) ? parse_url($_SERVER['HTTP_ORIGIN'], PHP_URL_HOST) : "");
         $nome = (isset($_POST['nome']) ? isc_lower(trim((string)$_POST['nome'])) : "");
-        $pw   = (isset($_POST['pw'])   ? trim((string)$_POST['pw'])   : "");
+        $passwd   = (isset($_POST['passwd'])   ? trim((string)$_POST['passwd'])   : "");
         $mail = (isset($_POST['mail']) ? trim((string)$_POST['mail']) : "");
         $t    = (isset($_POST['t'])    ? (string)$_POST['t']  : "");
         $tf   = (isset($_POST['tf'])   ? (string)$_POST['tf'] : "");
@@ -153,11 +153,11 @@ function main()
             $errore = "La pagina e' scaduta. Riprova.";
         else if ($esito[0] != 'ok')
             $errore = $esito[1] . ($esito[2] != "" ? " Prova: " . $esito[2] : "");
-        else if (strlen($pw) < 6)
+        else if (strlen($passwd) < 6)
             $errore = "La password deve avere almeno 6 caratteri.";
-        else if (strlen($pw) > 30 || preg_match('/\s/', $pw))
+        else if (strlen($passwd) > 30 || preg_match('/\s/', $passwd))
             $errore = "La password puo' avere al massimo 30 caratteri, senza spazi.";
-        else if (strcasecmp($pw, $nome) == 0)
+        else if (strcasecmp($passwd, $nome) == 0)
             $errore = "La password non puo' essere uguale al nome.";
         else if (isc_mail_suggest($mail) != "")
             $errore = "Controlla l'email: forse intendevi " . isc_mail_suggest($mail) . " ?";
@@ -176,7 +176,7 @@ function main()
             $bdb->transaction('BEGIN');
             $ok = FALSE;
             do {
-                if (($usr_obj = $bdb->user_add($nome, md5($pw), $mail,
+                if (($usr_obj = $bdb->user_add($nome, md5($passwd), $mail,
                                                USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
                                                USER_DIS_REA_NU_MAILED, $G_notguar_code)) == FALSE)
                     break;
@@ -197,7 +197,7 @@ function main()
                     break;
                 if ($bdb->selfreg_set($remote_ip) == FALSE)
                     break;
-                $mw = isc_mail_welcome($nick_tmp, $nome, $pw, $link);
+                $mw = isc_mail_welcome($nick_tmp, $nome, $passwd, $link);
                 if (brisk_mail($mail, "Utente Brisk {$nome}", $mw[0], $mw[1], $mw[2]) == FALSE)
                     break;
                 $ok = TRUE;
@@ -228,7 +228,7 @@ body{font-size:20px}h1{font-size:25px}
 input{font-size:21px;padding:11px}
 .esito{font-size:17px;margin:6px 0 0;min-height:24px}.si{color:#2e7d32;font-weight:bold}.no{color:#b3261e}
 .sug{display:inline-block;margin-left:6px;color:#0a58ca;text-decoration:underline;cursor:pointer;font-weight:bold}
-.pwriga{display:flex;gap:8px}.pwriga input{flex:1}.pwriga button{white-space:nowrap;font-size:16px;padding:8px 10px}
+.passwd_row{display:flex;gap:8px}.passwd_row input{flex:1}.passwd_row button{white-space:nowrap;font-size:16px;padding:8px 10px}
 .regole{background:#eaf6fc;border:1px solid #9ac4db;border-radius:6px;padding:10px 12px;margin:14px 0;font-size:18px}
 .spunta{display:flex;align-items:flex-start;gap:10px;font-weight:bold;margin-top:10px}.spunta input{width:28px;height:28px;flex:none;margin:0}
 .testo{display:none;white-space:pre-wrap;font-family:Arial,sans-serif;font-size:15px;max-height:260px;overflow:auto;background:#fff;border:1px solid #ccc;padding:8px;margin-top:8px}
@@ -257,10 +257,10 @@ input{font-size:21px;padding:11px}
     <input id="nome" name="nome" maxlength="12" value="<?php echo isc_h($nome); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="esito" id="enome"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nome provvisorio.</span></div>
 
-    <label for="pw">2. La tua password</label>
-    <div class="pwriga"><input id="pw" name="pw" type="text" maxlength="30" value="<?php echo isc_h($pw); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <label for="passwd">2. La tua password</label>
+    <div class="passwd_row"><input id="passwd" name="passwd" type="text" maxlength="30" value="<?php echo isc_h($passwd); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
       <button type="button" id="occhio">Nascondi</button></div>
-    <div class="esito" id="epw"><span class="piccolo">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
+    <div class="esito" id="epasswd"><span class="piccolo">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
 
     <label for="mail">3. La tua email</label>
     <input id="mail" name="mail" type="email" maxlength="120" value="<?php echo isc_h($mail); ?>" placeholder="esempio: mario.rossi@gmail.com" autocapitalize="none" autocorrect="off" spellcheck="false" required>
@@ -293,9 +293,9 @@ input{font-size:21px;padding:11px}
       tn = setTimeout(function () { chiedi('signup.php?nome=' + encodeURIComponent(v), function (r) { mostra($('enome'), r, $('nome')); }); }, 400); });
     $('mail').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(tm); if (v.indexOf('@') < 1 || v.indexOf('.') < 0) return;
       tm = setTimeout(function () { chiedi('signup.php?mail=' + encodeURIComponent(v), function (r) { mostra($('email'), r, $('mail')); }); }, 700); });
-    $('pw').addEventListener('input', function () { var l = this.value.trim().length;
-      $('epw').innerHTML = l === 0 ? '' : (l < 6 ? '<span class="no">\u274c Ancora ' + (6 - l) + ' caratteri</span>' : '<span class="si">\u2705 Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>'); });
-    $('occhio').onclick = function () { var c = $('pw'); if (c.type === 'text') { c.type = 'password'; this.textContent = 'Mostra'; } else { c.type = 'text'; this.textContent = 'Nascondi'; } };
+    $('passwd').addEventListener('input', function () { var l = this.value.trim().length;
+      $('epasswd').innerHTML = l === 0 ? '' : (l < 6 ? '<span class="no">\u274c Ancora ' + (6 - l) + ' caratteri</span>' : '<span class="si">\u2705 Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>'); });
+    $('occhio').onclick = function () { var c = $('passwd'); if (c.type === 'text') { c.type = 'password'; this.textContent = 'Mostra'; } else { c.type = 'text'; this.textContent = 'Nascondi'; } };
     $('tutto').onclick = function (e) { e.preventDefault(); var t = $('testo'); t.style.display = t.style.display === 'block' ? 'none' : 'block'; };
     $('f').addEventListener('submit', function () { $('crea').disabled = true; $('crea').textContent = 'Un momento...'; });
     if ($('nome').value) $('nome').dispatchEvent(new Event('input'));

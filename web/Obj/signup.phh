@@ -162,7 +162,7 @@ button:hover,.btn:hover{background-color:white}button:active,.btn:active{backgro
 .piccolo{font-size:15px;color:#555}
 .err{background:#ffdddd;border:1px solid #d99;border-radius:6px;padding:9px 12px;margin:10px 0}
 .ok{background:#eaf6fc;border:1px solid #9ac4db;border-radius:6px;padding:9px 12px;margin:10px 0}
-.pw{font-size:28px;font-weight:bold;background:#eaf6fc;border:1px solid #9ac4db;border-radius:7px;padding:12px;text-align:center;word-break:break-all;margin:12px 0}
+.passwd{font-size:28px;font-weight:bold;background:#eaf6fc;border:1px solid #9ac4db;border-radius:7px;padding:12px;text-align:center;word-break:break-all;margin:12px 0}
 .dopo{display:block;margin:14px auto 0;color:#555;text-align:center}
 </style>
 <?php

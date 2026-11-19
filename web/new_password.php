@@ -22,7 +22,7 @@
 
 /*
  *  New password from the link of forgotten_password.php (60 minutes, once only).
- *  The old password goes in users_pw_backup; an e-mail tells the player the change.
+ *  The old password goes in users_passwd_backup; an e-mail tells the player the change.
  */
 
 foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
@@ -43,7 +43,7 @@ require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
-define('PWD_DURATION_MIN', 60);
+define('PASSWD_DURATION_MIN', 60);
 
 header('Content-Type: text/html; charset=UTF-8');
 header('Cache-Control: no-store, max-age=0');
@@ -51,7 +51,7 @@ header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
 
 /* e-mail after the change, with name and password (for the older players) */
-function pwd_notice($mail, $nick, $pass)
+function passwd_notice($mail, $nick, $pass)
 {
     GLOBAL $G_proto, $G_domain, $G_webbase;
 
@@ -84,9 +84,9 @@ function main()
     $ip = (isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : "");
 
     if ($bdb != FALSE && preg_match('/^[0-9a-f]{48}$/D', $t)) {
-        $r_sql = sprintf("SELECT login FROM %spw_reset WHERE impronta = '%s' AND usato IS NULL
+        $r_sql = sprintf("SELECT login FROM %spasswd_reset WHERE impronta = '%s' AND usato IS NULL
                               AND creato > now() - interval '%d minutes';",
-                         $G_dbpfx, hash('sha256', $t), PWD_DURATION_MIN);
+                         $G_dbpfx, hash('sha256', $t), PASSWD_DURATION_MIN);
         $r_pg = $bdb->query($r_sql);
         if ($r_pg != FALSE && pg_num_rows($r_pg) == 1)
             $login = pg_fetch_object($r_pg, 0)->login;
@@ -108,11 +108,11 @@ function main()
             $ok = FALSE;
             $bdb->transaction('BEGIN');
             do {
-                $x = $bdb->query(sprintf("UPDATE %spw_reset SET usato = now() WHERE impronta = '%s' AND usato IS NULL;",
+                $x = $bdb->query(sprintf("UPDATE %spasswd_reset SET usato = now() WHERE impronta = '%s' AND usato IS NULL;",
                                          $G_dbpfx, hash('sha256', $t)));
                 if ($x == FALSE || pg_affected_rows($x) != 1)
                     break;
-                $b = $bdb->query(sprintf("INSERT INTO %susers_pw_backup (login, code, old_pass, ip)
+                $b = $bdb->query(sprintf("INSERT INTO %susers_passwd_backup (login, code, old_pass, ip)
                                               SELECT login, code, pass, '%s' FROM %susers
                                               WHERE login = '%s' AND (type & (CAST (X'%08x' as integer))) = 0;",
                                          $G_dbpfx, escsql($ip), $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE));
@@ -123,7 +123,7 @@ function main()
                                          $G_dbpfx, escsql($p1), escsql($login), USER_FLAG_TY_DISABLE));
                 if ($u == FALSE || pg_affected_rows($u) != 1)
                     break;
-                $z = $bdb->query(sprintf("UPDATE %spw_reset SET usato = now() WHERE login = '%s' AND usato IS NULL;",
+                $z = $bdb->query(sprintf("UPDATE %spasswd_reset SET usato = now() WHERE login = '%s' AND usato IS NULL;",
                                          $G_dbpfx, escsql($login)));
                 if ($z == FALSE)
                     break;
@@ -134,7 +134,7 @@ function main()
                 $nuova = $p1;
                 $m_pg = $bdb->query(sprintf("SELECT email FROM %susers WHERE login = '%s';", $G_dbpfx, escsql($login)));
                 if ($m_pg != FALSE && pg_num_rows($m_pg) == 1)
-                    @pwd_notice(pg_fetch_object($m_pg, 0)->email, $login, $p1);
+                    @passwd_notice(pg_fetch_object($m_pg, 0)->email, $login, $p1);
             }
             else {
                 $bdb->transaction('ROLLBACK');
@@ -149,14 +149,14 @@ function main()
 <?php if ($fatto) { ?>
   <h1>Fatto!</h1>
   <p>La nuova password di <b><?php echo isc_h($login); ?></b> e':</p>
-  <div class="pw" id="pw"><?php echo isc_h($nuova); ?></div>
+  <div class="passwd" id="passwd"><?php echo isc_h($nuova); ?></div>
   <button type="button" class="occhio" style="width:100%" onclick="copia()">Copia la password</button>
   <p class="piccolo" id="copiata"></p>
   <p>Ora entra con il tuo nome e questa password.</p>
   <div style="margin:14px 0;padding:12px 14px;background:#fff6c8;border:1px solid #e0c34a;border-radius:8px;font-size:20px;line-height:1.5"><b>Importante:</b> il browser ora ti chiede <b>&laquo;Vuoi salvare la password?&raquo;</b> (in alto o in basso nello schermo). Tocca <b>Salva</b>: le prossime volte entri da solo.</div>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($login); ?>">Entra</a>
   <script>
-  function copia(){var t=document.getElementById('pw').textContent;var ok=function(){document.getElementById('copiata').textContent='Password copiata.';};
+  function copia(){var t=document.getElementById('passwd').textContent;var ok=function(){document.getElementById('copiata').textContent='Password copiata.';};
    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){});}
    else{var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');ok();}catch(e){}document.body.removeChild(a);}}
   </script>
