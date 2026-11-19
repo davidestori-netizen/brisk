@@ -1805,7 +1805,7 @@ class Brisk
                                     "login" => $target,
                                     // FIXME: state internationalization
                                     "state" =>
-                                    ($user_item->type & USER_FLAG_TY_APPR ? "Apprendista" :
+                                    ($user_item->type & USER_FLAG_TY_APPR ? "Nuovo iscritto" :
                                      ($user_item->type & USER_FLAG_TY_CERT ? "Certificato" :
                                       ($user_item->type & (USER_FLAG_TY_NORM | USER_FLAG_TY_SUPER) ?
                                        "Normale" : "Stato sconosciuto"))),

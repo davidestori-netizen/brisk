@@ -490,7 +490,7 @@ function j_tab_act_cont(idx, act)
     }
     else if (act == 'sitappr') {
         // MLANG 1
-        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okappr.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "reserved table for authenticated and apprentice users only" : "tavolo riservato agli utenti registrati e agli apprendisti")+'" alt="'+(g_lang == 'en' ? "reserved table for authenticated and apprentice users only" : "tavolo riservato agli utenti registrati e agli apprendisti")+'">';
+        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okappr.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "table reserved to the players with a Brisk account" : "Tavolo riservato ai giocatori con un account Brisk.")+'" alt="'+(g_lang == 'en' ? "table reserved to the players with a Brisk account" : "Tavolo riservato ai giocatori con un account Brisk.")+'">';
     }
     else if (act == 'sitreser') {
         // MLANG 1
