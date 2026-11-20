@@ -43,7 +43,7 @@ require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
-function nickreq_page($msg, $is_error, $new_nick)
+function nickreq_page($msg, $is_error, $new_nick, $nick_tmp)
 {
     /* the link of the e-mail of the refusal brings the nickname (?n=): it
        is written and locked, the player writes only the password and the
@@ -70,6 +70,10 @@ function nickreq_page($msg, $is_error, $new_nick)
   <div class="entra">
     <b>Per entrare</b> userai sempre il nickname <b><?php echo eschtml($new_nick); ?></b> e la tua password.
   </div>
+<?php if ($nick_tmp != "") { ?>
+  <p class="piccolo">Gli altri giocatori, per ora, continuano a vederti come <span class="nicktmp"><?php echo eschtml($nick_tmp); ?>*</span>.
+     Quando <?php echo eschtml($new_nick); ?> sarà approvato, ti vedranno come <?php echo eschtml($new_nick); ?> e riceverai un'email.</p>
+<?php } ?>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($new_nick); ?>">Entra a giocare</a>
 <?php } else { ?>
   <h1>Il tuo nickname è stato rifiutato</h1>
@@ -104,6 +108,7 @@ function main()
     $msg = "";
     $is_error = TRUE;
     $new_nick = "";
+    $nick_tmp = "";
 
     do {
         if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] != 'POST')
@@ -137,12 +142,13 @@ function main()
             break;
         }
 
-        $msg = sprintf("Richiesta inviata: da adesso entri con '%s'. Il nome verrà controllato al più presto.", eschtml($nick));
+        $msg = sprintf("Da adesso entri con <b>%s</b>. I moderatori controlleranno il nickname al più presto.", eschtml($nick));
         $is_error = FALSE;
         $new_nick = $nick;
+        $nick_tmp = (isset($usr->nick_tmp) && $usr->nick_tmp !== NULL ? (string)$usr->nick_tmp : "");
     } while (FALSE);
 
-    nickreq_page($msg, $is_error, $new_nick);
+    nickreq_page($msg, $is_error, $new_nick, $nick_tmp);
 }
 
 main();
