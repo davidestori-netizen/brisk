@@ -129,6 +129,10 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'Nothing done: the page was reloaded or old. The list below is up to date.'),
                       'mg_reason_ask'  => array( 'it' => 'Perché rifiuti questo nickname? Lo leggerà il giocatore nella mail (massimo 60 caratteri).',
                                                  'en' => 'Why do you refuse this nickname? The player will read it in the e-mail (60 characters at most).'),
+                      'mg_reason_one'  => array( 'it' => 'Stai rifiutando il nickname %s. Perché? Lo leggerà il giocatore nella mail (massimo 60 caratteri).',
+                                                 'en' => 'You are refusing the nickname %s. Why? The player will read it in the e-mail (60 characters at most).'),
+                      'mg_accept_ask'  => array( 'it' => 'Stai accettando il nickname %s. Confermi?',
+                                                 'en' => 'You are accepting the nickname %s. Do you confirm?'),
                       'mg_reason_long' => array( 'it' => 'Motivo troppo lungo: massimo 60 caratteri. Accorcialo.',
                                                  'en' => 'Reason too long: 60 characters at most. Please shorten it.'),
                       'mg_reason_need' => array( 'it' => 'Per rifiutare un nickname scrivi il motivo.',
@@ -1083,11 +1087,15 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                 if ($role != "admin")
                     $email = (($at_pos = strrpos($email, "@")) === FALSE ? "..." : "..." . substr($email, $at_pos));
                 $is_ref = ($usr_obj->disa_reas == USER_DIS_REA_NU_NICKREF);
-                $btn_accept = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">%s</button>",
-                                      $usr_obj->code, eschtml(umgmt_txt('mg_accept')));
+                /* the buttons of a row name the player: one tap must not act on the wrong one */
+                $btn_accept = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\" onclick=\"return confirm(%s);\">%s</button>",
+                                      $usr_obj->code,
+                                      htmlspecialchars(json_encode(sprintf(umgmt_txt('mg_accept_ask'), $usr_obj->login)), ENT_QUOTES),
+                                      eschtml(umgmt_txt('mg_accept')));
                 $btn_delete = sprintf("<button type=\"submit\" name=\"f_row\" value=\"delete_%d\"%s>%s</button>",
                                       $usr_obj->code,
-                                      ($usr_obj->nick_tmp !== NULL ? " onclick=\"return umgmt_reason(this.form);\"" : ""),
+                                      ($usr_obj->nick_tmp !== NULL ? sprintf(" onclick=\"return umgmt_reason(this.form, %s);\"",
+                                                                             htmlspecialchars(json_encode(sprintf(umgmt_txt('mg_reason_one'), $usr_obj->login)), ENT_QUOTES)) : ""),
                                       eschtml(umgmt_txt($role == "admin" ? 'mg_delete' : 'mg_refuse')));
                 $btn_ban = sprintf("<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm(%s);\">%s</button>",
                                    $usr_obj->code,
@@ -1146,12 +1154,12 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                       return document.querySelectorAll('input[type=checkbox][name^=f_newuser]:checked').length;
                   }
                   /* the reason of a refused nickname: required, it goes in the e-mail to the player */
-                  function umgmt_reason(form) {
+                  function umgmt_reason(form, ask) {
                       var reason = '';
 
                       /* a short reason: the window of the browser shows one line only */
                       while (true) {
-                          reason = prompt(<?php echo json_encode(umgmt_txt('mg_reason_ask')); ?>, reason);
+                          reason = prompt(ask || <?php echo json_encode(umgmt_txt('mg_reason_ask')); ?>, reason);
                           if (reason === null || reason.trim() === '') {
                               return false;
                           }
