@@ -543,8 +543,8 @@ function main()
 
     var nicktmp_pairs = <?php echo json_encode($nicktmp_pairs); ?>;
 
-    /* the temporary nickname (gold, as in the game) and the reminder that
-       one always enters with the chosen nickname */
+    /* the temporary nickname (plain: here what matters is the name to enter
+       with) and the reminder that one always enters with the chosen nickname */
     function nicktmp_show() {
         var line = document.createElement('span');
         var name = document.createElement('span');
@@ -554,7 +554,6 @@ function main()
         var nickname = $('nickname').value.trim();
 
         line.textContent = 'Gli altri giocatori ti vedranno come: ';
-        name.className = 'nicktmp';
         name.textContent = $('nicktmp_animal').value + $('nicktmp_adjective').value + '*';
         line.appendChild(name);
         warning.className = 'avviso';
