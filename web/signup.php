@@ -70,7 +70,7 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
         . "Per ATTIVARE l'account apri questo link (vale 48 ore):\n" . $link
         . "\nFinché non lo apri non puoi entrare."
         . "\n\nDopo l'attivazione entra con:\nNickname: " . $nickname . "\nPassword: " . $passwd_t
-        . "\n\nIl tuo nome visualizzato nel gioco, per ora, è " . $nick_tmp . "*."
+        . "\n\nGli altri giocatori, per ora, ti vedranno come " . $nick_tmp . "*."
         . " Quando il tuo nickname sarà approvato, ti vedranno come " . $nickname . " e riceverai un'email.\n\n"
         . ($passwd === NULL ? "" : "Conserva questa email: ti ricorda la tua password.\n")
         . "Se non sei stato tu a iscriverti, ignora questa email.\n\nCi vediamo ai tavoli!\n";
@@ -89,7 +89,7 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
         . '<tr><td><table cellpadding="0" cellspacing="0" style="background:#eef7ee;border:2px solid #2e7d32;border-radius:6px;font-size:18px">'
         . '<tr><td style="padding:10px 16px 4px">Nickname: <b>' . isc_h($nickname) . '</b></td></tr>'
         . '<tr><td style="padding:4px 16px 10px">Password: <b>' . $passwd_h . '</b></td></tr></table></td></tr>'
-        . '<tr><td style="padding:10px 0 0;font-size:14px;color:#555">Il tuo nome visualizzato nel gioco, per ora, è '
+        . '<tr><td style="padding:10px 0 0;font-size:14px;color:#555">Gli altri giocatori, per ora, ti vedranno come '
         . '<span style="background:#ffe9b3;padding:0 4px 0 2px">' . isc_h($nick_tmp) . '*</span>. Quando il tuo nickname sarà approvato, ti vedranno come '
         . isc_h($nickname) . ' e riceverai un\'email.</td></tr>'
         . '<tr><td style="padding:14px 0;font-size:14px;color:#555">Finché non attivi l\'account non puoi entrare.'
@@ -364,7 +364,7 @@ function main()
     Nickname: <b><?php echo isc_h($nickname); ?></b><br>
     Password: quella che hai scelto<?php echo (empty($_POST['mail_passwd']) ? '' : " (è anche nell'email)"); ?>
   </div>
-  <p class="piccolo">Il tuo nome visualizzato nel gioco, per ora, è <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
+  <p class="piccolo">Gli altri giocatori, per ora, ti vedranno come <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
      Potrai comunque giocare subito dopo l'attivazione. Quando il tuo nickname sarà approvato, ti vedranno come <?php echo isc_h($nickname); ?> e riceverai un'email.</p>
   <p class="piccolo">Non trovi l'email? Guarda anche nelle cartelle <b>Spam</b>, <b>Posta indesiderata</b> o <b>Quarantena</b>. Il link vale 48 ore.</p>
   <a class="btn blu" href="index.php">Torna all'ingresso</a>
@@ -550,14 +550,17 @@ function main()
         var name = document.createElement('span');
         var warning = document.createElement('div');
         var bold = document.createElement('b');
+        var enter = document.createElement('b');
         var nickname = $('nickname').value.trim();
 
-        line.textContent = 'Il tuo nome visualizzato, per ora: ';
+        line.textContent = 'Gli altri giocatori ti vedranno come: ';
         name.className = 'nicktmp';
         name.textContent = $('nicktmp_animal').value + $('nicktmp_adjective').value + '*';
         line.appendChild(name);
         warning.className = 'avviso';
-        warning.appendChild(document.createTextNode('Per entrare userai sempre ' + (nickname ? 'il nickname ' : 'il tuo nickname')));
+        enter.textContent = 'Per entrare';
+        warning.appendChild(enter);
+        warning.appendChild(document.createTextNode(' userai sempre ' + (nickname ? 'il nickname ' : 'il tuo nickname')));
         bold.textContent = nickname;
         warning.appendChild(bold);
         warning.appendChild(document.createTextNode(' e la tua password.'));
