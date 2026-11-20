@@ -65,7 +65,7 @@ function nickreq_page($msg, $is_error, $new_nick)
 <div class="box">
   <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
 <?php if ($new_nick != "") { ?>
-  <h1>Nickname nuovo inviato</h1>
+  <h1>Richiesta inviata</h1>
   <div class="ok"><?php echo $msg; ?></div>
   <div class="entra">
     <b>Per entrare</b> userai sempre il nickname <b><?php echo eschtml($new_nick); ?></b> e la tua password.
@@ -76,7 +76,7 @@ function nickreq_page($msg, $is_error, $new_nick)
 <?php if ($msg != "") { ?>
   <div class="<?php echo ($is_error ? 'err' : 'ok'); ?>"><?php echo $msg; ?></div>
 <?php } ?>
-  <p>I moderatori non hanno approvato il nickname che avevi scelto. Scegline un altro: da subito entrerai con quello nuovo.
+  <p>I moderatori non hanno approvato il nickname che avevi scelto. Proponine un altro: da subito entrerai con quello nuovo, e i moderatori lo controlleranno.
      Gli altri giocatori, per ora, continueranno a vederti con il nome con l'asterisco.</p>
 <?php if ($login == "") { ?>
   <div class="err">Apri il link che trovi nella mail del rifiuto. Se non la trovi, scrivi a <?php echo eschtml($G_admin_mail); ?>.</div>
@@ -86,7 +86,7 @@ function nickreq_page($msg, $is_error, $new_nick)
     <input id="f_login" name="f_login" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false" value="<?php echo eschtml($login); ?>" readonly>
     <label for="f_pass">Password</label>
     <input id="f_pass" name="f_pass" type="password" maxlength="64">
-    <label for="f_nick">Nickname nuovo</label>
+    <label for="f_nick">Richiesta nuovo nickname</label>
     <input id="f_nick" name="f_nick" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false">
     <button type="submit" class="blu">Invia</button>
   </form>
