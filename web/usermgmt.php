@@ -133,6 +133,10 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'You are refusing the nickname %s. Why? The player will read it in the e-mail (60 characters at most).'),
                       'mg_accept_ask'  => array( 'it' => 'Stai accettando il nickname %s. Confermi?',
                                                  'en' => 'You are accepting the nickname %s. Do you confirm?'),
+                      'mg_not_waiting' => array( 'it' => 'Nessuna azione per %s: non è più in attesa di controllo.',
+                                                 'en' => 'Nothing done for %s: it is not waiting for a check any more.'),
+                      'mg_refused_nomail' => array( 'it' => 'Nickname %s rifiutato, ma la mail non è partita: avvisa il giocatore.',
+                                                 'en' => 'Nickname %s refused, but the e-mail was not sent: tell the player.'),
                       'mg_reason_long' => array( 'it' => 'Motivo troppo lungo: massimo 60 caratteri. Accorcialo.',
                                                  'en' => 'Reason too long: 60 characters at most. Please shorten it.'),
                       'mg_reason_need' => array( 'it' => 'Per rifiutare un nickname scrivi il motivo.',
@@ -915,6 +919,16 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                             break;
                         }
                         $reason = mb_substr($reason, 0, 60);
+                        /* the state changes first, and only if it was still waiting:
+                           a refusal saved by nobody, or done twice, sends no mail */
+                        if (($upd_pg = $bdb->query(sprintf("UPDATE %susers SET disa_reas = %d WHERE code = %d AND disa_reas = %d;",
+                                                           $G_dbpfx, USER_DIS_REA_NU_NICKREF, $usr_obj->code,
+                                                           USER_DIS_REA_NU_TOBECHK))) == FALSE
+                            || pg_affected_rows($upd_pg) != 1) {
+                            $status .= eschtml(sprintf(umgmt_txt('mg_not_waiting'), $usr_obj->login)) . "<br>";
+                            $res = TRUE;
+                            break;
+                        }
                         $nick_page = sprintf("%s://%s/%s/nickreq.php?n=%s", $G_proto, $G_domain, $G_webbase, rawurlencode($usr_obj->login));
                         $subj = "Brisk: nickname rifiutato";
                         $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
@@ -931,15 +945,12 @@ Motivo: %s<br>
 Proponine un altro qui:<br>%s<br>
 Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.<br><br>
 Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($reason), eschtml($nick_page), eschtml($usr_obj->nick_tmp));
-                        if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
-                            fprintf(STDERR, "ERROR: mail send FAILED\n");
-                            break;
-                        }
                         /* the refused request stays (the player still enters with it)
                            but it is marked, so nobody accepts it by mistake */
-                        $bdb->query(sprintf("UPDATE %susers SET disa_reas = %d WHERE code = %d AND disa_reas = %d;",
-                                            $G_dbpfx, USER_DIS_REA_NU_NICKREF, $usr_obj->code,
-                                            USER_DIS_REA_NU_TOBECHK));
+                        if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
+                            fprintf(STDERR, "ERROR: mail send FAILED\n");
+                            $status .= eschtml(sprintf(umgmt_txt('mg_refused_nomail'), $usr_obj->login)) . "<br>";
+                        }
                         umgmt_log("refuse-nick", $usr_obj->login . " (" . $usr_obj->nick_tmp . ") " . str_replace(array("|", "\n", "\r"), " ", $reason));
                         $res = TRUE;
                         break;
@@ -1118,8 +1129,10 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                    buttons at the bottom must not touch every player */
                 $tab_lines .= sprintf("<tr%s><td>%s</td><td>%s</td><td>%s</td><td class=\"email\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
                                       ($is_ref ? " style=\"color: #888;\"" : ""),
-                                      ($is_ref ? "" : sprintf("<input name=\"f_newuser%d\" type=\"checkbox\" %s>",
-                                                               $usr_obj->code, (($nocheck || $role != "admin") ? "" : "CHECKED"))),
+                                      ($is_ref ? "" : sprintf("<input name=\"f_newuser%d\" type=\"checkbox\"%s %s>",
+                                                               $usr_obj->code,
+                                                               ($usr_obj->nick_tmp !== NULL ? " data-tmp=\"1\"" : ""),
+                                                               (($nocheck || $role != "admin") ? "" : "CHECKED"))),
                                       ($is_ref ? "<s>" . eschtml($usr_obj->login) . "</s><br><small>" . eschtml(umgmt_txt('mg_refused')) . "</small>"
                                        : eschtml($usr_obj->login)),
                                       ($usr_obj->nick_tmp !== NULL ? eschtml($usr_obj->nick_tmp) . "*" : ""),
@@ -1156,6 +1169,12 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                   /* the reason of a refused nickname: required, it goes in the e-mail to the player */
                   function umgmt_reason(form, ask) {
                       var reason = '';
+
+                      /* the buttons at the bottom: a reason only if a new signup is checked,
+                         the old accounts of the administrator are deleted without it */
+                      if (!ask && document.querySelectorAll('input[type=checkbox][name^=f_newuser][data-tmp]:checked').length == 0) {
+                          return true;
+                      }
 
                       /* a short reason: the window of the browser shows one line only */
                       while (true) {
