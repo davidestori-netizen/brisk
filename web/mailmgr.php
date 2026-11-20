@@ -94,7 +94,7 @@ function main() {
 
             if ($is_nicktmp) {
                 /* the login is the nickname chosen by the player */
-                isc_page_activated($usr_rec->login);
+                isc_page_activated($usr_rec->login, $usr_rec->nick_tmp);
             }
             else {
                 singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Se il tuo nickname passerà il vaglio dei moderatori<br>riceverai una email con la password per accedere al sito.<br>Benvenuto!");

@@ -241,6 +241,18 @@ button:active,.btn:active {
     font-size: 15px;
     color: #555;
 }
+.entra {
+    border: 2px solid #2e7d32;
+    border-radius: 8px;
+    background: #eef7ee;
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-size: 20px;
+}
+.nicktmp {
+    background: #ffe9b3;
+    padding: 0 4px 0 2px;
+}
 .err {
     background: #ffdddd;
     border: 1px solid #d99;
@@ -277,7 +289,7 @@ button:active,.btn:active {
 }
 
 /* page after the click on the link of the e-mail (mailmgr.php) */
-function isc_page_activated($nick)
+function isc_page_activated($nick, $nick_tmp = NULL)
 {
     header('Content-Type: text/html; charset=UTF-8');
     header('Cache-Control: no-store, max-age=0');
@@ -299,7 +311,15 @@ h1 {
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
   <h1>Account attivato! &#127881;</h1>
   <div class="ok" style="text-align:center;font-size:21px">Benvenuto <b><?php echo isc_h($nick); ?></b>, ora puoi giocare.</div>
-  <p>Clicca il bottone qui sotto ed entra con il tuo nome e la tua password (se hai scelto di riceverla, la password è anche nell'email).</p>
+  <div class="entra">
+    <b>Per entrare scrivi sempre:</b><br>
+    Nickname: <b><?php echo isc_h($nick); ?></b><br>
+    Password: quella che hai scelto
+  </div>
+<?php if ($nick_tmp !== NULL && $nick_tmp != "") { ?>
+  <p class="piccolo">Nel gioco, per il momento, gli altri ti vedranno con il nome provvisorio <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
+     Quando il tuo nickname sarà approvato, ti vedranno come <?php echo isc_h($nick); ?> e riceverai un'email.</p>
+<?php } ?>
   <p>Quando il browser chiede <b>«Vuoi salvare la password?»</b> clicca <b>Salva</b>: la prossima volta entri da solo.</p>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($nick); ?>">Entra a giocare</a>
 </div></body></html>
