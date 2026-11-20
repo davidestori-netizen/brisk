@@ -127,6 +127,10 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'Nickname %s refused, it keeps playing seen as %s'),
                       'mg_repeated'    => array( 'it' => 'Nessuna azione eseguita: la pagina era stata ricaricata o era vecchia. Qui sotto c\'è la lista aggiornata.',
                                                  'en' => 'Nothing done: the page was reloaded or old. The list below is up to date.'),
+                      'mg_reason_ask'  => array( 'it' => 'Perché rifiuti questo nickname? Lo leggerà il giocatore nella mail (massimo 200 caratteri).',
+                                                 'en' => 'Why do you refuse this nickname? The player will read it in the e-mail (200 characters at most).'),
+                      'mg_reason_need' => array( 'it' => 'Per rifiutare un nickname scrivi il motivo.',
+                                                 'en' => 'To refuse a nickname write the reason.'),
                       'mg_banned'      => array( 'it' => 'Rifiutato e bloccato: %s (la sua email non si può più usare)',
                                                  'en' => '%s refused and blocked: the e-mail cannot be used again')
                       );
@@ -897,20 +901,30 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                         /* the player keeps entering with the refused nickname, that
                            nobody else can take, until he asks another one from
                            nickreq.php */
+                        /* the reason written by the moderator goes to the player */
+                        $reason = trim(isset($_POST['f_reason']) ? (string)$_POST['f_reason'] : "");
+                        if ($reason == "") {
+                            $status .= eschtml(umgmt_txt('mg_reason_need')) . "<br>";
+                            $res = TRUE;
+                            break;
+                        }
+                        $reason = mb_substr($reason, 0, 200);
                         $nick_page = sprintf("%s://%s/%s/nickreq.php?n=%s", $G_proto, $G_domain, $G_webbase, rawurlencode($usr_obj->login));
                         $subj = "Brisk: nickname rifiutato";
                         $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
 
 Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.
-Scegline un altro qui: <%s>
+Motivo: %s
+Proponine un altro qui: <%s>
 Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.
 
-Saluti e buone partite, mop.', $usr_obj->login, $nick_page, $usr_obj->nick_tmp);
+Saluti e buone partite, mop.', $usr_obj->login, $reason, $nick_page, $usr_obj->nick_tmp);
                         $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
 Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.<br>
-Scegline un altro qui:<br>%s<br>
+Motivo: %s<br>
+Proponine un altro qui:<br>%s<br>
 Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.<br><br>
-Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($nick_page), eschtml($usr_obj->nick_tmp));
+Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($reason), eschtml($nick_page), eschtml($usr_obj->nick_tmp));
                         if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                             fprintf(STDERR, "ERROR: mail send FAILED\n");
                             break;
@@ -920,7 +934,7 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($nick_page)
                         $bdb->query(sprintf("UPDATE %susers SET disa_reas = %d WHERE code = %d AND disa_reas = %d;",
                                             $G_dbpfx, USER_DIS_REA_NU_NICKREF, $usr_obj->code,
                                             USER_DIS_REA_NU_TOBECHK));
-                        umgmt_log("refuse-nick", $usr_obj->login . " (" . $usr_obj->nick_tmp . ")");
+                        umgmt_log("refuse-nick", $usr_obj->login . " (" . $usr_obj->nick_tmp . ") " . str_replace(array("|", "\n", "\r"), " ", $reason));
                         $res = TRUE;
                         break;
                     }
@@ -1069,8 +1083,10 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                 $is_ref = ($usr_obj->disa_reas == USER_DIS_REA_NU_NICKREF);
                 $btn_accept = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">%s</button>",
                                       $usr_obj->code, eschtml(umgmt_txt('mg_accept')));
-                $btn_delete = sprintf("<button type=\"submit\" name=\"f_row\" value=\"delete_%d\">%s</button>",
-                                      $usr_obj->code, eschtml(umgmt_txt($role == "admin" ? 'mg_delete' : 'mg_refuse')));
+                $btn_delete = sprintf("<button type=\"submit\" name=\"f_row\" value=\"delete_%d\"%s>%s</button>",
+                                      $usr_obj->code,
+                                      ($usr_obj->nick_tmp !== NULL ? " onclick=\"return umgmt_reason(this.form);\"" : ""),
+                                      eschtml(umgmt_txt($role == "admin" ? 'mg_delete' : 'mg_refuse')));
                 $btn_ban = sprintf("<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm(%s);\">%s</button>",
                                    $usr_obj->code,
                                    htmlspecialchars(json_encode(sprintf(umgmt_txt('mg_ban_ask'), $usr_obj->login)), ENT_QUOTES),
@@ -1116,6 +1132,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      <?php } ?>
      <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
      <input type="hidden" name="f_code" value="<?php echo $form_code; ?>">
+     <input type="hidden" name="f_reason" value="">
      <table class="the_tab">
      <?php
      echo $tab_lines;
@@ -1125,6 +1142,16 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                   /* the buttons at the bottom act on the checked rows: say how many */
                   function umgmt_n_checked() {
                       return document.querySelectorAll('input[type=checkbox][name^=f_newuser]:checked').length;
+                  }
+                  /* the reason of a refused nickname: required, it goes in the e-mail to the player */
+                  function umgmt_reason(form) {
+                      var reason = prompt(<?php echo json_encode(umgmt_txt('mg_reason_ask')); ?>, '');
+
+                      if (reason === null || reason.trim() === '') {
+                          return false;
+                      }
+                      form.elements['f_reason'].value = reason.trim().substring(0, 200);
+                      return true;
                   }
                   function umgmt_bulk(question) {
                       var checked = umgmt_n_checked();
@@ -1140,7 +1167,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                   <input type="submit" name="f_accept" value="<?php echo eschtml(umgmt_txt('mg_accept')); ?>"
                          onclick="return umgmt_bulk(<?php echo htmlspecialchars(json_encode(umgmt_txt('mg_bulk_accept')), ENT_QUOTES); ?>);">
                   <input type="submit" name="f_delete" value="<?php echo eschtml(umgmt_txt($role == "admin" ? 'mg_delete' : 'mg_refuse')); ?>"
-                         onclick="return umgmt_bulk(<?php echo htmlspecialchars(json_encode(umgmt_txt($role == "admin" ? 'mg_bulk_delete' : 'mg_bulk_refuse')), ENT_QUOTES); ?>);">
+                         onclick="return umgmt_bulk(<?php echo htmlspecialchars(json_encode(umgmt_txt($role == "admin" ? 'mg_bulk_delete' : 'mg_bulk_refuse')), ENT_QUOTES); ?>) && umgmt_reason(this.form);">
                   <input type="submit" name="f_ban" value="<?php echo eschtml(umgmt_txt('mg_ban')); ?>"
                          onclick="return umgmt_bulk(<?php echo htmlspecialchars(json_encode(umgmt_txt('mg_bulk_ban')), ENT_QUOTES); ?>);">
                   <?php if ($role == "moder") { ?>
