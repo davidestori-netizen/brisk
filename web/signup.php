@@ -187,7 +187,7 @@ function main()
             $error = sprintf("Da questa connessione è già stato creato un account da poco. Se siete in due "
                               . "(per esempio marito e moglie), scrivi a %s e ti aiutiamo.", $G_admin_mail);
         else if (($nick_tmp = $bdb->nick_fun_check($nicktmp_animal, $nicktmp_adjective)) === FALSE)
-            $error = "Il nickname provvisorio scelto è troppo lungo o è già usato da qualcun altro: "
+            $error = "Il nome provvisorio scelto nei due menu è troppo lungo o è già usato da qualcun altro: "
                      . "te ne abbiamo proposto un altro, puoi tenerlo o cambiarlo.";
         else {
             $bdb->transaction('BEGIN');
@@ -378,7 +378,7 @@ function main()
 
     <label for="nickname">1. Il tuo nickname per entrare e giocare</label>
     <input id="nickname" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-    <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nickname provvisorio.</span></div>
+    <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nome provvisorio.</span></div>
 
     <label for="nicktmp_animal">Finché il tuo nickname non viene approvato, verrai visualizzato con:</label>
     <div class="nicktmp_row">
