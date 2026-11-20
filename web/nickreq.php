@@ -84,7 +84,7 @@ function nickreq_page($msg, $is_error, $new_nick)
   <form method="POST" action="nickreq.php" accept-charset="utf-8">
     <label for="f_login">Il tuo nickname attuale (quello rifiutato)</label>
     <input id="f_login" name="f_login" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false" value="<?php echo eschtml($login); ?>" readonly>
-    <label for="f_pass">Password</label>
+    <label for="f_pass">La tua password attuale (quella con cui entri)</label>
     <input id="f_pass" name="f_pass" type="password" maxlength="64">
     <label for="f_nick">Richiesta nuovo nickname</label>
     <input id="f_nick" name="f_nick" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false">
