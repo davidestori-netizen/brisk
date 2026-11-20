@@ -125,6 +125,8 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'nickname %s approved, it was seen as %s'),
                       'mg_refused_ok'  => array( 'it' => 'Nome %s rifiutato: continua a giocare come %s',
                                                  'en' => 'Nickname %s refused, it keeps playing seen as %s'),
+                      'mg_repeated'    => array( 'it' => 'Nessuna azione eseguita: la pagina era stata ricaricata o era vecchia. Qui sotto c\'è la lista aggiornata.',
+                                                 'en' => 'Nothing done: the page was reloaded or old. The list below is up to date.'),
                       'mg_banned'      => array( 'it' => 'Rifiutato e bloccato: %s (la sua email non si può più usare)',
                                                  'en' => '%s refused and blocked: the e-mail cannot be used again')
                       );
@@ -696,6 +698,18 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
         exit;
     }
     else { // if ($_GET['do'] ...
+        /* every form of the list carries a code used only once, kept also in a
+           cookie: a reload (the browser sends the same form again), an old page
+           or a form sent from another site do not match and nothing is done */
+        $form_ok = (isset($_POST['f_code']) && isset($_COOKIE['umgmt_code'])
+                    && hash_equals((string)$_COOKIE['umgmt_code'], (string)$_POST['f_code']));
+        $form_code = bin2hex(random_bytes(16));
+        setcookie('umgmt_code', $form_code, array('httponly' => TRUE, 'samesite' => 'Strict'));
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST' && $form_ok == FALSE) {
+            $status .= eschtml(umgmt_txt('mg_repeated')) . "<br>";
+            $_POST = array();
+        }
+
         /* the buttons at the right of a row: the same action, on that player only */
         if (isset($_POST['f_row']) && preg_match('/^(accept|delete|ban)_([0-9]+)$/', $_POST['f_row'], $row_match)) {
             foreach (array_keys($_POST) as $key) {
@@ -1101,6 +1115,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      <div class="result"><b><?php echo eschtml(umgmt_txt('mg_result')); ?></b><br><?php echo $status; ?></div>
      <?php } ?>
      <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
+     <input type="hidden" name="f_code" value="<?php echo $form_code; ?>">
      <table class="the_tab">
      <?php
      echo $tab_lines;
