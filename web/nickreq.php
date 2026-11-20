@@ -45,8 +45,11 @@ require_once($G_base."spush/brisk-spush.phh");
 
 function nickreq_page($msg, $is_error, $new_nick)
 {
-    /* the link of the e-mail of the refusal brings the nickname (?n=), so
-       the player writes only the password and the new nickname */
+    /* the link of the e-mail of the refusal brings the nickname (?n=): it
+       is written and locked, the player writes only the password and the
+       new nickname; without it the page asks to open the link */
+    GLOBAL $G_admin_mail;
+
     $login = (isset($_POST['f_login']) ? (string)$_POST['f_login'] : (isset($_GET['n']) ? (string)$_GET['n'] : ""));
 
     header('Content-Type: text/html; charset=UTF-8');
@@ -75,15 +78,19 @@ function nickreq_page($msg, $is_error, $new_nick)
 <?php } ?>
   <p>I moderatori non hanno approvato il nickname che avevi scelto. Scegline un altro: da subito entrerai con quello nuovo.
      Gli altri giocatori, per ora, continueranno a vederti con il nome con l'asterisco.</p>
+<?php if ($login == "") { ?>
+  <div class="err">Apri il link che trovi nella mail del rifiuto. Se non la trovi, scrivi a <?php echo eschtml($G_admin_mail); ?>.</div>
+<?php } else { ?>
   <form method="POST" action="nickreq.php" accept-charset="utf-8">
     <label for="f_login">Il tuo nickname attuale (quello rifiutato)</label>
-    <input id="f_login" name="f_login" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false" value="<?php echo eschtml($login); ?>">
+    <input id="f_login" name="f_login" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false" value="<?php echo eschtml($login); ?>" readonly>
     <label for="f_pass">Password</label>
     <input id="f_pass" name="f_pass" type="password" maxlength="64">
     <label for="f_nick">Nickname nuovo</label>
     <input id="f_nick" name="f_nick" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false">
     <button type="submit" class="blu">Invia</button>
   </form>
+<?php } ?>
   <a class="dopo" href="index.php">Torna all'ingresso</a>
 <?php } ?>
 </div>
