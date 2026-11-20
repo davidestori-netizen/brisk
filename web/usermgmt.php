@@ -127,8 +127,10 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'Nickname %s refused, it keeps playing seen as %s'),
                       'mg_repeated'    => array( 'it' => 'Nessuna azione eseguita: la pagina era stata ricaricata o era vecchia. Qui sotto c\'è la lista aggiornata.',
                                                  'en' => 'Nothing done: the page was reloaded or old. The list below is up to date.'),
-                      'mg_reason_ask'  => array( 'it' => 'Perché rifiuti questo nickname? Lo leggerà il giocatore nella mail (massimo 200 caratteri).',
-                                                 'en' => 'Why do you refuse this nickname? The player will read it in the e-mail (200 characters at most).'),
+                      'mg_reason_ask'  => array( 'it' => 'Perché rifiuti questo nickname? Lo leggerà il giocatore nella mail (massimo 60 caratteri).',
+                                                 'en' => 'Why do you refuse this nickname? The player will read it in the e-mail (60 characters at most).'),
+                      'mg_reason_long' => array( 'it' => 'Motivo troppo lungo: massimo 60 caratteri. Accorcialo.',
+                                                 'en' => 'Reason too long: 60 characters at most. Please shorten it.'),
                       'mg_reason_need' => array( 'it' => 'Per rifiutare un nickname scrivi il motivo.',
                                                  'en' => 'To refuse a nickname write the reason.'),
                       'mg_banned'      => array( 'it' => 'Rifiutato e bloccato: %s (la sua email non si può più usare)',
@@ -908,7 +910,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                             $res = TRUE;
                             break;
                         }
-                        $reason = mb_substr($reason, 0, 200);
+                        $reason = mb_substr($reason, 0, 60);
                         $nick_page = sprintf("%s://%s/%s/nickreq.php?n=%s", $G_proto, $G_domain, $G_webbase, rawurlencode($usr_obj->login));
                         $subj = "Brisk: nickname rifiutato";
                         $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
@@ -1145,12 +1147,21 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                   }
                   /* the reason of a refused nickname: required, it goes in the e-mail to the player */
                   function umgmt_reason(form) {
-                      var reason = prompt(<?php echo json_encode(umgmt_txt('mg_reason_ask')); ?>, '');
+                      var reason = '';
 
-                      if (reason === null || reason.trim() === '') {
-                          return false;
+                      /* a short reason: the window of the browser shows one line only */
+                      while (true) {
+                          reason = prompt(<?php echo json_encode(umgmt_txt('mg_reason_ask')); ?>, reason);
+                          if (reason === null || reason.trim() === '') {
+                              return false;
+                          }
+                          reason = reason.trim();
+                          if (reason.length <= 60) {
+                              break;
+                          }
+                          alert(<?php echo json_encode(umgmt_txt('mg_reason_long')); ?>);
                       }
-                      form.elements['f_reason'].value = reason.trim().substring(0, 200);
+                      form.elements['f_reason'].value = reason;
                       return true;
                   }
                   function umgmt_bulk(question) {
