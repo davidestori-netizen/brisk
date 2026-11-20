@@ -867,7 +867,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                         /* the player keeps entering with the refused nickname, that
                            nobody else can take, until he asks another one from
                            nickreq.php */
-                        $nick_page = sprintf("%s://%s/%s/nickreq.php", $G_proto, $G_domain, $G_webbase);
+                        $nick_page = sprintf("%s://%s/%s/nickreq.php?n=%s", $G_proto, $G_domain, $G_webbase, rawurlencode($usr_obj->login));
                         $subj = "Brisk: nickname rifiutato";
                         $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
 
