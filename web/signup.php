@@ -469,6 +469,7 @@ function main()
     $('nickname').addEventListener('input', function () {
         var value = this.value.trim();
 
+        nicktmp_show();
         clearTimeout(nickname_timer);
         if (!value)
             return;
@@ -542,13 +543,26 @@ function main()
 
     var nicktmp_pairs = <?php echo json_encode($nicktmp_pairs); ?>;
 
+    /* the temporary nickname (gold, as in the game) and the reminder that
+       one always enters with the chosen nickname */
     function nicktmp_show() {
         var line = document.createElement('span');
+        var name = document.createElement('span');
+        var warning = document.createElement('div');
+        var bold = document.createElement('b');
+        var nickname = $('nickname').value.trim();
 
-        line.className = 'yes';
-        line.textContent = 'Ti vedranno come ' + $('nicktmp_animal').value + $('nicktmp_adjective').value;
+        line.textContent = 'Ti vedranno come ';
+        name.className = 'nicktmp';
+        name.textContent = $('nicktmp_animal').value + $('nicktmp_adjective').value + '*';
+        line.appendChild(name);
+        warning.className = 'avviso';
+        bold.textContent = 'Attenzione: per entrare userai sempre il tuo nickname'
+            + (nickname ? ' ' + nickname : '') + ', mai il nome provvisorio.';
+        warning.appendChild(bold);
         $('enicktmp').innerHTML = '';
         $('enicktmp').appendChild(line);
+        $('enicktmp').appendChild(warning);
     }
 
     /* the adjectives of the second menu: only the ones free with the animal chosen */

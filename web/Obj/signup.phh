@@ -253,6 +253,11 @@ button:active,.btn:active {
     background: #ffe9b3;
     padding: 0 4px 0 2px;
 }
+.avviso {
+    margin-top: 6px;
+    font-size: 16px;
+    color: #8a4b00;
+}
 .err {
     background: #ffdddd;
     border: 1px solid #d99;
