@@ -70,7 +70,7 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
         . "Per ATTIVARE l'account apri questo link (vale 48 ore):\n" . $link
         . "\nFinché non lo apri non puoi entrare."
         . "\n\nDopo l'attivazione entra con:\nNickname: " . $nickname . "\nPassword: " . $passwd_t
-        . "\n\nNel gioco, per il momento, gli altri ti vedranno con il nome provvisorio " . $nick_tmp . "*."
+        . "\n\nIl tuo nome visualizzato nel gioco, per ora, è " . $nick_tmp . "*."
         . " Quando il tuo nickname sarà approvato, ti vedranno come " . $nickname . " e riceverai un'email.\n\n"
         . ($passwd === NULL ? "" : "Conserva questa email: ti ricorda la tua password.\n")
         . "Se non sei stato tu a iscriverti, ignora questa email.\n\nCi vediamo ai tavoli!\n";
@@ -89,7 +89,7 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
         . '<tr><td><table cellpadding="0" cellspacing="0" style="background:#eef7ee;border:2px solid #2e7d32;border-radius:6px;font-size:18px">'
         . '<tr><td style="padding:10px 16px 4px">Nickname: <b>' . isc_h($nickname) . '</b></td></tr>'
         . '<tr><td style="padding:4px 16px 10px">Password: <b>' . $passwd_h . '</b></td></tr></table></td></tr>'
-        . '<tr><td style="padding:10px 0 0;font-size:14px;color:#555">Nel gioco, per il momento, gli altri ti vedranno con il nome provvisorio '
+        . '<tr><td style="padding:10px 0 0;font-size:14px;color:#555">Il tuo nome visualizzato nel gioco, per ora, è '
         . '<span style="background:#ffe9b3;padding:0 4px 0 2px">' . isc_h($nick_tmp) . '*</span>. Quando il tuo nickname sarà approvato, ti vedranno come '
         . isc_h($nickname) . ' e riceverai un\'email.</td></tr>'
         . '<tr><td style="padding:14px 0;font-size:14px;color:#555">Finché non attivi l\'account non puoi entrare.'
@@ -364,7 +364,7 @@ function main()
     Nickname: <b><?php echo isc_h($nickname); ?></b><br>
     Password: quella che hai scelto<?php echo (empty($_POST['mail_passwd']) ? '' : " (è anche nell'email)"); ?>
   </div>
-  <p class="piccolo">Nel gioco, per il momento, gli altri ti vedranno con il nome provvisorio <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
+  <p class="piccolo">Il tuo nome visualizzato nel gioco, per ora, è <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
      Potrai comunque giocare subito dopo l'attivazione. Quando il tuo nickname sarà approvato, ti vedranno come <?php echo isc_h($nickname); ?> e riceverai un'email.</p>
   <p class="piccolo">Non trovi l'email? Guarda anche nelle cartelle <b>Spam</b>, <b>Posta indesiderata</b> o <b>Quarantena</b>. Il link vale 48 ore.</p>
   <a class="btn blu" href="index.php">Torna all'ingresso</a>
@@ -376,7 +376,7 @@ function main()
     <input type="hidden" name="curtime" value="<?php echo isc_h($curtime); ?>"><input type="hidden" name="tf" value="<?php echo isc_h($tf); ?>">
     <div class="trap" aria-hidden="true"><label>Sito <input name="site" tabindex="-1" autocomplete="off"></label></div>
 
-    <label for="nickname">1. Il tuo nickname nel gioco</label>
+    <label for="nickname">1. Il tuo nickname per entrare e giocare</label>
     <input id="nickname" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nickname provvisorio.</span></div>
 
@@ -552,14 +552,15 @@ function main()
         var bold = document.createElement('b');
         var nickname = $('nickname').value.trim();
 
-        line.textContent = 'Ti vedranno come ';
+        line.textContent = 'Il tuo nome visualizzato, per ora: ';
         name.className = 'nicktmp';
         name.textContent = $('nicktmp_animal').value + $('nicktmp_adjective').value + '*';
         line.appendChild(name);
         warning.className = 'avviso';
-        bold.textContent = 'Attenzione: per entrare userai sempre il tuo nickname'
-            + (nickname ? ' ' + nickname : '') + ', mai il nome provvisorio.';
+        warning.appendChild(document.createTextNode('Per entrare userai sempre ' + (nickname ? 'il nickname ' : 'il tuo nickname')));
+        bold.textContent = nickname;
         warning.appendChild(bold);
+        warning.appendChild(document.createTextNode(' e la tua password.'));
         $('enicktmp').innerHTML = '';
         $('enicktmp').appendChild(line);
         $('enicktmp').appendChild(warning);

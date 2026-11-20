@@ -254,9 +254,13 @@ button:active,.btn:active {
     padding: 0 4px 0 2px;
 }
 .avviso {
-    margin-top: 6px;
-    font-size: 16px;
-    color: #8a4b00;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f2f2f2;
+    font-size: 17px;
+    color: #222;
 }
 .err {
     background: #ffdddd;
@@ -322,7 +326,7 @@ h1 {
     Password: quella che hai scelto
   </div>
 <?php if ($nick_tmp !== NULL && $nick_tmp != "") { ?>
-  <p class="piccolo">Nel gioco, per il momento, gli altri ti vedranno con il nome provvisorio <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
+  <p class="piccolo">Il tuo nome visualizzato nel gioco, per ora, è <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
      Quando il tuo nickname sarà approvato, ti vedranno come <?php echo isc_h($nick); ?> e riceverai un'email.</p>
 <?php } ?>
   <p>Quando il browser chiede <b>«Vuoi salvare la password?»</b> clicca <b>Salva</b>: la prossima volta entri da solo.</p>
