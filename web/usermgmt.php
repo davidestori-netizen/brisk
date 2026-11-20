@@ -225,6 +225,23 @@ function umgmt_log($action, $login)
         fwrite($log_file, sprintf("%ld|%s|%s|%s|%s|\n", time(), $G_umgmt_who, $remote_ip, $action, $login));
         fclose($log_file);
     }
+    else {
+        error_log(sprintf("usermgmt: the log of the actions cannot be written (%s %s)", $action, $login));
+    }
+}
+
+/* how many players are checked in the form: counted by the server, as a
+   field sent by the page could be forged */
+function umgmt_checked_count()
+{
+    GLOBAL $_POST;
+
+    $count = 0;
+    foreach (array_keys($_POST) as $key) {
+        if (substr($key, 0, 9) == "f_newuser")
+            $count++;
+    }
+    return ($count);
 }
 
 /* a moderator blocking more than one player at once confirms with his password */
@@ -688,7 +705,6 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
             unset($_POST['f_accept'], $_POST['f_delete'], $_POST['f_ban']);
             $_POST['f_newuser'.$row_match[2]] = "on";
             $_POST['f_'.$row_match[1]] = "1";
-            $_POST['f_single'] = "1";
         }
         if (isset($_POST['f_accept'])) {
             $action = "accept";
@@ -755,14 +771,14 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
 
 Il nickname \'%s\' che hai scelto è stato approvato:
 da adesso tutti ti vedranno con questo nome
-(il nickname provvisorio \'%s\' non vale più).
+(il nome provvisorio \'%s\' non vale più).
 Continui a entrare con \'%s\' e la tua solita password.
 
 Saluti e buone partite, mop.', $usr_obj->login, $usr_obj->nick_tmp, $usr_obj->login);
                     $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
 Il nickname <b>\'%s\'</b> che hai scelto è stato approvato:<br>
 da adesso tutti ti vedono con questo nome
-(il nickname provvisorio \'%s\' non vale più).<br>
+(il nome provvisorio \'%s\' non vale più).<br>
 Continui a entrare con <b>\'%s\'</b> e la tua solita password.<br><br>
 Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($usr_obj->nick_tmp), eschtml($usr_obj->login));
                     if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
@@ -960,7 +976,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                     printf("%s<br>\n", eschtml(sprintf(umgmt_txt('mg_refused_ok'), $usr_obj->login, $usr_obj->nick_tmp)));
             }
         }
-        else if ($action == "ban" && $role == "moder" && !isset($_POST['f_single'])
+        else if ($action == "ban" && $role == "moder" && umgmt_checked_count() > 1
                  && umgmt_moder_passwd_ok() == FALSE) {
             echo eschtml(umgmt_txt('mg_banpass_need')) . "<br>";
         }
