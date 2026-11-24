@@ -192,31 +192,49 @@ function main()
         else {
             $bdb->transaction('BEGIN');
             $ok = FALSE;
+            /* every step that fails says why to the player:
+               a single "try again" was wrong where trying again cannot help */
+            $err_int = sprintf("Errore interno del sito durante la registrazione: il tuo account non è stato creato. "
+                               . "Scrivi a %s e ti aiutiamo.", $G_admin_mail);
             do {
                 if (($usr_obj = $bdb->user_add($nickname, md5($passwd), $mail,
                                                USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
-                                               USER_DIS_REA_NU_MAILED, $G_notguar_code)) == FALSE)
+                                               USER_DIS_REA_NU_MAILED, $G_notguar_code)) == FALSE) {
+                    $error = "Il nickname o l'email sono appena stati usati da un'altra iscrizione: controllali e riprova.";
                     break;
-                if ($bdb->user_nicktmp_set($usr_obj->code, $nick_tmp) == FALSE)
+                }
+                if ($bdb->user_nicktmp_set($usr_obj->code, $nick_tmp) == FALSE) {
+                    $error = "Il nome provvisorio scelto non è più libero: scegline un altro nei due menu.";
                     break;
+                }
                 // the rules are accepted in this page
-                if ($bdb->user_tos_update($usr_obj->code, $G_tos_vers) == FALSE)
+                if ($bdb->user_tos_update($usr_obj->code, $G_tos_vers) == FALSE) {
+                    $error = $err_int;
                     break;
-                if (($mail_code = $bdb->mail_reserve_code()) == FALSE)
+                }
+                if (($mail_code = $bdb->mail_reserve_code()) == FALSE) {
+                    $error = $err_int;
                     break;
+                }
                 $hash = md5(time() . $G_alarm_passwd . $nick_tmp . $mail);
                 $link = sprintf("%s://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
                                 $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
                 $ms = isc_mail_welcome($nick_tmp, $nickname, NULL, $link);
                 $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK, time(),
                                             $ms[0], $ms[1], $ms[2], $hash);
-                if ($mail_item->store($bdb) == FALSE)
+                if ($mail_item->store($bdb) == FALSE) {
+                    $error = $err_int;
                     break;
-                if ($bdb->selfreg_set($remote_ip) == FALSE)
+                }
+                if ($bdb->selfreg_set($remote_ip) == FALSE) {
+                    $error = $err_int;
                     break;
+                }
                 $mw = isc_mail_welcome($nick_tmp, $nickname, (empty($_POST['mail_passwd']) ? NULL : $passwd), $link);
-                if (brisk_mail($mail, "Utente Brisk {$nickname}", $mw[0], $mw[1], $mw[2]) == FALSE)
+                if (brisk_mail($mail, "Utente Brisk {$nickname}", $mw[0], $mw[1], $mw[2]) == FALSE) {
+                    $error = "Non riusciamo a mandare la mail a questo indirizzo: controlla che sia giusto e riprova.";
                     break;
+                }
                 $ok = TRUE;
             } while (FALSE);
 
@@ -226,7 +244,6 @@ function main()
             }
             else {
                 $bdb->transaction('ROLLBACK');
-                $error = "Non è stato possibile creare l'account. Riprova tra poco.";
             }
         }
     }
