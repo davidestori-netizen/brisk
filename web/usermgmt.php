@@ -1112,6 +1112,12 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                                    $usr_obj->code,
                                    htmlspecialchars(json_encode(sprintf(umgmt_txt('mg_ban_ask'), $usr_obj->login)), ENT_QUOTES),
                                    eschtml(umgmt_txt('mg_ban')));
+                /* the administrator works from the PC and asked for no confirmations:
+                   they stay for the moderators only */
+                if ($role == "admin") {
+                    $btn_accept = preg_replace('/ onclick="return confirm\([^"]*\);"/', '', $btn_accept);
+                    $btn_ban = preg_replace('/ onclick="return confirm\([^"]*\);"/', '', $btn_ban);
+                }
                 if ($is_ref) {
                     /* refused nickname: nothing to accept until the player asks another one */
                     $row_btns = $btn_ban;
@@ -1163,12 +1169,18 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
             </table>
                   <script>
                   /* the buttons at the bottom act on the checked rows: say how many */
+                  /* confirmations and the question of the reason: for the moderators only */
+                  var umgmt_ask = <?php echo ($role == "admin" ? "false" : "true"); ?>;
                   function umgmt_n_checked() {
                       return document.querySelectorAll('input[type=checkbox][name^=f_newuser]:checked').length;
                   }
                   /* the reason of a refused nickname: required, it goes in the e-mail to the player */
                   function umgmt_reason(form, ask) {
                       var reason = '';
+
+                      if (!umgmt_ask) {
+                          return true;
+                      }
 
                       /* the buttons at the bottom: a reason only if a new signup is checked,
                          the old accounts of the administrator are deleted without it */
@@ -1197,6 +1209,9 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                       if (checked == 0) {
                           alert(<?php echo json_encode(umgmt_txt('mg_none')); ?>);
                           return false;
+                      }
+                      if (!umgmt_ask) {
+                          return true;
                       }
                       return confirm(question.replace('%n', checked));
                   }
