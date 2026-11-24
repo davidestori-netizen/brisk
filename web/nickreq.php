@@ -1,4 +1,6 @@
 <?php
+/* the page carries a code valid for a short time: never from the cache */
+header('Cache-Control: no-store, max-age=0');
 /*
  *  brisk - nickreq.php
  *
