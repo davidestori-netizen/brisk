@@ -896,7 +896,7 @@ sideslide.prototype = {
             'Benvenuto, ' + (nick_req ? nick_req : nick) + '! &#127183;</div>' +
             '<div style="margin:0 0 12px;text-align:left">Il tuo account &egrave; pronto: <b>puoi giocare subito</b>.<br><br>' +
             'Per ora nel gioco ti vedi, e ti vedono gli altri, con il nome provvisorio <b>' + nick + '</b> (con il piccolo asterisco <span style="color:#888">&#10033;</span>).<br><br>' +
-            'Quando i moderatori approvano il nome che hai scelto ti arriva un\'email, e da l&igrave; tutti ti vedono con quello.<br><br>' +
+            'Quando i moderatori approvano il nome che hai scelto ti arriva un\'email, e da l&igrave; tutti ti vedranno con quello.<br><br>' +
             'Per entrare usi sempre <b>il nome che hai scelto</b> e la tua password: li trovi nell\'<b>email</b>, <b>conservala</b>.</div>' +
             '<input type="button" class="button" value="Iniziamo!" style="font-size:18px;padding:8px 18px;margin:8px 4px">';
         velo.appendChild(box); document.body.appendChild(velo);
