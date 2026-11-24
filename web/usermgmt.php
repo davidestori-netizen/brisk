@@ -127,10 +127,10 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'Nickname %s refused, it keeps playing seen as %s'),
                       'mg_repeated'    => array( 'it' => 'Nessuna azione eseguita: la pagina era stata ricaricata o era vecchia. Qui sotto c\'è la lista aggiornata.',
                                                  'en' => 'Nothing done: the page was reloaded or old. The list below is up to date.'),
-                      'mg_reason_ask'  => array( 'it' => 'Perché rifiuti questo nickname? Lo leggerà il giocatore nella mail (massimo 60 caratteri).',
-                                                 'en' => 'Why do you refuse this nickname? The player will read it in the e-mail (60 characters at most).'),
-                      'mg_reason_one'  => array( 'it' => 'Stai rifiutando il nickname %s. Perché? Lo leggerà il giocatore nella mail (massimo 60 caratteri).',
-                                                 'en' => 'You are refusing the nickname %s. Why? The player will read it in the e-mail (60 characters at most).'),
+                      'mg_reason_ask'  => array( 'it' => 'Perché rifiuti questo nickname? Facoltativo: se lo scrivi, lo leggerà il giocatore nella mail (massimo 60 caratteri).',
+                                                 'en' => 'Why do you refuse this nickname? Optional: if written, the player will read it in the e-mail (60 characters at most).'),
+                      'mg_reason_one'  => array( 'it' => 'Stai rifiutando il nickname %s. Motivo facoltativo: se lo scrivi, lo leggerà il giocatore nella mail (massimo 60 caratteri).',
+                                                 'en' => 'You are refusing the nickname %s. Optional reason: if written, the player will read it in the e-mail (60 characters at most).'),
                       'mg_accept_ask'  => array( 'it' => 'Stai accettando il nickname %s. Confermi?',
                                                  'en' => 'You are accepting the nickname %s. Do you confirm?'),
                       'mg_not_waiting' => array( 'it' => 'Nessuna azione per %s: non è più in attesa di controllo.',
@@ -139,8 +139,6 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'Nickname %s refused, but the e-mail was not sent: tell the player.'),
                       'mg_reason_long' => array( 'it' => 'Motivo troppo lungo: massimo 60 caratteri. Accorcialo.',
                                                  'en' => 'Reason too long: 60 characters at most. Please shorten it.'),
-                      'mg_reason_need' => array( 'it' => 'Per rifiutare un nickname scrivi il motivo.',
-                                                 'en' => 'To refuse a nickname write the reason.'),
                       'mg_banned'      => array( 'it' => 'Rifiutato e bloccato: %s (la sua email non si può più usare)',
                                                  'en' => '%s refused and blocked: the e-mail cannot be used again')
                       );
@@ -913,12 +911,10 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                            nickreq.php */
                         /* the reason written by the moderator goes to the player */
                         $reason = trim(isset($_POST['f_reason']) ? (string)$_POST['f_reason'] : "");
-                        if ($reason == "") {
-                            $status .= eschtml(umgmt_txt('mg_reason_need')) . "<br>";
-                            $res = TRUE;
-                            break;
-                        }
+                        /* the reason is optional: with none the e-mail is the usual one */
                         $reason = mb_substr($reason, 0, 60);
+                        $reason_txt = ($reason != "" ? "Motivo: " . $reason . "\n" : "");
+                        $reason_htm = ($reason != "" ? "Motivo: " . eschtml($reason) . "<br>\n" : "");
                         /* the state changes first, and only if it was still waiting:
                            a refusal saved by nobody, or done twice, sends no mail */
                         if (($upd_pg = $bdb->query(sprintf("UPDATE %susers SET disa_reas = %d WHERE code = %d AND disa_reas = %d;",
@@ -934,17 +930,15 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                         $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
 
 Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.
-Motivo: %s
-Proponine un altro qui: <%s>
+%sProponine un altro qui: <%s>
 Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.
 
-Saluti e buone partite, mop.', $usr_obj->login, $reason, $nick_page, $usr_obj->nick_tmp);
+Saluti e buone partite, mop.', $usr_obj->login, $reason_txt, $nick_page, $usr_obj->nick_tmp);
                         $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
 Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.<br>
-Motivo: %s<br>
-Proponine un altro qui:<br>%s<br>
+%sProponine un altro qui:<br>%s<br>
 Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.<br><br>
-Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($reason), eschtml($nick_page), eschtml($usr_obj->nick_tmp));
+Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), $reason_htm, eschtml($nick_page), eschtml($usr_obj->nick_tmp));
                         /* the refused request stays (the player still enters with it)
                            but it is marked, so nobody accepts it by mistake */
                         if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
@@ -1174,7 +1168,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                   function umgmt_n_checked() {
                       return document.querySelectorAll('input[type=checkbox][name^=f_newuser]:checked').length;
                   }
-                  /* the reason of a refused nickname: required, it goes in the e-mail to the player */
+                  /* the reason of a refused nickname: optional, if written it goes in the e-mail to the player */
                   function umgmt_reason(form, ask) {
                       var reason = '';
 
@@ -1191,7 +1185,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
                       /* a short reason: the window of the browser shows one line only */
                       while (true) {
                           reason = prompt(ask || <?php echo json_encode(umgmt_txt('mg_reason_ask')); ?>, reason);
-                          if (reason === null || reason.trim() === '') {
+                          if (reason === null) {
                               return false;
                           }
                           reason = reason.trim();
