@@ -55,7 +55,7 @@ function nickreq_page($msg, $is_error, $new_nick, $nick_tmp)
     header('Content-Type: text/html; charset=UTF-8');
 ?><!doctype html>
 <html lang="it">
-<head>
+<head><link rel="shortcut icon" href="img/brisk_ico.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Brisk: scegli un altro nickname</title>

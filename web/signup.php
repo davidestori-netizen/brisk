@@ -267,7 +267,7 @@ function main()
     if (!mb_check_encoding($rules, 'UTF-8'))
         $rules = mb_convert_encoding($rules, 'UTF-8', 'ISO-8859-1');
 ?><!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="it"><head><link rel="shortcut icon" href="img/brisk_ico.png"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Crea il tuo account</title>
 <?php isc_style(); ?>
 <style>

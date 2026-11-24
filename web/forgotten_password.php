@@ -134,7 +134,7 @@ function main()
         }
     }
 ?><!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="it"><head><link rel="shortcut icon" href="img/brisk_ico.png"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Password dimenticata</title><?php isc_style(); ?></head><body><div class="box">
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
 <?php if ($result == 'inviata' || $result == 'gia') { ?>
