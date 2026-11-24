@@ -124,8 +124,8 @@ function main()
             $r = array('stato' => 'no', 'msg' => "Forse intendevi:", 'sug' => $sug);
         else if (!isc_mail_ok($m))
             $r = array('stato' => 'no', 'msg' => "Questa email non sembra giusta. Controlla come l'hai scritta.", 'sug' => "");
-        else if ($bdb->mail_is_used($m))
-            $r = array('stato' => 'no', 'msg' => "Questa email è già usata da un altro account. Se è il tuo, usa \"Password dimenticata?\".", 'sug' => "");
+        /* no check of an e-mail already used while typing: it would tell anyone
+           which e-mails are on Brisk. It is checked after "Iscriviti" only */
         else
             $r = array('stato' => 'ok', 'msg' => "Email giusta", 'sug' => "");
         echo json_encode($r);
