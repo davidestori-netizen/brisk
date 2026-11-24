@@ -139,6 +139,8 @@ Benvenuto e buone partite, mop.<br>',
                                                  'en' => 'Nickname %s refused, but the e-mail was not sent: tell the player.'),
                       'mg_reason_long' => array( 'it' => 'Motivo troppo lungo: massimo 60 caratteri. Accorcialo.',
                                                  'en' => 'Reason too long: 60 characters at most. Please shorten it.'),
+                      'mg_back'        => array( 'it' => 'Torna alla lista',
+                                                 'en' => 'Back to the list'),
                       'mg_banned'      => array( 'it' => 'Rifiutato e bloccato: %s (la sua email non si può più usare)',
                                                  'en' => '%s refused and blocked: the e-mail cannot be used again')
                       );
@@ -1151,7 +1153,7 @@ SELECT usr.*, guar.login AS guar_login, tmp.nick AS nick_tmp
      <h2><?php echo eschtml(umgmt_txt('mg_head')); ?></h2>
      <?php echo $who_line; ?>
      <?php if ($status != "") { ?>
-     <div class="result"><b><?php echo eschtml(umgmt_txt('mg_result')); ?></b><br><?php echo $status; ?></div>
+     <div class="result"><b><?php echo eschtml(umgmt_txt('mg_result')); ?></b><br><?php echo $status; ?><br><a href="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>"><?php echo eschtml(umgmt_txt('mg_back')); ?></a></div>
      <?php } ?>
      <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
      <input type="hidden" name="f_code" value="<?php echo $form_code; ?>">
