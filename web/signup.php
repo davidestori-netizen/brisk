@@ -413,11 +413,11 @@ function main()
     <div class="result" id="enicktmp"><span class="piccolo">Se non ti piace, scegli un altro nome o un altro aggettivo.</span></div>
 
     <label for="passwd">2. La tua password</label>
-    <div class="passwd_row"><input id="passwd" name="passwd" type="password" maxlength="30" value="<?php echo isc_h($passwd); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <div class="passwd_row"><input id="passwd" name="passwd" type="password" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" required>
       <button type="button" id="occhio">Mostra</button></div>
     <div class="result" id="epasswd"><span class="piccolo">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
     <label for="passwd2">Riscrivi la password</label>
-    <input id="passwd2" name="passwd2" type="password" maxlength="30" value="<?php echo isc_h($passwd2); ?>" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <input id="passwd2" name="passwd2" type="password" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="epasswd2"></div>
     <label class="cbox" style="margin-top: 0"><input type="checkbox" name="mail_passwd" value="1"<?php echo (!empty($_POST['mail_passwd']) ? ' checked' : ''); ?>> Ricevi la password anche via email</label>
 

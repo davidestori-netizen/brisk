@@ -84,7 +84,6 @@ function main()
     $login = FALSE;
     $error = "";
     $done = FALSE;
-    $new_passwd = "";
     $ip = (isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : "");
 
     if ($bdb != FALSE && preg_match('/^[0-9a-f]{48}$/D', $secret)) {
@@ -135,7 +134,6 @@ function main()
             } while (FALSE);
             if ($ok && $bdb->transaction('COMMIT')) {
                 $done = TRUE;
-                $new_passwd = $passwd1;
                 $m_pg = $bdb->query(sprintf("SELECT email FROM %susers WHERE login = '%s';", $G_dbpfx, escsql($login)));
                 if ($m_pg != FALSE && pg_num_rows($m_pg) == 1)
                     @passwd_notice(pg_fetch_object($m_pg, 0)->email, $login, $passwd1);
@@ -152,36 +150,10 @@ function main()
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
 <?php if ($done) { ?>
   <h1>Fatto!</h1>
-  <p>La nuova password di <b><?php echo isc_h($login); ?></b> e':</p>
-  <div class="passwd" id="passwd"><?php echo isc_h($new_passwd); ?></div>
-  <button type="button" class="occhio" style="width:100%" onclick="copy_passwd()">Copia la password</button>
-  <p class="piccolo" id="copied"></p>
-  <p>Ora entra con il tuo nome e questa password.</p>
+  <p>La password di <b><?php echo isc_h($login); ?></b> &egrave; stata cambiata.</p>
+  <p>Ora entra con il tuo nome e la nuova password. Segnatela su un foglietto: per sicurezza non la mostriamo e non la mandiamo per email.</p>
   <div style="margin:14px 0;padding:12px 14px;background:#fff6c8;border:1px solid #e0c34a;border-radius:8px;font-size:20px;line-height:1.5"><b>Importante:</b> il browser ora ti chiede <b>&laquo;Vuoi salvare la password?&raquo;</b> (in alto o in basso nello schermo). Clicca <b>Salva</b>: le prossime volte entri da solo.</div>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($login); ?>">Entra</a>
-  <script>
-  function copy_passwd(){
-      var passwd = document.getElementById('passwd').textContent;
-      var ok = function(){
-          document.getElementById('copied').textContent='Password copiata.';
-      };
-      if (navigator.clipboard&&navigator.clipboard.writeText){
-          navigator.clipboard.writeText(passwd).then(ok,function(){});
-      }
-      else{
-          var text_area = document.createElement('textarea');
-          text_area.value = passwd;
-          document.body.appendChild(text_area);
-          text_area.select();
-          try{
-              document.execCommand('copy');
-              ok();
-          } catch(e) {
-          }
-          document.body.removeChild(text_area);
-      }
-  }
-  </script>
 <?php } else if ($login === FALSE) { ?>
   <h1>Link scaduto o gia' usato</h1>
   <p>Questo link non vale più: dura 60 minuti e si può usare una volta sola.</p>
@@ -205,7 +177,7 @@ function main()
   function show(){
       var passwd1 = document.getElementById('passwd1'),
           passwd2 = document.getElementById('passwd2'),
-          typ = (a.type ==='password') ? 'text' : 'password';
+          typ = (passwd1.type === 'password') ? 'text' : 'password';
       passwd1.type = typ;
       passwd2.type = typ;
   }
