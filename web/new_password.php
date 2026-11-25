@@ -155,7 +155,6 @@ function main()
   <h1>Fatto!</h1>
   <p>La password di <b><?php echo isc_h($login); ?></b> &egrave; stata cambiata.</p>
   <p>Ora entra con il tuo nome e la nuova password. Segnatela su un foglietto: per sicurezza non la mostriamo e non la mandiamo per email.</p>
-  <div style="margin:14px 0;padding:12px 14px;background:#fff6c8;border:1px solid #e0c34a;border-radius:8px;font-size:20px;line-height:1.5"><b>Importante:</b> il browser ora ti chiede <b>&laquo;Vuoi salvare la password?&raquo;</b> (in alto o in basso nello schermo). Clicca <b>Salva</b>: le prossime volte entri da solo.</div>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($login); ?>">Entra</a>
 <?php } else if ($login === FALSE) { ?>
   <h1>Link scaduto o gia' usato</h1>
@@ -175,6 +174,7 @@ function main()
     <label for="passwd2">Ripeti la password</label>
     <input id="passwd2" name="passwd2" type="password" autocomplete="new-password" maxlength="40" required>
     <label style="display:flex;align-items:center;gap:10px;margin:12px 0;font-size:20px;font-weight:normal"><input type="checkbox" name="mail_passwd" value="1" style="width:24px;height:24px;margin:0"<?php echo (!empty($_POST['mail_passwd']) ? ' checked' : ''); ?>> Ricevi la password anche via email</label>
+    <div style="margin:14px 0;padding:12px 14px;background:#fff6c8;border:1px solid #e0c34a;border-radius:8px;font-size:20px;line-height:1.5">Quando premi <b>Salva</b>, il browser pu&ograve; chiederti <b>&laquo;Vuoi salvare la password?&raquo;</b>: clicca <b>Salva</b>, cos&igrave; le prossime volte entri da solo.</div>
     <button type="submit" class="blu">Salva la password</button>
   </form>
   <script>
