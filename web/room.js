@@ -921,7 +921,7 @@ sideslide.prototype = {
             if (++tries > 120) { clearInterval(t); return; }
             if (typeof window.myname == 'undefined' || !window.myname) return;
             clearInterval(t);
-            if (!window.myname_tmp) return;
+            if (!window.myname_req) return;
             var k = 'brisk_benv_' + String(window.myname).toLowerCase();
             try { if (localStorage.getItem(k) == '1') return; localStorage.setItem(k, '1'); } catch (e) { }
             isc_welcome(window.myname, window.myname_req);

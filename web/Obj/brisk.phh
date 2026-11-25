@@ -2178,8 +2178,7 @@ class Brisk
                       ($user->subst != 'standup' && $this->table[$user->table]->auth_type == TABLE_AUTH_TY_PUBL)
                       )
                       ) {
-                          // Remove auth if name changed (and the temporary nickname, out of TY_ALL)
-                          $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL | USER_FLAG_TY_NICKTMP);
+                          $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL); // Remove auth if name changed
                           $user->login = "";
                           for ($i = 0 ; $i < TABLES_N ; $i++) {
                               $to_user .= $this->table[$i]->act_content($user);
@@ -2314,7 +2313,7 @@ class Brisk
           }
 
           if ($only_you) {
-              $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape("== chat ban =="));
+              $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags_client(), xcape($user->name), xcape("== chat ban =="));
           }
           else {
               // TEMPORARY DISABLED UNTIL test user option will be available
@@ -2332,12 +2331,12 @@ class Brisk
                       $aug_body[mt_rand(0, count($aug_body)-1)],
                       $aug_tail[mt_rand(0, count($aug_tail)-1)]);
 
-                      $to_room = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name),
+                      $to_room = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags_client(), xcape($user->name),
                       xcape($auguri));
                   }
               }
               else {
-                  $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape($msg));
+                  $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags_client(), xcape($user->name), xcape($msg));
                   // temporary silentiation for troll (will became array check)
                   // if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
                   $to_room = $to_user;
@@ -2742,7 +2741,7 @@ class Brisk
           || $this->user[$i]->name == "")       // or the name is empty, happens when user is reset (TODO: check it)
               continue;
 
-          $flags = $this->user[$i]->flags;
+          $flags = $this->user[$i]->flags_client();
 
           // sql record exists AND last donate > 2013-01-01
           if ($this->user[$i]->is_supp_custom()) {
@@ -2783,7 +2782,7 @@ class Brisk
       for ($i = 0 ; $i < $table->player_n ; $i++) {
           $user_cur = $this->user[$table->player[$i]];
 
-          $flags = $user_cur->flags;
+          $flags = $user_cur->flags_client();
 
           log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
           if ($user_cur->is_supp_custom())

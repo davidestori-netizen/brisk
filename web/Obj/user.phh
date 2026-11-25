@@ -67,10 +67,9 @@ define('USER_FLAG_TY_ADMIN',   0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
 
 /* temporary nickname of the easy signup, the requested one waits for a
-   check: never stored in users.type (out of USER_FLAG_TY_ALL), set when
-   the account is read with its row in users_nicktmp
-   (BriskDB::nicktmp_fix()), and sent to the players with the other flags
-   (user_decorator() in commons.js shows it with a "*") */
+   check: only in the flags sent to the players (User::flags_client()),
+   never in users.type or in User->flags; user_decorator() in commons.js
+   shows it with a "*" */
 define('USER_FLAG_TY_NICKTMP', 0x1000000);
 
 // ... reasons for disabling account ...
@@ -432,6 +431,20 @@ class User {
       return ($flags_old);
   }
 
+  /* easy signup: the player still has a temporary nickname, when the login
+     and the name the others see (vis_login of users_vis) differ */
+  function is_nicktmp()
+  {
+      return ($this->is_auth() && is_object($this->rec)
+              && $this->rec->login_get() != $this->rec->vis_login_get());
+  }
+
+  /* the flags sent to the players: USER_FLAG_TY_NICKTMP is added only here */
+  function flags_client()
+  {
+      return ($this->flags | ($this->is_nicktmp() ? USER_FLAG_TY_NICKTMP : 0));
+  }
+
   function prefs_store()
   {
       if (($bdb = BriskDB::create()) == FALSE) {
@@ -664,15 +677,12 @@ class User {
           }
       }
       $myname = xcape($this->name,ENT_COMPAT,"UTF-8");
-      /* USER_FLAG_TY_NICKTMP: temporary nickname, shown with a "*" */
-      /* easy signup: the nickname chosen by the player, his login, to greet
-         him with it while the others see the temporary one */
-      $myname_req = (($this->flags & USER_FLAG_TY_NICKTMP) && isset($this->rec) && is_object($this->rec)
-                     ? xcape($this->rec->login_get(), ENT_COMPAT, "UTF-8") : "");
-      return (sprintf('window.myname_req = "%s"; ', $myname_req) .
-              sprintf('window.myname = "%s"; window.myname_tmp = %d; $("myname").innerHTML = "<span class=\"%s\"><span>%s%s</span></span>";',
-                      $myname, (($this->flags & USER_FLAG_TY_NICKTMP) ? 1 : 0), $cl, $myname,
-                      (($this->flags & USER_FLAG_TY_NICKTMP) ? "<span style='color:#888;font-size:75%;margin-left:2px;vertical-align:super;font-style:normal'>&#10033;</span>" : "")));
+      /* easy signup: with a temporary nickname the "*", and the nickname he
+         chose, his login, to greet him in the welcome window (room.js) */
+      $myname_req = ($this->is_nicktmp() ? xcape($this->rec->login_get(), ENT_COMPAT, "UTF-8") : "");
+      return (sprintf('window.myname_req = "%s"; window.myname = "%s"; $("myname").innerHTML = "<span class=\"%s\"><span>%s%s</span></span>";',
+                      $myname_req, $myname, $cl, $myname,
+                      ($myname_req != "" ? "<span class='nicktmp'>&#10033;</span>" : "")));
   }
 
   /* INDEX_RD PORT */
