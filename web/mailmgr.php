@@ -77,7 +77,7 @@ function main() {
                password chosen by the player; NU_TOBECHK stays as reason until the
                login, the nickname chosen by the player, is checked in usermgmt.php */
             $is_nicktmp = (($usr_rec = $bdb->getrecord_bycode($mai->ucode)) != FALSE
-                           && ($usr_rec->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP);
+                           && $usr_rec->nick_tmp !== NULL);
 
             if (($bdb->user_update_flag_ty($mai->ucode, USER_FLAG_TY_DISABLE,
                                         TRUE, USER_DIS_REA_NU_MAILED,

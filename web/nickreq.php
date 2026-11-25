@@ -23,7 +23,7 @@ header('Cache-Control: no-store, max-age=0');
  */
 
 /*
- *  A player that still plays with a temporary nickname (USER_FLAG_TY_NICKTMP)
+ *  A player that still plays with a temporary nickname (nick_tmp in users_vis)
  *  asks for another nickname, i.e. after the first one has been refused:
  *  it becomes his login, and is checked by hand in usermgmt.php like the
  *  first one; the others keep seeing the temporary nickname until then.
@@ -127,7 +127,7 @@ function main()
 
         if ($login == "" || ($usr = $bdb->getrecord_bylogin($login)) == FALSE
             || strcmp($usr->pass, md5($pass)) != 0
-            || ($usr->type & USER_FLAG_TY_NICKTMP) != USER_FLAG_TY_NICKTMP) {
+            || $usr->nick_tmp === NULL) {
             $msg = "Nome o password sbagliati.";
             break;
         }
