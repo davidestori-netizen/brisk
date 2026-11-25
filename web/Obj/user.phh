@@ -67,7 +67,7 @@ define('USER_FLAG_TY_DISABLE', 0x800000); // done
 
 /* temporary nickname of the easy signup, the requested one waits for a
    check: never stored in users.type (out of USER_FLAG_TY_ALL), set when
-   the account is read with its row in users_nickreq
+   the account is read with its row in users_nicktmp
    (BriskDB::nicktmp_fix()), and sent to the players with the other flags
    (user_decorator() in commons.js shows it with a "*") */
 define('USER_FLAG_TY_NICKTMP', 0x1000000);
