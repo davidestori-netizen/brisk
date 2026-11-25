@@ -78,14 +78,14 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
        of the frame around the body would turn them into empty lines. The logo is
        the one at the top of the home page, linked with the address of the site. */
     $logo = sprintf("%s://%s/%s/img/brisk_logo64.png", $G_proto, $G_domain, $G_webbase);
-    $td = 'style="padding:6px 0;font-size:16px;line-height:1.45"';
+    $cell_style = 'style="padding:6px 0;font-size:16px;line-height:1.45"';
     $html = '<table cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;font-family:Arial,Helvetica,sans-serif;color:#222;border-collapse:collapse">'
         . '<tr><td style="padding:10px 0 12px;border-bottom:3px solid #193747"><img src="' . isc_h($logo) . '" alt="brisk" height="48" style="display:block;border:0"></td></tr>'
         . '<tr><td style="padding:18px 0 6px;font-size:22px;font-weight:bold">Ciao ' . isc_h($nickname) . ', benvenuto su Brisk!</td></tr>'
         . '<tr><td style="padding:16px 0 8px;font-size:16px">Per <b>attivare</b> l\'account clicca il pulsante (vale 48 ore):</td></tr>'
         . '<tr><td style="padding:4px 0 8px"><a href="' . isc_h($link) . '" style="display:inline-block;background:#193747;color:#fff;padding:14px 26px;border-radius:6px;text-decoration:none;font-size:20px;font-weight:bold">Attiva il mio account</a></td></tr>'
         . '<tr><td style="padding:0 0 14px;font-size:12px;color:#777">Se il pulsante non funziona, apri questo indirizzo: ' . isc_h($link) . '</td></tr>'
-        . '<tr><td ' . $td . '>Dopo l\'attivazione entra con:</td></tr>'
+        . '<tr><td ' . $cell_style . '>Dopo l\'attivazione entra con:</td></tr>'
         . '<tr><td><table cellpadding="0" cellspacing="0" style="background:#eef7ee;border:2px solid #2e7d32;border-radius:6px;font-size:18px">'
         . '<tr><td style="padding:10px 16px 4px">Nickname: <b>' . isc_h($nickname) . '</b></td></tr>'
         . '<tr><td style="padding:4px 16px 10px">Password: <b>' . $passwd_h . '</b></td></tr></table></td></tr>'
@@ -111,23 +111,23 @@ function main()
     /* checks while typing (json answers) */
     if (isset($_GET['nickname'])) {
         header('Content-Type: application/json; charset=UTF-8');
-        $e = isc_nick_check($bdb, (string)$_GET['nickname']);
-        echo json_encode(array('stato' => $e[0], 'msg' => $e[1], 'sug' => $e[2]));
+        $check = isc_nick_check($bdb, (string)$_GET['nickname']);
+        echo json_encode(array('state' => $check[0], 'msg' => $check[1], 'sug' => $check[2]));
         return;
     }
     if (isset($_GET['mail'])) {
         header('Content-Type: application/json; charset=UTF-8');
-        $m = trim((string)$_GET['mail']);
-        $sug = isc_mail_suggest($m);
+        $typed = trim((string)$_GET['mail']);
+        $sug = isc_mail_suggest($typed);
         if ($sug != "")
-            $r = array('stato' => 'no', 'msg' => "Forse intendevi:", 'sug' => $sug);
-        else if (!isc_mail_ok($m))
-            $r = array('stato' => 'no', 'msg' => "Questa email non sembra giusta. Controlla come l'hai scritta.", 'sug' => "");
+            $answer = array('state' => 'no', 'msg' => "Forse intendevi:", 'sug' => $sug);
+        else if (!isc_mail_ok($typed))
+            $answer = array('state' => 'no', 'msg' => "Questa email non sembra giusta. Controlla come l'hai scritta.", 'sug' => "");
         /* no check of an e-mail already used while typing: it would tell anyone
            which e-mails are on Brisk. It is checked after "Iscriviti" only */
         else
-            $r = array('stato' => 'ok', 'msg' => "Email giusta", 'sug' => "");
-        echo json_encode($r);
+            $answer = array('state' => 'ok', 'msg' => "Email giusta", 'sug' => "");
+        echo json_encode($answer);
         return;
     }
 
@@ -154,7 +154,7 @@ function main()
         $nicktmp_animal = (isset($_POST['nicktmp_animal']) ? (string)$_POST['nicktmp_animal'] : "");
         $nicktmp_adjective = (isset($_POST['nicktmp_adjective']) ? (string)$_POST['nicktmp_adjective'] : "");
         $curtime  = (isset($_POST['curtime']) ? (string)$_POST['curtime']  : "");
-        $tf   = (isset($_POST['tf'])   ? (string)$_POST['tf'] : "");
+        $time_sign   = (isset($_POST['tf'])   ? (string)$_POST['tf'] : "");
         /* the network guard of the old apprentice form, with the address seen by the web server */
         $remote_ip = ip2int(addrtoipv4(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ""));
         $result = isc_nick_check($bdb, $nickname);
@@ -163,15 +163,15 @@ function main()
             $error = "Richiesta non valida. Riapri la pagina e riprova.";
         else if (!empty($_POST['site']))                       // trap field for the robots
             $error = "Richiesta non valida.";
-        else if (!preg_match('/^\d+$/', $curtime) || !hash_equals(hash_hmac('sha256', $curtime, $key_t), $tf)
+        else if (!preg_match('/^\d+$/', $curtime) || !hash_equals(hash_hmac('sha256', $curtime, $key_t), $time_sign)
                  || time() - (int)$curtime < 4)
             $error = "La pagina è scaduta. Riprova.";
         else if ($result[0] != 'ok')
             $error = $result[1] . ($result[2] != "" ? " Prova: " . $result[2] : "");
         else if (($passwd_error = isc_passwd_check($passwd, $passwd2, $nickname)) != "")
             $error = $passwd_error;
-        else if (isc_mail_suggest($mail) != "")
-            $error = "Controlla l'email: forse intendevi " . isc_mail_suggest($mail) . " ?";
+        else if (($mail_suggestion = isc_mail_suggest($mail)) != "")
+            $error = "Controlla l'email: forse intendevi " . $mail_suggestion . " ?";
         else if (!isc_mail_ok($mail))
             $error = "Questa email non sembra giusta. Controlla come l'hai scritta.";
         else if ($bdb->mail_is_used($mail))
@@ -214,9 +214,9 @@ function main()
                 $hash = md5(time() . $G_alarm_passwd . $nick_tmp . $mail);
                 $link = sprintf("%s://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
                                 $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
-                $ms = isc_mail_welcome($nick_tmp, $nickname, NULL, $link);
+                $mail_stored = isc_mail_welcome($nick_tmp, $nickname, NULL, $link);
                 $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK, time(),
-                                            $ms[0], $ms[1], $ms[2], $hash);
+                                            $mail_stored[0], $mail_stored[1], $mail_stored[2], $hash);
                 if ($mail_item->store($bdb) == FALSE) {
                     $error = $err_int;
                     break;
@@ -225,8 +225,8 @@ function main()
                     $error = $err_int;
                     break;
                 }
-                $mw = isc_mail_welcome($nick_tmp, $nickname, (empty($_POST['mail_passwd']) ? NULL : $passwd), $link);
-                if (brisk_mail($mail, "Utente Brisk {$nickname}", $mw[0], $mw[1], $mw[2]) == FALSE) {
+                $mail_sent = isc_mail_welcome($nick_tmp, $nickname, (empty($_POST['mail_passwd']) ? NULL : $passwd), $link);
+                if (brisk_mail($mail, "Utente Brisk {$nickname}", $mail_sent[0], $mail_sent[1], $mail_sent[2]) == FALSE) {
                     $error = "Non riusciamo a mandare la mail a questo indirizzo: controlla che sia giusto e riprova.";
                     break;
                 }
@@ -258,7 +258,7 @@ function main()
     $nicktmp_allowed = (isset($nicktmp_pairs[$nicktmp_animal]) ? $nicktmp_pairs[$nicktmp_animal] : array());
 
     $curtime = (string)time();
-    $tf = hash_hmac('sha256', $curtime, $key_t);
+    $time_sign = hash_hmac('sha256', $curtime, $key_t);
     $rules = (string)@file_get_contents(__DIR__ . "/Obj/doc/terms-of-service_V" . $G_tos_vers . "_it.txt");
     if (!mb_check_encoding($rules, 'UTF-8'))
         $rules = mb_convert_encoding($rules, 'UTF-8', 'ISO-8859-1');
@@ -267,12 +267,6 @@ function main()
 <title>Crea il tuo account</title>
 <?php isc_style(); ?>
 <style>
-     body {
-        font-size: 20px;
-    }
-    h1 {
-        font-size: 25px;
-    }
     input {
         font-size: 21px;
         padding: 11px;
@@ -326,19 +320,6 @@ function main()
         margin: 14px 0;
         font-size: 18px;
     }
-    .cbox{
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        font-weight: bold;
-        margin-top: 10px;
-    }
-    .cbox input{
-        width: 28px;
-        height: 28px;
-        flex: none;
-        margin:0;
-    }
     .content{
         display: none;
         white-space: pre-wrap;
@@ -366,32 +347,32 @@ function main()
         margin: 0 0 12px;
         font-size:18px;
     }
-</style></head><body><div class="box">
+</style></head><body class="big"><div class="box">
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
 <?php if ($done) { ?>
   <h1>Quasi fatto, <?php echo isc_h($nickname); ?>!</h1>
   <div class="ok" style="text-align:center;font-size:21px">Ti abbiamo mandato un'<b>email</b> a<br><b><?php echo isc_h($mail); ?></b></div>
   <p style="font-size:21px"><b>Apri l'email e clicca il bottone «Attiva il mio account». Solo dopo potrai entrare e giocare.</b></p>
-  <div class="entra">
+  <div class="enter_box">
     <b>Per entrare scrivi sempre:</b><br>
     Nickname: <b><?php echo isc_h($nickname); ?></b><br>
     Password: quella che hai scelto<?php echo (empty($_POST['mail_passwd']) ? '' : " (è anche nell'email)"); ?>
   </div>
-  <p class="piccolo">Gli altri giocatori, per ora, ti vedranno come <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
+  <p class="small">Gli altri giocatori, per ora, ti vedranno come <span class="tmp_name"><?php echo isc_h($nick_tmp); ?>*</span>.
      Potrai comunque giocare subito dopo l'attivazione. Quando il tuo nickname sarà approvato, ti vedranno come <?php echo isc_h($nickname); ?> e riceverai un'email.</p>
-  <p class="piccolo">Non trovi l'email? Guarda anche nelle cartelle <b>Spam</b>, <b>Posta indesiderata</b> o <b>Quarantena</b>. Il link vale 48 ore.</p>
-  <a class="btn blu" href="index.php">Torna all'ingresso</a>
+  <p class="small">Non trovi l'email? Guarda anche nelle cartelle <b>Spam</b>, <b>Posta indesiderata</b> o <b>Quarantena</b>. Il link vale 48 ore.</p>
+  <a class="btn action" href="index.php">Torna all'ingresso</a>
 <?php } else { ?>
   <h1>Crea il tuo account</h1>
   <p style="text-align:center">Ci vuole un minuto, e giochi subito.</p>
   <?php if ($error != "") { ?><div class="err"><?php echo isc_h($error); ?></div><?php } ?>
   <form method="post" action="signup.php" autocomplete="off" id="f" accept-charset="utf-8">
-    <input type="hidden" name="curtime" value="<?php echo isc_h($curtime); ?>"><input type="hidden" name="tf" value="<?php echo isc_h($tf); ?>">
+    <input type="hidden" name="curtime" value="<?php echo isc_h($curtime); ?>"><input type="hidden" name="tf" value="<?php echo isc_h($time_sign); ?>">
     <div class="trap" aria-hidden="true"><label>Sito <input name="site" tabindex="-1" autocomplete="off"></label></div>
 
     <label for="nickname">1. Il tuo nickname per entrare e giocare</label>
     <input id="nickname" autocomplete="off" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-    <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nome provvisorio.</span></div>
+    <div class="result" id="enickname"><span class="small">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nome provvisorio.</span></div>
 
     <label for="nicktmp_animal">Finché il tuo nickname non viene approvato, verrai visualizzato con:</label>
     <div class="nicktmp_row">
@@ -406,12 +387,12 @@ function main()
 <?php } ?>
       </select>
     </div>
-    <div class="result" id="enicktmp"><span class="piccolo">Se non ti piace, scegli un altro nome o un altro aggettivo.</span></div>
+    <div class="result" id="enicktmp"><span class="small">Se non ti piace, scegli un altro nome o un altro aggettivo.</span></div>
 
     <label for="passwd">2. La tua password</label>
     <div class="passwd_row"><input id="passwd" autocomplete="new-password" name="passwd" type="password" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-      <button type="button" id="occhio">Mostra</button></div>
-    <div class="result" id="epasswd"><span class="piccolo">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
+      <button type="button" id="show_passwd">Mostra</button></div>
+    <div class="result" id="epasswd"><span class="small">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
     <label for="passwd2">Riscrivi la password</label>
     <input id="passwd2" autocomplete="new-password" name="passwd2" type="password" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="epasswd2"></div>
@@ -419,7 +400,7 @@ function main()
 
     <label for="mail">3. La tua email</label>
     <input id="mail" autocomplete="email" name="mail" type="email" maxlength="120" value="<?php echo isc_h($mail); ?>" placeholder="esempio: mario.rossi@gmail.com" autocapitalize="none" autocorrect="off" spellcheck="false" required>
-    <div class="result" id="email"><span class="piccolo">Deve essere la tua: ti mandiamo il link per <b>attivare l'account</b>.</span></div>
+    <div class="result" id="email"><span class="small">Deve essere la tua: ti mandiamo il link per <b>attivare l'account</b>.</span></div>
 
     <div class="rules">
       <div class="guidelines"><b>Prima di tutto: lo spirito di Brisk</b><br>
@@ -427,13 +408,13 @@ function main()
         chi è esperto e chi sta imparando. <b>Sono tutti benvenuti allo stesso modo.</b><br>
         <b>Sii tollerante con chi sbaglia o è meno bravo:</b> nessuno va rimproverato, deriso o umiliato per come gioca.
         Se un compagno o un tavolo non ti piace, <b>sei libero di cambiare tavolo</b>, senza insultare nessuno. È un gioco, e deve restare un piacere per tutti.</div>
-      <a href="#" id="full_rules" class="piccolo">Leggi il regolamento completo</a>
+      <a href="#" id="full_rules" class="small">Leggi il regolamento completo</a>
       <div class="content" id="content"><?php echo isc_h($rules); ?></div>
       <label class="cbox"><input type="checkbox" name="rules" value="1"<?php echo (!empty($_POST['rules']) ? ' checked' : ''); ?> required> Ho letto e accetto il regolamento</label>
     </div>
-    <button type="submit" class="blu" id="create">Crea il mio account</button>
+    <button type="submit" class="action" id="create">Crea il mio account</button>
   </form>
-  <a class="dopo" href="index.php">Torna all'ingresso</a>
+  <a class="back_link" href="index.php">Torna all'ingresso</a>
   <script>
   (function () {
     var nickname_timer = null;
@@ -464,8 +445,8 @@ function main()
         var suggestion;
 
         box.innerHTML = '';
-        line.className = (result.stato === 'ok' ? 'yes' : 'no');
-        line.textContent = (result.stato === 'ok' ? '✅ ' : '❌ ') + result.msg;
+        line.className = (result.state === 'ok' ? 'yes' : 'no');
+        line.textContent = (result.state === 'ok' ? '✅ ' : '❌ ') + result.msg;
         box.appendChild(line);
         if (result.sug) {
             suggestion = document.createElement('span');
@@ -514,10 +495,10 @@ function main()
         else if (length < 6)
             $('epasswd').innerHTML = '<span class="no">❌ Ancora ' + (6 - length) + ' caratteri</span>';
         else
-            $('epasswd').innerHTML = '<span class="yes">✅ Va bene</span> <span class="piccolo">Scrivila anche su un foglio.</span>';
+            $('epasswd').innerHTML = '<span class="yes">✅ Va bene</span> <span class="small">Scrivila anche su un foglio.</span>';
     });
 
-    $('occhio').onclick = function () {
+    $('show_passwd').onclick = function () {
         var show = ($('passwd').type === 'password');
 
         $('passwd').type = (show ? 'text' : 'password');
@@ -569,7 +550,7 @@ function main()
         line.textContent = 'Gli altri giocatori ti vedranno come: ';
         name.textContent = $('nicktmp_animal').value + $('nicktmp_adjective').value + '*';
         line.appendChild(name);
-        warning.className = 'avviso';
+        warning.className = 'notice';
         enter.textContent = 'Per entrare';
         warning.appendChild(enter);
         warning.appendChild(document.createTextNode(' userai sempre ' + (nickname ? 'il nickname ' : 'il tuo nickname')));
