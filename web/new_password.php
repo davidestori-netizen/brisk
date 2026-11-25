@@ -102,12 +102,8 @@ function main()
         $passwd2 = (isset($_POST['passwd2']) ? trim((string)$_POST['passwd2']) : "");
         if (!isc_origin_ok())
             $error = "Richiesta non valida. Riapri il link dell'email.";
-        else if (strlen($passwd1) < 4)
-            $error = "La password deve avere almeno 4 caratteri.";
-        else if (strlen($passwd1) > 40)
-            $error = "La password è troppo lunga (massimo 40 caratteri).";
-        else if ($passwd1 !== $passwd2)
-            $error = "Le due password non sono uguali. Riscrivile.";
+        else if (($passwd_error = isc_passwd_check($passwd1, $passwd2, $login)) != "")
+            $error = $passwd_error;
         else {
             $ok = FALSE;
             $bdb->transaction('BEGIN');
@@ -161,17 +157,17 @@ function main()
   <a class="btn blu" href="forgotten_password.php">Chiedi un nuovo link</a>
 <?php } else { ?>
   <h1>Scegli la nuova password</h1>
-  <p>Scegli una password che ricordi facilmente.</p>
+  <p>Scegli una password che ricordi facilmente: almeno 6 caratteri, senza spazi.</p>
   <?php if ($error != "") { ?><div class="err"><?php echo isc_h($error); ?></div><?php } ?>
   <form method="post" action="new_password.php" autocomplete="on">
     <input type="hidden" name="secret" value="<?php echo isc_h($secret); ?>">
     <label for="u">Il tuo nome</label>
     <input id="u" name="username" autocomplete="username" value="<?php echo isc_h($login); ?>" readonly>
     <label for="passwd1">Nuova password</label>
-    <div class="riga"><input id="passwd1" name="passwd1" type="password" autocomplete="new-password" maxlength="40" required>
+    <div class="riga"><input id="passwd1" name="passwd1" type="password" autocomplete="new-password" maxlength="30" required>
     <button type="button" class="occhio" onclick="show()">Mostra</button></div>
     <label for="passwd2">Ripeti la password</label>
-    <input id="passwd2" name="passwd2" type="password" autocomplete="new-password" maxlength="40" required>
+    <input id="passwd2" name="passwd2" type="password" autocomplete="new-password" maxlength="30" required>
     <label style="display:flex;align-items:center;gap:10px;margin:12px 0;font-size:20px;font-weight:normal"><input type="checkbox" name="mail_passwd" value="1" style="width:24px;height:24px;margin:0"<?php echo (!empty($_POST['mail_passwd']) ? ' checked' : ''); ?>> Ricevi la password anche via email</label>
     <div style="margin:14px 0;padding:12px 14px;background:#fff6c8;border:1px solid #e0c34a;border-radius:8px;font-size:20px;line-height:1.5">Quando premi <b>Salva</b>, il browser pu&ograve; chiederti <b>&laquo;Vuoi salvare la password?&raquo;</b>: clicca <b>Salva</b>, cos&igrave; le prossime volte entri da solo.</div>
     <button type="submit" class="blu">Salva la password</button>

@@ -132,6 +132,21 @@ function isc_origin_ok()
     return (strcasecmp($host, preg_replace('/:[0-9]+$/', '', (string)$_SERVER['HTTP_HOST'])) == 0);
 }
 
+/* the rules of a new password, the same in signup.php and new_password.php:
+   the error for the player, "" when the password is good */
+function isc_passwd_check($passwd, $passwd2, $nick)
+{
+    if (strlen($passwd) < 6)
+        return "La password deve avere almeno 6 caratteri.";
+    if (strlen($passwd) > 30 || preg_match('/\s/', $passwd))
+        return "La password può avere al massimo 30 caratteri, senza spazi.";
+    if (strcasecmp($passwd, $nick) == 0)
+        return "La password non può essere uguale al nickname.";
+    if ($passwd2 !== $passwd)
+        return "Le due password non sono uguali: riscrivile.";
+    return "";
+}
+
 /* signups never confirmed: after 48 hours account and mail go away, so nickname and e-mail are free again */
 function isc_clean_expired($bdb)
 {

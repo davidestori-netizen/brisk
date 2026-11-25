@@ -166,14 +166,8 @@ function main()
             $error = "La pagina è scaduta. Riprova.";
         else if ($result[0] != 'ok')
             $error = $result[1] . ($result[2] != "" ? " Prova: " . $result[2] : "");
-        else if (strlen($passwd) < 6)
-            $error = "La password deve avere almeno 6 caratteri.";
-        else if (strlen($passwd) > 30 || preg_match('/\s/', $passwd))
-            $error = "La password può avere al massimo 30 caratteri, senza spazi.";
-        else if (strcasecmp($passwd, $nickname) == 0)
-            $error = "La password non può essere uguale al nickname.";
-        else if ($passwd2 !== $passwd)
-            $error = "Le due password non sono uguali: riscrivile.";
+        else if (($passwd_error = isc_passwd_check($passwd, $passwd2, $nickname)) != "")
+            $error = $passwd_error;
         else if (isc_mail_suggest($mail) != "")
             $error = "Controlla l'email: forse intendevi " . isc_mail_suggest($mail) . " ?";
         else if (!isc_mail_ok($mail))
