@@ -134,7 +134,7 @@ function main()
         }
     }
 ?><!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="it"><head><link rel="shortcut icon" href="img/brisk_ico.png"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Password dimenticata</title><?php isc_style(); ?></head><body><div class="box">
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
 <?php if ($result == 'inviata' || $result == 'gia') { ?>
@@ -162,7 +162,7 @@ function main()
   <p>Scrivi il tuo <b>nome nel gioco</b> oppure la tua <b>email</b>: ti mandiamo un link per sceglierne una nuova.</p>
   <?php if ($error != "") { ?><div class="err"><?php echo isc_h($error); ?></div><?php } ?>
   <form method="post" action="forgotten_password.php">
-    <label for="who">Nome nel gioco o email</label>
+    <label for="who">Nickname o email</label>
     <input id="who" name="who" autocomplete="username" maxlength="120" value="<?php echo isc_h($who); ?>" required>
     <button type="submit" class="blu">Mandami il link</button>
   </form>

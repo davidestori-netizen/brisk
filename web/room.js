@@ -490,7 +490,7 @@ function j_tab_act_cont(idx, act)
     }
     else if (act == 'sitappr') {
         // MLANG 1
-        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okappr.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "reserved table for authenticated and apprentice users only" : "tavolo riservato agli utenti registrati e agli apprendisti")+'" alt="'+(g_lang == 'en' ? "reserved table for authenticated and apprentice users only" : "tavolo riservato agli utenti registrati e agli apprendisti")+'">';
+        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okappr.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "table reserved to the players with a Brisk account" : "Tavolo riservato ai giocatori con un account Brisk.")+'" alt="'+(g_lang == 'en' ? "table reserved to the players with a Brisk account" : "Tavolo riservato ai giocatori con un account Brisk.")+'">';
     }
     else if (act == 'sitreser') {
         // MLANG 1
@@ -896,7 +896,7 @@ sideslide.prototype = {
             'Benvenuto, ' + (nick_req ? nick_req : nick) + '! &#127183;</div>' +
             '<div style="margin:0 0 12px;text-align:left">Il tuo account &egrave; pronto: <b>puoi giocare subito</b>.<br><br>' +
             'Per ora nel gioco ti vedi, e ti vedono gli altri, con il nome provvisorio <b>' + nick + '</b> (con il piccolo asterisco <span style="color:#888">&#10033;</span>).<br><br>' +
-            'Quando i moderatori approvano il nome che hai scelto ti arriva un\'email, e da l&igrave; tutti ti vedono con quello.<br><br>' +
+            'Quando i moderatori approvano il nome che hai scelto ti arriva un\'email, e da l&igrave; tutti ti vedranno con quello.<br><br>' +
             'Per entrare usi sempre <b>il nome che hai scelto</b> e la tua password: li trovi nell\'<b>email</b>, <b>conservala</b>.</div>' +
             '<input type="button" class="button" value="Iniziamo!" style="font-size:18px;padding:8px 18px;margin:8px 4px">';
         velo.appendChild(box); document.body.appendChild(velo);

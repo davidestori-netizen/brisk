@@ -1,4 +1,6 @@
 <?php
+/* the page carries a code valid for a short time: never from the cache */
+header('Cache-Control: no-store, max-age=0');
 /*
  *  brisk - nickreq.php
  *
@@ -43,35 +45,60 @@ require_once($G_base."Obj/signup.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
-function nickreq_page($msg, $is_error)
+function nickreq_page($msg, $is_error, $new_nick, $nick_tmp)
 {
+    /* the link of the e-mail of the refusal brings the nickname (?n=): it
+       is written and locked, the player writes only the password and the
+       new nickname; without it the page asks to open the link */
+    GLOBAL $G_admin_mail;
+
+    $login = (isset($_POST['f_login']) ? (string)$_POST['f_login'] : (isset($_GET['n']) ? (string)$_GET['n'] : ""));
+
     header('Content-Type: text/html; charset=UTF-8');
 ?><!doctype html>
 <html lang="it">
-<head>
+<head><link rel="shortcut icon" href="img/brisk_ico.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Brisk: proponi un nickname</title>
+<title>Brisk: scegli un altro nickname</title>
 <?php isc_style(); ?>
 </head>
 <body>
 <div class="box">
   <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
-  <h1>Proponi un nickname</h1>
+<?php if ($new_nick != "") { ?>
+  <h1>Richiesta inviata</h1>
+  <div class="ok"><?php echo $msg; ?></div>
+  <div class="entra">
+    <b>Per entrare</b> userai sempre il nickname <b><?php echo eschtml($new_nick); ?></b> e la tua password.
+  </div>
+<?php if ($nick_tmp != "") { ?>
+  <p class="piccolo">Gli altri giocatori, per ora, continuano a vederti come <span class="nicktmp"><?php echo eschtml($nick_tmp); ?>*</span>.
+     Quando <?php echo eschtml($new_nick); ?> sarà approvato, ti vedranno come <?php echo eschtml($new_nick); ?> e riceverai un'email.</p>
+<?php } ?>
+  <a class="btn blu" href="index.php?n=<?php echo rawurlencode($new_nick); ?>">Entra a giocare</a>
+<?php } else { ?>
+  <h1>Il tuo nickname è stato rifiutato</h1>
 <?php if ($msg != "") { ?>
   <div class="<?php echo ($is_error ? 'err' : 'ok'); ?>"><?php echo $msg; ?></div>
 <?php } ?>
-  <p>Da subito entri con il nome nuovo. Finché non viene approvato, nel gioco ti vedono con quello provvisorio (con l'asterisco).</p>
+  <p>I moderatori non hanno approvato il nickname che avevi scelto. Proponine un altro: da subito entrerai con quello nuovo, e i moderatori lo controlleranno.
+     Gli altri giocatori, per ora, continueranno a vederti con il nome con l'asterisco.</p>
+<?php if ($login == "") { ?>
+  <div class="err">Apri il link che trovi nella mail del rifiuto. Se non la trovi, scrivi a <?php echo eschtml($G_admin_mail); ?>.</div>
+<?php } else { ?>
   <form method="POST" action="nickreq.php" accept-charset="utf-8">
-    <label for="f_login">Nome con cui entri</label>
-    <input id="f_login" name="f_login" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false">
-    <label for="f_pass">Password</label>
+    <label for="f_login">Il tuo nickname attuale (quello rifiutato)</label>
+    <input id="f_login" name="f_login" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false" value="<?php echo eschtml($login); ?>" readonly>
+    <label for="f_pass">La tua password attuale (quella con cui entri)</label>
     <input id="f_pass" name="f_pass" type="password" maxlength="64">
-    <label for="f_nick">Nickname che vorresti</label>
+    <label for="f_nick">Proponi un nuovo nickname</label>
     <input id="f_nick" name="f_nick" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false">
     <button type="submit" class="blu">Invia</button>
   </form>
+<?php } ?>
   <a class="dopo" href="index.php">Torna all'ingresso</a>
+<?php } ?>
 </div>
 </body>
 </html>
@@ -82,6 +109,8 @@ function main()
 {
     $msg = "";
     $is_error = TRUE;
+    $new_nick = "";
+    $nick_tmp = "";
 
     do {
         if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] != 'POST')
@@ -115,11 +144,13 @@ function main()
             break;
         }
 
-        $msg = sprintf("Richiesta inviata: da adesso entri con '%s'. Il nome verrà controllato al più presto.", eschtml($nick));
+        $msg = sprintf("Da adesso entri con <b>%s</b>. I moderatori controlleranno il nickname al più presto.", eschtml($nick));
         $is_error = FALSE;
+        $new_nick = $nick;
+        $nick_tmp = (isset($usr->nick_tmp) && $usr->nick_tmp !== NULL ? (string)$usr->nick_tmp : "");
     } while (FALSE);
 
-    nickreq_page($msg, $is_error);
+    nickreq_page($msg, $is_error, $new_nick, $nick_tmp);
 }
 
 main();
