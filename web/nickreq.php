@@ -69,14 +69,14 @@ function nickreq_page($msg, $is_error, $new_nick, $nick_tmp)
 <?php if ($new_nick != "") { ?>
   <h1>Richiesta inviata</h1>
   <div class="ok"><?php echo $msg; ?></div>
-  <div class="entra">
+  <div class="enter_box">
     <b>Per entrare</b> userai sempre il nickname <b><?php echo eschtml($new_nick); ?></b> e la tua password.
   </div>
 <?php if ($nick_tmp != "") { ?>
-  <p class="piccolo">Gli altri giocatori, per ora, continuano a vederti come <span class="nicktmp"><?php echo eschtml($nick_tmp); ?>*</span>.
+  <p class="small">Gli altri giocatori, per ora, continuano a vederti come <span class="tmp_name"><?php echo eschtml($nick_tmp); ?>*</span>.
      Quando <?php echo eschtml($new_nick); ?> sarà approvato, ti vedranno come <?php echo eschtml($new_nick); ?> e riceverai un'email.</p>
 <?php } ?>
-  <a class="btn blu" href="index.php?n=<?php echo rawurlencode($new_nick); ?>">Entra a giocare</a>
+  <a class="btn action" href="index.php?n=<?php echo rawurlencode($new_nick); ?>">Entra a giocare</a>
 <?php } else { ?>
   <h1>Il tuo nickname è stato rifiutato</h1>
 <?php if ($msg != "") { ?>
@@ -94,10 +94,10 @@ function nickreq_page($msg, $is_error, $new_nick, $nick_tmp)
     <input id="f_pass" autocomplete="current-password" name="f_pass" type="password" maxlength="64">
     <label for="f_nick">Proponi un nuovo nickname</label>
     <input id="f_nick" autocomplete="off" name="f_nick" type="text" maxlength="12" autocapitalize="none" autocorrect="off" spellcheck="false">
-    <button type="submit" class="blu">Invia</button>
+    <button type="submit" class="action">Invia</button>
   </form>
 <?php } ?>
-  <a class="dopo" href="index.php">Torna all'ingresso</a>
+  <a class="back_link" href="index.php">Torna all'ingresso</a>
 <?php } ?>
 </div>
 </body>
@@ -133,9 +133,9 @@ function main()
         }
 
         /* the same rules of the signup page (signup.php) */
-        $esito = isc_nick_check($bdb, $nick);
-        if ($esito[0] != 'ok') {
-            $msg = eschtml($esito[1] . ($esito[2] != "" ? " Prova: " . $esito[2] : ""));
+        $check = isc_nick_check($bdb, $nick);
+        if ($check[0] != 'ok') {
+            $msg = eschtml($check[1] . ($check[2] != "" ? " Prova: " . $check[2] : ""));
             break;
         }
 
@@ -147,7 +147,7 @@ function main()
         $msg = sprintf("Da adesso entri con <b>%s</b>. I moderatori controlleranno il nickname al più presto.", eschtml($nick));
         $is_error = FALSE;
         $new_nick = $nick;
-        $nick_tmp = (isset($usr->nick_tmp) && $usr->nick_tmp !== NULL ? (string)$usr->nick_tmp : "");
+        $nick_tmp = (string)$usr->nick_tmp;
     } while (FALSE);
 
     nickreq_page($msg, $is_error, $new_nick, $nick_tmp);

@@ -56,53 +56,53 @@ function isc_nick_shape($n)
 /* clearly offensive words, anywhere in the nickname (digits read as letters, doubles removed) */
 function isc_nick_forbidden($n)
 {
-    $s = strtr(isc_no_accents($n), array('0' => 'o', '1' => 'i', '3' => 'e', '4' => 'a', '5' => 's',
+    $plain = strtr(isc_no_accents($n), array('0' => 'o', '1' => 'i', '3' => 'e', '4' => 'a', '5' => 's',
                                          '7' => 't', '8' => 'b', '9' => 'g'));
-    $s2 = preg_replace('/(.)\1+/', '$1', $s);
-    $v = array('cazz', 'merd', 'troia', 'puttan', 'stronz', 'vaffa', 'fanculo', 'minchi', 'coglion', 'diocan',
+    $single = preg_replace('/(.)\1+/', '$1', $plain);
+    $words = array('cazz', 'merd', 'troia', 'puttan', 'stronz', 'vaffa', 'fanculo', 'minchi', 'coglion', 'diocan',
                'dioporc', 'porcodio', 'porcamadonn', 'madonnaputt', 'froci', 'ricchion', 'hitler', 'mussolin',
                'porno', 'fuck', 'shit', 'bitch', 'suca', 'bocchin', 'pompin', 'zoccol', 'mignott', 'inculo',
                'admin', 'amministra', 'staff', 'moderat', 'briskserv', 'nickserv', 'assistenza');
-    foreach ($v as $p) {
-        if (strpos($s, $p) !== FALSE || strpos($s2, $p) !== FALSE)
+    foreach ($words as $word) {
+        if (strpos($plain, $word) !== FALSE || strpos($single, $word) !== FALSE)
             return TRUE;
     }
     return FALSE;
 }
 
 /* nickname check: array(state 'ok'|'no', message, suggestion) */
-function isc_nick_check($bdb, $n)
+function isc_nick_check($bdb, $nick)
 {
-    $n = trim((string)$n);
-    if ($n == "")
+    $nick = trim((string)$nick);
+    if ($nick == "")
         return array('no', "Scrivi il nome che vuoi usare.", "");
-    if (mb_strlen($n, 'UTF-8') < 2)
+    if (mb_strlen($nick, 'UTF-8') < 2)
         return array('no', "Il nome deve avere almeno 2 caratteri.", "");
-    if (mb_strlen($n, 'UTF-8') > 12)
+    if (mb_strlen($nick, 'UTF-8') > 12)
         return array('no', "Il nome può avere al massimo 12 caratteri.", "");
-    if (!preg_match('/^[A-Za-z0-9' . ISC_ACCENTS . ']+$/uD', $n))
+    if (!preg_match('/^[A-Za-z0-9' . ISC_ACCENTS . ']+$/uD', $nick))
         return array('no', "Usa solo lettere (anche accentate, come ò) e numeri, senza spazi o simboli.", "");
-    if (isc_nick_forbidden($n))
+    if (isc_nick_forbidden($nick))
         return array('no', "Questo nome non è permesso. Scegline un altro.", "");
-    if ($bdb->nick_is_free($n) == FALSE) {
-        $sug = "";
-        for ($i = 1 ; $i < 100 && $sug == "" ; $i++) {
-            $p = mb_substr(isc_lower($n), 0, 12 - strlen((string)$i), 'UTF-8') . $i;
-            if (isc_nick_shape($p) && $bdb->nick_is_free($p))
-                $sug = $p;
+    if ($bdb->nick_is_free($nick) == FALSE) {
+        $suggestion = "";
+        for ($i = 1 ; $i < 100 && $suggestion == "" ; $i++) {
+            $candidate = mb_substr(isc_lower($nick), 0, 12 - strlen((string)$i), 'UTF-8') . $i;
+            if (isc_nick_shape($candidate) && $bdb->nick_is_free($candidate))
+                $suggestion = $candidate;
         }
-        return array('no', "Questo nome è già usato da un altro giocatore.", $sug);
+        return array('no', "Questo nome è già usato da un altro giocatore.", $suggestion);
     }
     return array('ok', "Nome libero", "");
 }
 
 /* common typing errors in the e-mail domain */
-function isc_mail_suggest($e)
+function isc_mail_suggest($mail)
 {
-    $e = strtolower(trim((string)$e));
-    if (($at = strrpos($e, '@')) === FALSE)
+    $mail = strtolower(trim((string)$mail));
+    if (($at_pos = strrpos($mail, '@')) === FALSE)
         return "";
-    $d = substr($e, $at + 1);
+    $domain = substr($mail, $at_pos + 1);
     $right = array('gmial.com' => 'gmail.com', 'gmai.com' => 'gmail.com', 'gamil.com' => 'gmail.com',
                    'gmil.com' => 'gmail.com', 'gnail.com' => 'gmail.com', 'gmail.it' => 'gmail.com',
                    'gmail.con' => 'gmail.com', 'hotmial.com' => 'hotmail.com', 'hotmal.it' => 'hotmail.it',
@@ -110,12 +110,41 @@ function isc_mail_suggest($e)
                    'yaho.it' => 'yahoo.it', 'yahho.it' => 'yahoo.it', 'tiscalli.it' => 'tiscali.it',
                    'alcie.it' => 'alice.it', 'virgillio.it' => 'virgilio.it', 'outlok.it' => 'outlook.it',
                    'outlook.con' => 'outlook.com');
-    return (isset($right[$d]) ? substr($e, 0, $at + 1) . $right[$d] : "");
+    return (isset($right[$domain]) ? substr($mail, 0, $at_pos + 1) . $right[$domain] : "");
 }
 
 function isc_mail_ok($e)
 {
     return (filter_var((string)$e, FILTER_VALIDATE_EMAIL) !== FALSE && strlen((string)$e) <= 120);
+}
+
+/* the forms of these pages are accepted only from the pages of the site:
+   when the browser says where the request comes from (Origin), its host must
+   be the one of the site. Only the hosts are compared: HTTP_HOST has the port
+   when it is not the usual one (like :10443), or not, behind a proxy */
+function isc_origin_ok()
+{
+    if (!isset($_SERVER['HTTP_ORIGIN']))
+        return TRUE;
+    $host = parse_url((string)$_SERVER['HTTP_ORIGIN'], PHP_URL_HOST);
+    if ($host === NULL || $host === FALSE || $host == "")
+        return TRUE;
+    return (strcasecmp($host, preg_replace('/:[0-9]+$/', '', (string)$_SERVER['HTTP_HOST'])) == 0);
+}
+
+/* the rules of a new password, the same in signup.php and new_password.php:
+   the error for the player, "" when the password is good */
+function isc_passwd_check($passwd, $passwd2, $nick)
+{
+    if (strlen($passwd) < 6)
+        return "La password deve avere almeno 6 caratteri.";
+    if (strlen($passwd) > 30 || preg_match('/\s/', $passwd))
+        return "La password può avere al massimo 30 caratteri, senza spazi.";
+    if (strcasecmp($passwd, $nick) == 0)
+        return "La password non può essere uguale al nickname.";
+    if ($passwd2 !== $passwd)
+        return "Le due password non sono uguali: riscrivile.";
+    return "";
 }
 
 /* signups never confirmed: after 48 hours account and mail go away, so nickname and e-mail are free again */
@@ -191,7 +220,7 @@ label {
     font-weight: bold;
     margin: 14px 0 5px;
 }
-.riga {
+.row {
     display: flex;
     gap: 8px;
 }
@@ -229,19 +258,19 @@ button:hover,.btn:hover {
 button:active,.btn:active {
     background-color: #ffff99;
 }
-.blu {
+.action {
     width: 100%;
     margin-top: 18px;
     font-weight: bold;
 }
-.occhio {
+.show_btn {
     white-space: nowrap;
 }
-.piccolo {
+.small {
     font-size: 15px;
     color: #555;
 }
-.entra {
+.enter_box {
     border: 2px solid #2e7d32;
     border-radius: 8px;
     background: #eef7ee;
@@ -249,11 +278,11 @@ button:active,.btn:active {
     margin: 14px 0;
     font-size: 20px;
 }
-.nicktmp {
+.tmp_name {
     background: #ffe9b3;
     padding: 0 4px 0 2px;
 }
-.avviso {
+.notice {
     margin-top: 8px;
     padding: 8px 10px;
     border: 2px solid #2e7d32;
@@ -276,18 +305,26 @@ button:active,.btn:active {
     padding: 9px 12px;
     margin: 10px 0;
 }
-.passwd {
-    font-size: 28px;
+.cbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
     font-weight: bold;
-    background: #eaf6fc;
-    border: 1px solid #9ac4db;
-    border-radius: 7px;
-    padding: 12px;
-    text-align: center;
-    word-break: break-all;
-    margin: 12px 0;
+    margin-top: 10px;
 }
-.dopo {
+.cbox input {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    margin: 0;
+}
+body.big {
+    font-size: 20px;
+}
+body.big h1 {
+    font-size: 25px;
+}
+.back_link {
     display: block;
     margin: 14px auto 0;
     color: #555;
@@ -306,31 +343,23 @@ function isc_page_activated($nick, $nick_tmp = NULL)
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Attiva il tuo account</title>
 <?php isc_style(); ?>
-<style>
-body {
-    font-size: 20px;
-}
-h1 {
-    font-size: 25px;
-}
-</style>
 </head>
-<body>
+<body class="big">
 <div class="box">
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
   <h1>Account attivato! &#127881;</h1>
   <div class="ok" style="text-align:center;font-size:21px">Benvenuto <b><?php echo isc_h($nick); ?></b>, ora puoi giocare.</div>
-  <div class="entra">
+  <div class="enter_box">
     <b>Per entrare scrivi sempre:</b><br>
     Nickname: <b><?php echo isc_h($nick); ?></b><br>
     Password: quella che hai scelto
   </div>
 <?php if ($nick_tmp !== NULL && $nick_tmp != "") { ?>
-  <p class="piccolo">Gli altri giocatori, per ora, ti vedranno come <span class="nicktmp"><?php echo isc_h($nick_tmp); ?>*</span>.
+  <p class="small">Gli altri giocatori, per ora, ti vedranno come <span class="tmp_name"><?php echo isc_h($nick_tmp); ?>*</span>.
      Quando il tuo nickname sarà approvato, ti vedranno come <?php echo isc_h($nick); ?> e riceverai un'email.</p>
 <?php } ?>
   <p>Quando il browser chiede <b>«Vuoi salvare la password?»</b> clicca <b>Salva</b>: la prossima volta entri da solo.</p>
-  <a class="btn blu" href="index.php?n=<?php echo rawurlencode($nick); ?>">Entra a giocare</a>
+  <a class="btn action" href="index.php?n=<?php echo rawurlencode($nick); ?>">Entra a giocare</a>
 </div></body></html>
 <?php
 }
@@ -343,23 +372,15 @@ function isc_page_link_not_valid()
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Attiva il tuo account</title>
 <?php isc_style(); ?>
-<style>
-body {
-    font-size: 20px;
-}
-h1 {
-    font-size: 25px;
-}
-</style>
 </head>
-<body>
+<body class="big">
 <div class="box">
 <div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
   <h1>Link già usato o non valido</h1>
   <p>Forse avevi già attivato il tuo account: in quel caso entra pure con il tuo nickname e la tua password.</p>
   <p>Il link vale 48 ore: se è passato, rifai l'iscrizione.</p>
-  <a class="btn blu" href="index.php">Vai a giocare</a>
-  <a class="btn blu" href="signup.php">Crea il tuo account</a>
+  <a class="btn action" href="index.php">Vai a giocare</a>
+  <a class="btn action" href="signup.php">Crea il tuo account</a>
 </div></body></html>
 <?php
 }
