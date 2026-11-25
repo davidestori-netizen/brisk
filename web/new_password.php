@@ -86,6 +86,7 @@ function main()
     $login = FALSE;
     $error = "";
     $done = FALSE;
+    $passwd_mailed = FALSE;
     $ip = (isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : "");
 
     if ($bdb != FALSE && preg_match('/^[0-9a-f]{48}$/D', $secret)) {
@@ -133,8 +134,9 @@ function main()
                 $done = TRUE;
                 $m_pg = $bdb->query(sprintf("SELECT email FROM %susers WHERE login = '%s';", $G_dbpfx, escsql($login)));
                 if ($m_pg != FALSE && pg_num_rows($m_pg) == 1)
-                    @passwd_notice(pg_fetch_object($m_pg, 0)->email, $login,
-                                   (empty($_POST['mail_passwd']) ? NULL : $passwd1));
+                    $passwd_mailed = (@passwd_notice(pg_fetch_object($m_pg, 0)->email, $login,
+                                                      (empty($_POST['mail_passwd']) ? NULL : $passwd1))
+                                      && !empty($_POST['mail_passwd']));
             }
             else {
                 $bdb->transaction('ROLLBACK');
@@ -149,7 +151,7 @@ function main()
 <?php if ($done) { ?>
   <h1>Fatto!</h1>
   <p>La password di <b><?php echo isc_h($login); ?></b> &egrave; stata cambiata.</p>
-  <p>Ora entra con il tuo nome e la nuova password. Segnatela su un foglietto: per sicurezza non la mostriamo e non la mandiamo per email.</p>
+  <p>Ora entra con il tuo nome e la nuova password. <?php echo ($passwd_mailed ? "Te l'abbiamo mandata anche per email, come hai chiesto." : "Segnatela su un foglietto: per sicurezza non la mostriamo."); ?></p>
   <a class="btn blu" href="index.php?n=<?php echo rawurlencode($login); ?>">Entra</a>
 <?php } else if ($login === FALSE) { ?>
   <h1>Link scaduto o gia' usato</h1>
