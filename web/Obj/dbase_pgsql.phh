@@ -517,8 +517,7 @@ class BriskDB
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("INSERT INTO %susers_nicktmp (ucode, nick) VALUES (%d, lower('%s'))
-                                 ON CONFLICT (ucode) DO UPDATE SET nick = EXCLUDED.nick, ctime = now();",
+        $user_sql = sprintf("INSERT INTO %susers_nicktmp (ucode, nick) VALUES (%d, lower('%s'));",
                             $G_dbpfx, $code, escsql($nick));
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
@@ -530,7 +529,8 @@ class BriskDB
 
     /* a new login for the account $code, that still plays with the
        temporary nickname: the player asked for another name after a refusal
-       (nickreq.php); fails if the login is taken */
+       (nickreq.php, that checks the temporary nickname before); fails if
+       the login is taken */
     function user_login_change($code, $login)
     {
         GLOBAL $G_dbpfx;
@@ -538,9 +538,9 @@ class BriskDB
         /* a new nickname after a refusal goes back to be checked */
         $user_sql = sprintf("UPDATE %susers SET login = lower('%s'),
                                      disa_reas = (CASE WHEN disa_reas = %d THEN %d ELSE disa_reas END)
-                                 WHERE code = %d AND EXISTS (SELECT 1 FROM %susers_nicktmp WHERE ucode = %d);",
+                                 WHERE code = %d;",
                             $G_dbpfx, escsql($login), USER_DIS_REA_NU_NICKREF, USER_DIS_REA_NU_TOBECHK,
-                            $code, $G_dbpfx, $code);
+                            $code);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
