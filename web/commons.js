@@ -1164,7 +1164,7 @@ function user_decorator(user, is_real)
     }
 
     /* USER_FLAG_TY_NICKTMP (0x1000000): temporary nickname, the requested one is not checked yet */
-    var nick = user[1] + ((user[0] & 0x1000000) ? '<span style="color:#888;font-size:75%;margin-left:2px;vertical-align:super;font-style:normal">&#10033;</span>' : "");
+    var nick = user[1] + ((user[0] & 0x1000000) ? '<span class="nicktmp">&#10033;</span>' : "");
 
     if (flags != 0) {
         name = "<span class='" + cl + "'><span class='" +

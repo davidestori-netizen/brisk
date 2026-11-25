@@ -7,8 +7,7 @@
 --  the row; the row goes away with its account too (ON DELETE CASCADE).
 --
 --  USER_FLAG_TY_NICKTMP (0x1000000) is not stored in users.type: the code
---  sets it when it reads an account that has a row here
---  (BriskDB::nicktmp_fix()).
+--  adds it only to the flags sent to the players (User::flags_client()).
 --
 --  The name the other players see is users_vis.vis_login: the temporary
 --  nickname while there is one, the login otherwise. Everything public

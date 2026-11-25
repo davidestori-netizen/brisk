@@ -338,6 +338,15 @@ span.au3_off span {
     background-color: #ffe9b3;
 }
 
+/* easy signup: the "*" after a temporary nickname */
+span.nicktmp {
+    color: #888;
+    font-size: 75%;
+    margin-left: 2px;
+    vertical-align: super;
+    font-style: normal;
+}
+
 div.bye_msg {
     font-weigth: bold;
 }

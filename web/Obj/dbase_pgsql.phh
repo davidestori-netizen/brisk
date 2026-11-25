@@ -161,20 +161,6 @@ class BriskDB
         return FALSE;
     }
 
-    /* the temporary nickname (USER_FLAG_TY_NICKTMP) is not stored in
-       users.type: an account has it while it has a row in users_nicktmp,
-       that the view users_vis reads as nick_tmp (and vis_login, the name
-       the others see). Set (or cleared) here in the record read, so that
-       the rest of the code and the players see it */
-    static function nicktmp_fix($user_obj)
-    {
-        if ($user_obj == FALSE)
-            return ($user_obj);
-        $user_obj->type = ((int)$user_obj->type & ~USER_FLAG_TY_NICKTMP)
-            | (isset($user_obj->nick_tmp) && $user_obj->nick_tmp !== NULL ? USER_FLAG_TY_NICKTMP : 0);
-        return ($user_obj);
-    }
-
     function getrecord_bylogin($login) {
         GLOBAL $G_dbpfx;
 
@@ -187,7 +173,7 @@ class BriskDB
         if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
-        return (self::nicktmp_fix(pg_fetch_object($user_pg, 0)));
+        return (pg_fetch_object($user_pg, 0));
     }
 
     /* the account the others see as $name (vis_login: the temporary
@@ -206,7 +192,7 @@ class BriskDB
         if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
-        return (self::nicktmp_fix(pg_fetch_object($user_pg, 0)));
+        return (pg_fetch_object($user_pg, 0));
     }
 
     function user_add($login, $pass, $email, $type, $disa_reas, $guar_code) {
@@ -339,7 +325,7 @@ class BriskDB
         if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
-        return (self::nicktmp_fix(pg_fetch_object($user_pg, 0)));
+        return (pg_fetch_object($user_pg, 0));
     }
 
     function user_update_login_time($code, $lintm)
