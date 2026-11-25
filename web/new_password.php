@@ -50,7 +50,8 @@ header('Cache-Control: no-store, max-age=0');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
 
-/* e-mail after the change, with name and password (for the older players) */
+/* e-mail after the change; name and password only when the player ticked
+   "mail_passwd" ($pass != NULL), otherwise only the notice of the change */
 function passwd_notice($mail, $nick, $pass)
 {
     GLOBAL $G_proto, $G_domain, $G_webbase;
@@ -60,15 +61,16 @@ function passwd_notice($mail, $nick, $pass)
     $when = date('d/m/Y') . ' alle ' . date('H:i');
     $site = sprintf("%s://%s/%s/", $G_proto, $G_domain, $G_webbase);
     $text = "Ciao " . $nick . ",\n\nla password del tuo account " . $nick . " è stata cambiata il " . $when . ".\n"
-        . "\nNome utente: " . $nick . "\nPassword: " . $pass . "\n"
-        . "Conserva questa email: ti ricorda la tua password.\n"
+        . ($pass === NULL ? "" : "\nNome utente: " . $nick . "\nPassword: " . $pass . "\n"
+           . "Conserva questa email: ti ricorda la tua password.\n")
         . "\nSe sei stato tu, va tutto bene.\nSe NON sei stato tu, rispondi subito a questa email.\n\n" . $site . "\n";
     /* NOTE: brisk_mail() builds the text version from the html (msgHTML), so the html
        uses <br> between the lines and shows the address of the link in full */
     $html = 'Ciao <b>' . isc_h($nick) . '</b>,<br><br>la password del tuo account <b>' . isc_h($nick) . '</b> è stata cambiata il ' . $when . '.<br><br>'
-        . '<div style="font-size:18px;background:#fff6c8;border:1px solid #e0c34a;border-radius:6px;padding:10px 14px">'
-        . 'Nome utente: <b>' . isc_h($nick) . '</b><br>Password: <b>' . isc_h($pass) . '</b></div><br>'
-        . 'Conserva questa email: ti ricorda la tua password.<br><br>'
+        . ($pass === NULL ? '' :
+           '<div style="font-size:18px;background:#fff6c8;border:1px solid #e0c34a;border-radius:6px;padding:10px 14px">'
+           . 'Nome utente: <b>' . isc_h($nick) . '</b><br>Password: <b>' . isc_h($pass) . '</b></div><br>'
+           . 'Conserva questa email: ti ricorda la tua password.<br><br>')
         . 'Se sei stato tu, va tutto bene.<br><b>Se NON sei stato tu, rispondi subito a questa email.</b><br><br>'
         . isc_h($site);
     return (brisk_mail($mail, "Utente Brisk {$nick}", "La password del tuo account Brisk è stata cambiata", $text, isc_mail_lines($html)));
@@ -136,7 +138,8 @@ function main()
                 $done = TRUE;
                 $m_pg = $bdb->query(sprintf("SELECT email FROM %susers WHERE login = '%s';", $G_dbpfx, escsql($login)));
                 if ($m_pg != FALSE && pg_num_rows($m_pg) == 1)
-                    @passwd_notice(pg_fetch_object($m_pg, 0)->email, $login, $passwd1);
+                    @passwd_notice(pg_fetch_object($m_pg, 0)->email, $login,
+                                   (empty($_POST['mail_passwd']) ? NULL : $passwd1));
             }
             else {
                 $bdb->transaction('ROLLBACK');
@@ -171,6 +174,7 @@ function main()
     <button type="button" class="occhio" onclick="show()">Mostra</button></div>
     <label for="passwd2">Ripeti la password</label>
     <input id="passwd2" name="passwd2" type="password" autocomplete="new-password" maxlength="40" required>
+    <label style="display:flex;align-items:center;gap:10px;margin:12px 0;font-size:20px;font-weight:normal"><input type="checkbox" name="mail_passwd" value="1" style="width:24px;height:24px;margin:0"<?php echo (!empty($_POST['mail_passwd']) ? ' checked' : ''); ?>> Ricevi la password anche via email</label>
     <button type="submit" class="blu">Salva la password</button>
   </form>
   <script>
