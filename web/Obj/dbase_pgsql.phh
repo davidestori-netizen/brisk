@@ -151,10 +151,9 @@ class BriskDB
            the others see (users_nicktmp) */
         log_main("login_exists: ".$login);
 
-        $user_sql = sprintf("SELECT code FROM %susers WHERE login = '%s'
-                             UNION ALL
-                             SELECT ucode FROM %susers_nicktmp WHERE lower(nick) = lower('%s');",
-                            $G_dbpfx, escsql($login), $G_dbpfx, escsql($login));
+        $user_sql = sprintf("SELECT code FROM %susers_vis
+                                 WHERE login = '%s' OR lower(nick_tmp) = lower('%s');",
+                            $G_dbpfx, escsql($login), escsql($login));
         if (($user_pg = $this->query($user_sql)) != FALSE)
             if (pg_num_rows($user_pg) >= 1)
                 return TRUE;
@@ -416,12 +415,10 @@ class BriskDB
 
         $plain = strtr(mb_strtolower((string)$nick, 'UTF-8'), array('à' => 'a', 'á' => 'a', 'è' => 'e', 'é' => 'e', 'ì' => 'i',
                                                                     'í' => 'i', 'ò' => 'o', 'ó' => 'o', 'ù' => 'u', 'ú' => 'u'));
-        $nick_sql = sprintf("SELECT code FROM %susers
+        $nick_sql = sprintf("SELECT code FROM %susers_vis
                                  WHERE translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') = '%s'
-                             UNION ALL
-                             SELECT ucode FROM %susers_nicktmp
-                                 WHERE translate(lower(nick), 'àáèéìíòóùú', 'aaeeiioouu') = '%s';",
-                            $G_dbpfx, escsql($plain), $G_dbpfx, escsql($plain));
+                                    OR translate(lower(nick_tmp), 'àáèéìíòóùú', 'aaeeiioouu') = '%s';",
+                            $G_dbpfx, escsql($plain), escsql($plain));
         if (($nick_pg = $this->query($nick_sql)) == FALSE) {
             return FALSE;
         }
@@ -489,17 +486,22 @@ class BriskDB
         foreach (array_keys($candidates) as $nick)
             $quoted[] = "'" . escsql($nick) . "'";
         $list_sql = implode(', ', $quoted);
-        $taken_sql = sprintf("SELECT translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') AS nick FROM %susers
+        /* one row per account: its login and its temporary nickname (NULL when
+           it has none), both without accents; a candidate is taken if it is one
+           of the two */
+        $taken_sql = sprintf("SELECT translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') AS login_plain,
+                                     translate(lower(nick_tmp), 'àáèéìíòóùú', 'aaeeiioouu') AS nick_plain
+                                  FROM %susers_vis
                                   WHERE translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') IN (%s)
-                              UNION
-                              SELECT translate(lower(nick), 'àáèéìíòóùú', 'aaeeiioouu') AS nick FROM %susers_nicktmp
-                                  WHERE translate(lower(nick), 'àáèéìíòóùú', 'aaeeiioouu') IN (%s);",
-                             $G_dbpfx, $list_sql, $G_dbpfx, $list_sql);
+                                     OR translate(lower(nick_tmp), 'àáèéìíòóùú', 'aaeeiioouu') IN (%s);",
+                             $G_dbpfx, $list_sql, $list_sql);
         if (($taken_pg = $this->query($taken_sql)) == FALSE)
             return FALSE;
         for ($row = 0 ; $row < pg_num_rows($taken_pg) ; $row++) {
             $taken = pg_fetch_object($taken_pg, $row);
-            unset($candidates[$taken->nick]);
+            unset($candidates[$taken->login_plain]);
+            if ($taken->nick_plain !== NULL)
+                unset($candidates[$taken->nick_plain]);
         }
         foreach ($candidates as $pair)
             $pairs[$pair[0]][] = $pair[1];
