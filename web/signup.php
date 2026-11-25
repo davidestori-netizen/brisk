@@ -394,7 +394,7 @@ function main()
     <div class="trap" aria-hidden="true"><label>Sito <input name="site" tabindex="-1" autocomplete="off"></label></div>
 
     <label for="nickname">1. Il tuo nickname per entrare e giocare</label>
-    <input id="nickname" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <input id="nickname" autocomplete="off" name="nickname" maxlength="12" value="<?php echo isc_h($nickname); ?>" placeholder="esempio: mario60" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="enickname"><span class="piccolo">Da 2 a 12 lettere o numeri, senza spazi. Finché i moderatori non lo controllano, nel gioco ti vedono con un nome provvisorio.</span></div>
 
     <label for="nicktmp_animal">Finché il tuo nickname non viene approvato, verrai visualizzato con:</label>
@@ -413,16 +413,16 @@ function main()
     <div class="result" id="enicktmp"><span class="piccolo">Se non ti piace, scegli un altro nome o un altro aggettivo.</span></div>
 
     <label for="passwd">2. La tua password</label>
-    <div class="passwd_row"><input id="passwd" name="passwd" type="password" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <div class="passwd_row"><input id="passwd" autocomplete="new-password" name="passwd" type="password" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" required>
       <button type="button" id="occhio">Mostra</button></div>
     <div class="result" id="epasswd"><span class="piccolo">Almeno 6 caratteri. Scrivila anche su un foglio.</span></div>
     <label for="passwd2">Riscrivi la password</label>
-    <input id="passwd2" name="passwd2" type="password" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <input id="passwd2" autocomplete="new-password" name="passwd2" type="password" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="epasswd2"></div>
     <label class="cbox" style="margin-top: 0"><input type="checkbox" name="mail_passwd" value="1"<?php echo (!empty($_POST['mail_passwd']) ? ' checked' : ''); ?>> Ricevi la password anche via email</label>
 
     <label for="mail">3. La tua email</label>
-    <input id="mail" name="mail" type="email" maxlength="120" value="<?php echo isc_h($mail); ?>" placeholder="esempio: mario.rossi@gmail.com" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <input id="mail" autocomplete="email" name="mail" type="email" maxlength="120" value="<?php echo isc_h($mail); ?>" placeholder="esempio: mario.rossi@gmail.com" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     <div class="result" id="email"><span class="piccolo">Deve essere la tua: ti mandiamo il link per <b>attivare l'account</b>.</span></div>
 
     <div class="rules">

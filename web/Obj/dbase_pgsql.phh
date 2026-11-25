@@ -408,17 +408,16 @@ class BriskDB
     }
 
     /* TRUE if nobody uses the nickname as login or as temporary nickname,
-       also apart from the accents (nicolo and nicolò are the same name) */
+       also apart from the accents (nicolo and nicolò are the same name):
+       unaccent() of PostgreSQL, extension made by sql/sql.d/110-unaccent.sql */
     function nick_is_free($nick)
     {
         GLOBAL $G_dbpfx;
 
-        $plain = strtr(mb_strtolower((string)$nick, 'UTF-8'), array('à' => 'a', 'á' => 'a', 'è' => 'e', 'é' => 'e', 'ì' => 'i',
-                                                                    'í' => 'i', 'ò' => 'o', 'ó' => 'o', 'ù' => 'u', 'ú' => 'u'));
         $nick_sql = sprintf("SELECT code FROM %susers_vis
-                                 WHERE translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') = '%s'
-                                    OR translate(lower(nick_tmp), 'àáèéìíòóùú', 'aaeeiioouu') = '%s';",
-                            $G_dbpfx, escsql($plain), escsql($plain));
+                                 WHERE lower(unaccent(login)) = lower(unaccent('%s'))
+                                    OR lower(unaccent(nick_tmp)) = lower(unaccent('%s'));",
+                            $G_dbpfx, escsql((string)$nick), escsql((string)$nick));
         if (($nick_pg = $this->query($nick_sql)) == FALSE) {
             return FALSE;
         }
@@ -489,11 +488,11 @@ class BriskDB
         /* one row per account: its login and its temporary nickname (NULL when
            it has none), both without accents; a candidate is taken if it is one
            of the two */
-        $taken_sql = sprintf("SELECT translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') AS login_plain,
-                                     translate(lower(nick_tmp), 'àáèéìíòóùú', 'aaeeiioouu') AS nick_plain
+        $taken_sql = sprintf("SELECT lower(unaccent(login)) AS login_plain,
+                                     lower(unaccent(nick_tmp)) AS nick_plain
                                   FROM %susers_vis
-                                  WHERE translate(lower(login), 'àáèéìíòóùú', 'aaeeiioouu') IN (%s)
-                                     OR translate(lower(nick_tmp), 'àáèéìíòóùú', 'aaeeiioouu') IN (%s);",
+                                  WHERE lower(unaccent(login)) IN (%s)
+                                     OR lower(unaccent(nick_tmp)) IN (%s);",
                              $G_dbpfx, $list_sql, $list_sql);
         if (($taken_pg = $this->query($taken_sql)) == FALSE)
             return FALSE;
