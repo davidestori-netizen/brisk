@@ -22,7 +22,7 @@
 
 /*
  *  New password from the link of forgotten_password.php (60 minutes, once only).
- *  The old password goes in users_passwd_backup; an e-mail tells the player the change.
+ *  An e-mail tells the player the change.
  */
 
 foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
@@ -87,7 +87,6 @@ function main()
     $error = "";
     $done = FALSE;
     $passwd_mailed = FALSE;
-    $ip = (isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : "");
 
     if ($bdb != FALSE && preg_match('/^[0-9a-f]{48}$/D', $secret)) {
         $r_sql = sprintf("SELECT login FROM %spasswd_reset WHERE impronta = '%s' AND usato IS NULL
@@ -112,12 +111,6 @@ function main()
                 $x = $bdb->query(sprintf("UPDATE %spasswd_reset SET usato = now() WHERE impronta = '%s' AND usato IS NULL;",
                                          $G_dbpfx, hash('sha256', $secret)));
                 if ($x == FALSE || pg_affected_rows($x) != 1)
-                    break;
-                $b = $bdb->query(sprintf("INSERT INTO %susers_passwd_backup (login, code, old_pass, ip)
-                                              SELECT login, code, pass, '%s' FROM %susers
-                                              WHERE login = '%s' AND (type & (CAST (X'%08x' as integer))) = 0;",
-                                         $G_dbpfx, escsql($ip), $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE));
-                if ($b == FALSE || pg_affected_rows($b) != 1)
                     break;
                 $u = $bdb->query(sprintf("UPDATE %susers SET pass = md5('%s') WHERE login = '%s'
                                               AND (type & (CAST (X'%08x' as integer))) = 0;",
