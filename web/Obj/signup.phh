@@ -118,6 +118,20 @@ function isc_mail_ok($e)
     return (filter_var((string)$e, FILTER_VALIDATE_EMAIL) !== FALSE && strlen((string)$e) <= 120);
 }
 
+/* the forms of these pages are accepted only from the pages of the site:
+   when the browser says where the request comes from (Origin), its host must
+   be the one of the site. Only the hosts are compared: HTTP_HOST has the port
+   when it is not the usual one (like :10443), or not, behind a proxy */
+function isc_origin_ok()
+{
+    if (!isset($_SERVER['HTTP_ORIGIN']))
+        return TRUE;
+    $host = parse_url((string)$_SERVER['HTTP_ORIGIN'], PHP_URL_HOST);
+    if ($host === NULL || $host === FALSE || $host == "")
+        return TRUE;
+    return (strcasecmp($host, preg_replace('/:[0-9]+$/', '', (string)$_SERVER['HTTP_HOST'])) == 0);
+}
+
 /* signups never confirmed: after 48 hours account and mail go away, so nickname and e-mail are free again */
 function isc_clean_expired($bdb)
 {

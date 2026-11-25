@@ -98,10 +98,9 @@ function main()
     }
 
     if ($login !== FALSE && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST') {
-        $origin = (isset($_SERVER['HTTP_ORIGIN']) ? parse_url($_SERVER['HTTP_ORIGIN'], PHP_URL_HOST) : "");
         $passwd1 = (isset($_POST['passwd1']) ? trim((string)$_POST['passwd1']) : "");
         $passwd2 = (isset($_POST['passwd2']) ? trim((string)$_POST['passwd2']) : "");
-        if ($origin != "" && $origin !== NULL && strcasecmp($origin, (string)$_SERVER['HTTP_HOST']) != 0)
+        if (!isc_origin_ok())
             $error = "Richiesta non valida. Riapri il link dell'email.";
         else if (strlen($passwd1) < 4)
             $error = "La password deve avere almeno 4 caratteri.";

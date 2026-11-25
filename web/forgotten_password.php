@@ -81,10 +81,9 @@ function main()
     $u = FALSE;
 
     if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST') {
-        $origine = (isset($_SERVER['HTTP_ORIGIN']) ? parse_url($_SERVER['HTTP_ORIGIN'], PHP_URL_HOST) : "");
         $bdb = BriskDB::create();
         $ip = (isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : "");
-        if ($origine != "" && $origine !== NULL && strcasecmp($origine, (string)$_SERVER['HTTP_HOST']) != 0)
+        if (!isc_origin_ok())
             $error = "Richiesta non valida. Riprova.";
         else if ($who == "" || strlen($who) > 120)
             $error = "Scrivi il tuo nome nel gioco oppure la tua email.";

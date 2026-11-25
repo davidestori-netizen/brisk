@@ -145,7 +145,6 @@ function main()
     $done = FALSE;
 
     if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST') {
-        $origine = (isset($_SERVER['HTTP_ORIGIN']) ? parse_url($_SERVER['HTTP_ORIGIN'], PHP_URL_HOST) : "");
         $nickname = (isset($_POST['nickname']) ? isc_lower(trim((string)$_POST['nickname'])) : "");
         $passwd   = (isset($_POST['passwd'])   ? trim((string)$_POST['passwd'])   : "");
         $passwd2  = (isset($_POST['passwd2'])  ? trim((string)$_POST['passwd2'])  : "");
@@ -158,7 +157,7 @@ function main()
         $remote_ip = ip2int(addrtoipv4(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ""));
         $result = isc_nick_check($bdb, $nickname);
 
-        if ($origine != "" && $origine !== NULL && strcasecmp($origine, (string)$_SERVER['HTTP_HOST']) != 0)
+        if (!isc_origin_ok())
             $error = "Richiesta non valida. Riapri la pagina e riprova.";
         else if (!empty($_POST['site']))                       // trap field for the robots
             $error = "Richiesta non valida.";
