@@ -107,7 +107,6 @@ function main()
         echo "Il sito non riesce a rispondere adesso. Riprova tra poco.";
         return;
     }
-    isc_clean_expired($bdb);
 
     /* checks while typing (json answers) */
     if (isset($_GET['nickname'])) {
@@ -131,6 +130,9 @@ function main()
         echo json_encode($r);
         return;
     }
+
+    /* signups never confirmed: when the page is opened or sent, not at every check while typing */
+    isc_clean_expired($bdb);
 
     header('Content-Type: text/html; charset=UTF-8');
     $key_t = hash('sha256', 'iscr-tempo|' . $G_alarm_passwd);
@@ -231,12 +233,13 @@ function main()
                 $ok = TRUE;
             } while (FALSE);
 
-            if ($ok) {
-                $bdb->transaction('COMMIT');
+            if ($ok && $bdb->transaction('COMMIT')) {
                 $done = TRUE;
             }
             else {
                 $bdb->transaction('ROLLBACK');
+                if ($error == "")
+                    $error = $err_int;
             }
         }
     }
