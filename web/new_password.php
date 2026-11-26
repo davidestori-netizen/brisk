@@ -106,8 +106,9 @@ function main()
             $error = $passwd_error;
         else {
             $ok = FALSE;
-            $bdb->transaction('BEGIN');
             do {
+                if ($bdb->transaction('BEGIN') == FALSE)
+                    break;
                 $reset_pg = $bdb->query(sprintf("UPDATE %spasswd_reset SET used = now() WHERE code_hash = '%s' AND used IS NULL;",
                                          $G_dbpfx, hash('sha256', $secret)));
                 if ($reset_pg == FALSE || pg_affected_rows($reset_pg) != 1)
