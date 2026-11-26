@@ -816,7 +816,10 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($usr_obj->n
                    in the expected state, and the player got no mail */
                 $passwd = passwd_gen();
 
-                $bdb->transaction('BEGIN');
+                if ($bdb->transaction('BEGIN') == FALSE) {
+                    printf("transaction start failed for %s, skipped<br>\n", eschtml($usr_obj->login));
+                    continue;
+                }
                 if (($bdb->user_update_flag_ty($usr_obj->code, USER_FLAG_TY_DISABLE,
                                                TRUE, USER_DIS_REA_NU_TOBECHK,
                                                FALSE, USER_DIS_REA_NONE)) == FALSE) {
@@ -830,7 +833,11 @@ Saluti e buone partite, mop.<br>', eschtml($usr_obj->login), eschtml($usr_obj->n
                     printf("password update failed for %s, skipped<br>\n", eschtml($usr_obj->login));
                     continue;
                 }
-                $bdb->transaction('COMMIT');
+                if ($bdb->transaction('COMMIT') == FALSE) {
+                    $bdb->transaction('ROLLBACK');
+                    printf("save failed for %s, skipped<br>\n", eschtml($usr_obj->login));
+                    continue;
+                }
 
                 $bdb->user_update_login_time($usr_obj->code, 0);
 
