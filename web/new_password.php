@@ -89,8 +89,8 @@ function main()
     $passwd_mailed = FALSE;
 
     if ($bdb != FALSE && preg_match('/^[0-9a-f]{48}$/D', $secret)) {
-        $r_sql = sprintf("SELECT login FROM %spasswd_reset WHERE impronta = '%s' AND usato IS NULL
-                              AND creato > now() - interval '%d minutes';",
+        $r_sql = sprintf("SELECT login FROM %spasswd_reset WHERE code_hash = '%s' AND used IS NULL
+                              AND ctime > now() - interval '%d minutes';",
                          $G_dbpfx, hash('sha256', $secret), PASSWD_DURATION_MIN);
         $r_pg = $bdb->query($r_sql);
         if ($r_pg != FALSE && pg_num_rows($r_pg) == 1)
@@ -108,7 +108,7 @@ function main()
             $ok = FALSE;
             $bdb->transaction('BEGIN');
             do {
-                $reset_pg = $bdb->query(sprintf("UPDATE %spasswd_reset SET usato = now() WHERE impronta = '%s' AND usato IS NULL;",
+                $reset_pg = $bdb->query(sprintf("UPDATE %spasswd_reset SET used = now() WHERE code_hash = '%s' AND used IS NULL;",
                                          $G_dbpfx, hash('sha256', $secret)));
                 if ($reset_pg == FALSE || pg_affected_rows($reset_pg) != 1)
                     break;
@@ -117,7 +117,7 @@ function main()
                                          $G_dbpfx, escsql($passwd1), escsql($login), USER_FLAG_TY_DISABLE));
                 if ($user_pg == FALSE || pg_affected_rows($user_pg) != 1)
                     break;
-                $others_pg = $bdb->query(sprintf("UPDATE %spasswd_reset SET usato = now() WHERE login = '%s' AND usato IS NULL;",
+                $others_pg = $bdb->query(sprintf("UPDATE %spasswd_reset SET used = now() WHERE login = '%s' AND used IS NULL;",
                                          $G_dbpfx, escsql($login)));
                 if ($others_pg == FALSE)
                     break;

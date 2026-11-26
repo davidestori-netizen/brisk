@@ -64,7 +64,7 @@ function passwd_count($bdb, $where)
 {
     GLOBAL $G_dbpfx;
 
-    $c_sql = sprintf("SELECT count(*) AS n FROM %spasswd_reset WHERE %s AND creato > now() - interval '1 hour';", $G_dbpfx, $where);
+    $c_sql = sprintf("SELECT count(*) AS n FROM %spasswd_reset WHERE %s AND ctime > now() - interval '1 hour';", $G_dbpfx, $where);
     if (($c_pg = $bdb->query($c_sql)) == FALSE || pg_num_rows($c_pg) != 1)
         return 1000;
     return ((int)pg_fetch_object($c_pg, 0)->n);
@@ -107,7 +107,7 @@ function main()
                 }
                 else {
                     $secret = bin2hex(random_bytes(24));
-                    $ins_sql = sprintf("INSERT INTO %spasswd_reset (impronta, login, ip) VALUES ('%s', '%s', '%s');",
+                    $ins_sql = sprintf("INSERT INTO %spasswd_reset (code_hash, login, ip) VALUES ('%s', '%s', '%s');",
                                        $G_dbpfx, hash('sha256', $secret), escsql($usr_rec->login), escsql($ip));
                     $ok = $bdb->query($ins_sql);
                     $link = sprintf("%s://%s/%s/new_password.php?secret=%s", $G_proto, $G_domain, $G_webbase, $secret);
