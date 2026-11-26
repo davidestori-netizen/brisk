@@ -153,9 +153,9 @@ function isc_error_html($error)
    the error for the player, "" when the password is good */
 function isc_passwd_check($passwd, $passwd2, $nick)
 {
-    if (strlen($passwd) < 6)
+    if (mb_strlen($passwd, 'UTF-8') < 6)
         return "La password deve avere almeno 6 caratteri.";
-    if (strlen($passwd) > 30 || preg_match('/\s/', $passwd))
+    if (mb_strlen($passwd, 'UTF-8') > 30 || preg_match('/\s/', $passwd))
         return "La password può avere al massimo 30 caratteri, senza spazi.";
     if (strcasecmp($passwd, $nick) == 0)
         return "La password non può essere uguale al nickname.";

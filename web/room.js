@@ -596,7 +596,7 @@ function j_new_apprentice(form)
 
 function j_login_manager(form)
 {
-    var token;
+    var token, passwd_utf8;
 
     if (form.elements['passid'].value == '')
         return (true);
@@ -612,7 +612,11 @@ function j_login_manager(form)
         if (token == null)
             return (false);
 
-        token = calcMD5(tokens[1]+calcMD5(form.elements['passid'].value));
+        /* the server stores md5() of the UTF-8 bytes of the password while
+           calcMD5() reads one byte per character: the password is turned
+           into UTF-8 first, otherwise accented letters never match */
+        passwd_utf8 = unescape(encodeURIComponent(form.elements['passid'].value));
+        token = calcMD5(tokens[1]+calcMD5(passwd_utf8));
 
         form.elements['passid_private'].value = token;
         form.elements['passid'].value = ""; // FIXME da sost con la stessa len di A
