@@ -64,7 +64,7 @@ function passwd_count($bdb, $where)
 
 function main()
 {
-    GLOBAL $G_dbpfx, $G_proto, $G_domain, $G_webbase, $G_admin_mail;
+    GLOBAL $G_dbpfx, $G_proto, $G_domain, $G_webbase;
 
     $who = (isset($_POST['who']) ? trim((string)$_POST['who']) : (isset($_GET['n']) ? trim((string)$_GET['n']) : ""));
     $error = "";
@@ -99,14 +99,14 @@ function main()
                 $text = "Ciao " . $usr_rec->login . ",\n\nhai chiesto di scegliere una nuova password per Brisk.\n"
                     . "Apri questo link (vale 60 minuti, una volta sola):\n\n" . $link
                     . "\n\nSe non sei stato tu, ignora questa email: la tua password resta quella di prima.\n\n"
-                    . "Hai bisogno di aiuto? Scrivi a " . $G_admin_mail . "\n";
+                    . "Hai bisogno di aiuto? Rispondi a questa email.\n";
                 /* NOTE: brisk_mail() builds the text version from the html (msgHTML), so the html
                    uses <br> between the lines and shows the address of the link in full */
                 $html = 'Ciao <b>' . isc_h($usr_rec->login) . '</b>,<br><br>hai chiesto di scegliere una nuova password per Brisk.<br><br>'
                     . '<a href="' . isc_h($link) . '" style="display:inline-block;padding:12px 20px;background:#193747;color:#fff;text-decoration:none;border-radius:6px;font-size:18px">Scegli la nuova password</a><br><br>'
                     . 'Se il bottone non funziona, apri questo indirizzo:<br>' . isc_h($link) . '<br><br>'
                     . '<span style="color:#555">Il link vale 60 minuti, una volta sola.<br>Se non sei stato tu, ignora questa email: la tua password resta quella di prima.<br>'
-                    . 'Hai bisogno di aiuto? Scrivi a ' . isc_h($G_admin_mail) . '</span>';
+                    . 'Hai bisogno di aiuto? ' . isc_admin_link("Contatta l'amministratore") . '</span>';
                 if ($bdb->query($ins_sql) != FALSE)
                     brisk_mail($usr_rec->email, "Utente Brisk {$usr_rec->login}", "La tua nuova password per Brisk", $text, isc_mail_lines($html));
             }
@@ -130,11 +130,11 @@ function main()
     <button type="submit" class="action">Mandamela di nuovo</button>
   </form>
   <form method="get" action="index.php" style="margin-top:10px"><button type="submit" class="action">Torna alla pagina d'ingresso</button></form>
-  <p style="margin-top:16px">Ancora niente? Scrivi all'amministratore: <b><?php echo isc_h($G_admin_mail); ?></b>, indicando il tuo nome nel gioco.</p>
+  <p style="margin-top:16px">Ancora niente? <?php echo isc_admin_link("Contatta l'amministratore"); ?> indicando il tuo nome nel gioco.</p>
 <?php } else { ?>
   <h1>Password dimenticata?</h1>
   <p>Scrivi il tuo <b>nome nel gioco</b> oppure la tua <b>email</b>: ti mandiamo un link per sceglierne una nuova.</p>
-  <?php if ($error != "") { ?><div class="err"><?php echo isc_h($error); ?></div><?php } ?>
+  <?php if ($error != "") { ?><div class="err"><?php echo isc_error_html($error); ?></div><?php } ?>
   <form method="post" action="forgotten_password.php">
     <label for="who">Nickname o email</label>
     <input id="who" name="who" autocomplete="username" maxlength="120" value="<?php echo isc_h($who); ?>" required>

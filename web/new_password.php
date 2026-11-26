@@ -133,7 +133,7 @@ function main()
             }
             else {
                 $bdb->transaction('ROLLBACK');
-                $error = "Non è stato possibile salvare. Riprova tra poco o scrivi all'amministratore.";
+                $error = "Non è stato possibile salvare. Riprova tra poco o contatta l'amministratore.";
             }
         }
     }
@@ -153,7 +153,7 @@ function main()
 <?php } else { ?>
   <h1>Scegli la nuova password</h1>
   <p>Scegli una password che ricordi facilmente: almeno 6 caratteri, senza spazi.</p>
-  <?php if ($error != "") { ?><div class="err"><?php echo isc_h($error); ?></div><?php } ?>
+  <?php if ($error != "") { ?><div class="err"><?php echo isc_error_html($error); ?></div><?php } ?>
   <form method="post" action="new_password.php" autocomplete="on">
     <input type="hidden" name="secret" value="<?php echo isc_h($secret); ?>">
     <label for="username">Il tuo nome</label>
