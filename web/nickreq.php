@@ -50,7 +50,6 @@ function nickreq_page($msg, $is_error, $new_nick, $nick_tmp)
     /* the link of the e-mail of the refusal brings the nickname (?n=): it
        is written and locked, the player writes only the password and the
        new nickname; without it the page asks to open the link */
-    GLOBAL $G_admin_mail;
 
     $login = (isset($_POST['f_login']) ? (string)$_POST['f_login'] : (isset($_GET['n']) ? (string)$_GET['n'] : ""));
 
@@ -85,7 +84,7 @@ function nickreq_page($msg, $is_error, $new_nick, $nick_tmp)
   <p>I moderatori non hanno approvato il nickname che avevi scelto. Proponine un altro: da subito entrerai con quello nuovo, e i moderatori lo controlleranno.
      Gli altri giocatori, per ora, continueranno a vederti con il nome con l'asterisco.</p>
 <?php if ($login == "") { ?>
-  <div class="err">Apri il link che trovi nella mail del rifiuto. Se non la trovi, scrivi a <?php echo eschtml($G_admin_mail); ?>.</div>
+  <div class="err">Apri il link che trovi nella mail del rifiuto. Se non la trovi, <?php echo isc_admin_link("contatta l'amministratore"); ?>.</div>
 <?php } else { ?>
   <form method="POST" action="nickreq.php" accept-charset="utf-8">
     <label for="f_login">Il tuo nickname attuale (quello rifiutato)</label>

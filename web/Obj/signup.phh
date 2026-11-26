@@ -132,6 +132,23 @@ function isc_origin_ok()
     return (strcasecmp($host, preg_replace('/:[0-9]+$/', '', (string)$_SERVER['HTTP_HOST'])) == 0);
 }
 
+/* the link to write to the administrator: his address is not shown */
+function isc_admin_link($text)
+{
+    GLOBAL $G_admin_mail;
+
+    return ('<a href="mailto:' . isc_h($G_admin_mail) . '">' . isc_h($text) . '</a>');
+}
+
+/* an error for the player, with the link where it says to contact the administrator */
+function isc_error_html($error)
+{
+    $html = isc_h($error);
+    foreach (array("Contatta l'amministratore", "contatta l'amministratore") as $words)
+        $html = str_replace(isc_h($words), isc_admin_link($words), $html);
+    return ($html);
+}
+
 /* the rules of a new password, the same in signup.php and new_password.php:
    the error for the player, "" when the password is good */
 function isc_passwd_check($passwd, $passwd2, $nick)

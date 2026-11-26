@@ -101,7 +101,7 @@ function isc_mail_welcome($nick_tmp, $nickname, $passwd, $link)
 
 function main()
 {
-    GLOBAL $G_alarm_passwd, $G_notguar_code, $G_proto, $G_domain, $G_webbase, $G_admin_mail, $G_tos_vers;
+    GLOBAL $G_alarm_passwd, $G_notguar_code, $G_proto, $G_domain, $G_webbase, $G_tos_vers;
 
     if (($bdb = BriskDB::create()) == FALSE) {
         echo "Il sito non riesce a rispondere adesso. Riprova tra poco.";
@@ -179,8 +179,8 @@ function main()
         else if (empty($_POST['rules']))
             $error = "Per creare l'account devi accettare il regolamento.";
         else if ($bdb->selfreg_check($remote_ip) == FALSE)
-            $error = sprintf("Da questa connessione è già stato creato un account da poco. Se siete in due "
-                              . "(per esempio marito e moglie), scrivi a %s e ti aiutiamo.", $G_admin_mail);
+            $error = "Da questa connessione è già stato creato un account da poco. Se siete in due "
+                     . "(per esempio marito e moglie), contatta l'amministratore e ti aiutiamo.";
         else if (($nick_tmp = $bdb->nick_fun_check($nicktmp_animal, $nicktmp_adjective)) === FALSE)
             $error = "Il nome provvisorio scelto nei due menu è troppo lungo o è già usato da qualcun altro: "
                      . "te ne abbiamo proposto un altro, puoi tenerlo o cambiarlo.";
@@ -189,8 +189,8 @@ function main()
             $ok = FALSE;
             /* every step that fails says why to the player:
                a single "try again" was wrong where trying again cannot help */
-            $err_int = sprintf("Errore interno del sito durante la registrazione: il tuo account non è stato creato. "
-                               . "Scrivi a %s e ti aiutiamo.", $G_admin_mail);
+            $err_int = "Errore interno del sito durante la registrazione: il tuo account non è stato creato. "
+                       . "Contatta l'amministratore e ti aiutiamo.";
             do {
                 if (($usr_obj = $bdb->user_add($nickname, md5($passwd), $mail,
                                                USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
@@ -365,7 +365,7 @@ function main()
 <?php } else { ?>
   <h1>Crea il tuo account</h1>
   <p style="text-align:center">Ci vuole un minuto, e giochi subito.</p>
-  <?php if ($error != "") { ?><div class="err"><?php echo isc_h($error); ?></div><?php } ?>
+  <?php if ($error != "") { ?><div class="err"><?php echo isc_error_html($error); ?></div><?php } ?>
   <form method="post" action="signup.php" autocomplete="off" id="f" accept-charset="utf-8">
     <input type="hidden" name="curtime" value="<?php echo isc_h($curtime); ?>"><input type="hidden" name="tf" value="<?php echo isc_h($time_sign); ?>">
     <div class="trap" aria-hidden="true"><label>Sito <input name="site" tabindex="-1" autocomplete="off"></label></div>
